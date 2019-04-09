@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.28307.489
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.BI", "SanteDB.BI\SanteDB.BI.csproj", "{030666AA-FC71-449E-9DFC-270F1C23C5DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.BI.Test", "SanteDB.BI.Test\SanteDB.BI.Test.csproj", "{0E614226-EA3F-454C-BB7D-B26D2DD1E92A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Rest.BIS", "SanteDB.Rest.BIS\SanteDB.Rest.BIS.csproj", "{200AC0CB-EBBF-4FDE-81D0-447CDFFFA2F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{030666AA-FC71-449E-9DFC-270F1C23C5DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{030666AA-FC71-449E-9DFC-270F1C23C5DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{030666AA-FC71-449E-9DFC-270F1C23C5DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E614226-EA3F-454C-BB7D-B26D2DD1E92A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E614226-EA3F-454C-BB7D-B26D2DD1E92A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E614226-EA3F-454C-BB7D-B26D2DD1E92A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E614226-EA3F-454C-BB7D-B26D2DD1E92A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{200AC0CB-EBBF-4FDE-81D0-447CDFFFA2F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{200AC0CB-EBBF-4FDE-81D0-447CDFFFA2F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{200AC0CB-EBBF-4FDE-81D0-447CDFFFA2F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{200AC0CB-EBBF-4FDE-81D0-447CDFFFA2F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
