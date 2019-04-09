@@ -14,12 +14,18 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BisPackage), Namespace = BiConstants.XmlNamespace)]
     public class BisPackage : BisDefinition
     {
-
+        
         /// <summary>
         /// Gets or sets the list of data sources
         /// </summary>
         [XmlArray("sources"), XmlArrayItem("add")]
         public List<BisDataSourceDefinition> DataSources { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of data sources
+        /// </summary>
+        [XmlArray("formats"), XmlArrayItem("add")]
+        public List<BisRenderFormatDefinition> Formats { get; set; }
 
         /// <summary>
         /// Gets or sets the list of parameter definitions
@@ -37,7 +43,7 @@ namespace SanteDB.BI.Model
         /// Gets or sets the list of view defintiions
         /// </summary>
         [XmlArray("views"), XmlArrayItem("add")]
-        public List<BiViewDefinition> Views { get; set; }
+        public List<BisViewDefinition> Views { get; set; }
 
         /// <summary>
         /// Gets or set sthe list of report definitions
