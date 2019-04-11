@@ -20,13 +20,14 @@ using System.Linq.Expressions;
 using SanteDB.Core.Model.Query;
 using RestSrvr;
 using System.Collections;
+using SanteDB.BI.Util;
 
 namespace SanteDB.Rest.BIS
 {
     /// <summary>
     /// Default implementation of the BIS service contract
     /// </summary>
-    [ServiceBehavior(Name = "Business Intelligence Service", InstanceMode = ServiceInstanceMode.Singleton)]
+    [ServiceBehavior(Name = "BIS", InstanceMode = ServiceInstanceMode.Singleton)]
     public class BisServiceBehavior : IBisServiceContract
     {
 
@@ -85,6 +86,7 @@ namespace SanteDB.Rest.BIS
             }
         }
 
+
         /// <summary>
         /// Get the specified resource type
         /// </summary>
@@ -94,9 +96,17 @@ namespace SanteDB.Rest.BIS
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                return this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBisMetadataRepository.Get),
+                var retVal = this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBisMetadataRepository.Get),
                     new Type[] { rt },
                     new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BisDefinition;
+
+                // Resolve any refs in the object
+                if (retVal == null)
+                    throw new KeyNotFoundException(id);
+                else
+                {
+                    return BiUtils.ResolveRefs(retVal);
+                }
             }
             catch (Exception e)
             {
@@ -156,6 +166,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Search for BIS definitions
         /// </summary>
+        [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
         public List<BisDefinition> Search(string resourceType)
         {
             try

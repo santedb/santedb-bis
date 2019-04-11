@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -11,6 +12,8 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BisParameterDataType), Namespace = BiConstants.XmlNamespace)]
     public enum BisParameterDataType
     {
+        [XmlEnum("ref")]
+        Ref,
         [XmlEnum("uuid")]
         Uuid,
         [XmlEnum("string")]
@@ -39,14 +42,17 @@ namespace SanteDB.BI.Model
         /// </summary>
         public BisParameterDefinition()
         {
-            this.Values = new List<BisQueryDefinition>();
         }
 
         /// <summary>
         /// Gets or sets the type of parameter
         /// </summary>
         [XmlAttribute("type"), JsonProperty("type")]
-        public BisParameterDataType Type { get; set; }
+        public BisParameterDataType Type
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or set the min value
@@ -63,8 +69,25 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the values for the parameter
         /// </summary>
-        [XmlArray("values"), XmlArrayItem("add"), JsonProperty("values")]
-        public List<BisQueryDefinition> Values { get; set; }
+        [XmlElement("query", typeof(BisQueryDefinition)),
+         XmlElement("values", typeof(BisParameterValueCollection)),
+         JsonProperty("values")]
+        public Object Values { get; set; }
 
+        /// <summary>
+        /// Required value
+        /// </summary>
+        [XmlAttribute("required"), JsonProperty("required")]
+        public string RequiredXml
+        {
+            get => this.Required?.ToString().ToLower();
+            set => this.Required = string.IsNullOrEmpty(value) ? false : bool.Parse(value);
+        }
+
+        /// <summary>
+        /// Required parameter?
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool? Required { get; set; }
     }
 }

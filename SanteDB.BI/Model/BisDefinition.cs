@@ -16,15 +16,16 @@ namespace SanteDB.BI.Model
     public abstract class BisDefinition
     {
 
-        // Serializer
-        private static XmlSerializer m_serializer = new XmlSerializer(typeof(BisPackage), new Type[]
+        /// <summary>
+        /// Default ctor
+        /// </summary>
+        public BisDefinition()
         {
-            typeof(BisQueryDefinition),
-            typeof(BisDataSourceDefinition),
-            typeof(BisParameterDefinition),
-            typeof(BisReportDefinition),
-            typeof(BisViewDefinition)
-        });
+            this.Demands = new List<string>();
+        }
+
+        // Serializer
+        private static XmlSerializer m_serializer;
 
         /// <summary>
         /// Gets or sets the alias name
@@ -67,6 +68,15 @@ namespace SanteDB.BI.Model
         /// </summary>
         public static BisDefinition Load(Stream s)
         {
+            if(m_serializer == null)
+                m_serializer = new XmlSerializer(typeof(BisPackage), new Type[]
+                {
+                    typeof(BisQueryDefinition),
+                    typeof(BisDataSourceDefinition),
+                    typeof(BisParameterDefinition),
+                    typeof(BisReportDefinition),
+                    typeof(BisViewDefinition)
+                });
             // Attempt to load the appropriate serializer
             using (var xr = XmlReader.Create(s))
                 if (m_serializer.CanDeserialize(xr))
@@ -74,5 +84,6 @@ namespace SanteDB.BI.Model
                 else
                     throw new InvalidDataException("Stream does not contain a valid BIS definition");
         }
+
     }
 }

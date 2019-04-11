@@ -35,7 +35,6 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <Folder Include="Renderer\" />
-    <Folder Include="Services\Impl\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BiConstants.cs" />
@@ -44,6 +43,7 @@
     <Compile Include="Model\BisDataSourceDefinition.cs" />
     <Compile Include="Model\BisDefinition.cs" />
     <Compile Include="Model\BisParameterDefinition.cs" />
+    <Compile Include="Model\BisParameterValueCollection.cs" />
     <Compile Include="Model\BisQueryDefinition.cs" />
     <Compile Include="Model\BisRenderFormatDefinition.cs" />
     <Compile Include="Model\BisReportDefinition.cs" />
@@ -54,6 +54,8 @@
     <Compile Include="Services\IBisDataSource.cs" />
     <Compile Include="Services\IBisMetadataRepository.cs" />
     <Compile Include="Services\IBisViewRenderer.cs" />
+    <Compile Include="Services\Impl\AppletMetadataRepository.cs" />
+    <Compile Include="Util\BiUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json">
@@ -87,7 +89,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="SanteDB.Core.Applets" Version="1.40.0.0"/>
+        <PackageReference Include="SanteDB.Core.Applets" Version="1.40.0.0" />
       </ItemGroup>
     </Otherwise>
   </Choose>

@@ -21,7 +21,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets the body in JSON format
         /// </summary>
-        [XmlIgnore, JsonProperty("div")]
+        [XmlIgnore, JsonProperty("doc")]
         public string JsonBody
         {
             get => this.Body?.ToString();

@@ -36,6 +36,7 @@
   </xs:complexType>
   <xs:simpleType name="BisParameterDataType">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="ref" />
       <xs:enumeration value="uuid" />
       <xs:enumeration value="string" />
       <xs:enumeration value="int" />
@@ -49,18 +50,17 @@
     <xs:complexContent mixed="false">
       <xs:extension base="tns:BisDefinition">
         <xs:sequence>
-          <xs:element minOccurs="0" maxOccurs="1" name="values" type="tns:ArrayOfBisQueryDefinition" />
+          <xs:choice minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="0" maxOccurs="1" name="query" type="tns:BisQueryDefinition" />
+            <xs:element minOccurs="0" maxOccurs="1" name="values" type="tns:BisParameterValueCollection" />
+          </xs:choice>
         </xs:sequence>
         <xs:attribute name="type" type="tns:BisParameterDataType" use="required" />
         <xs:attribute name="min" type="xs:string" />
         <xs:attribute name="max" type="xs:string" />
+        <xs:attribute name="required" type="xs:string" />
       </xs:extension>
     </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="ArrayOfBisQueryDefinition">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisQueryDefinition" />
-    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="BisQueryDefinition">
     <xs:complexContent mixed="false">
@@ -98,6 +98,18 @@
       <xs:element minOccurs="0" maxOccurs="unbounded" name="invariant" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="BisParameterValueCollection">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" type="tns:BisParameterValue" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BisParameterValue">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="value" type="xs:string" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:element name="BisQueryDefinition" nillable="true" type="tns:BisQueryDefinition" />
   <xs:element name="BisRenderFormatDefinition" nillable="true" type="tns:BisRenderFormatDefinition" />
   <xs:complexType name="BisRenderFormatDefinition">
@@ -119,6 +131,11 @@
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisQueryDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisQueryDefinition" />
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ArrayOfBisViewDefinition">
     <xs:sequence>

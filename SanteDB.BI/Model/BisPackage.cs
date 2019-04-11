@@ -79,7 +79,7 @@ namespace SanteDB.BI.Model
                 itm.ShouldSerializeDefinitions = true;
             foreach (var itm in this.Views)
                 itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Parameters.SelectMany(p => p.Values))
+            foreach (var itm in this.Parameters.Select(p => p.Values).OfType<BisQueryDefinition>())
                 itm.ShouldSerializeDefinitions = true;
 
             new XmlSerializer(typeof(BisPackage)).Serialize(s, this);

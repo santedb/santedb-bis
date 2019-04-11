@@ -9,6 +9,9 @@ using SanteDB.BI.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Exceptions;
+using SanteDB.Core.Security;
+using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 
 namespace SanteDB.BI.Services.Impl
@@ -16,7 +19,7 @@ namespace SanteDB.BI.Services.Impl
     /// <summary>
     /// Represents a default implementation of a BIS metadata repository which loads definitions from loaded applets
     /// </summary>
-    public class AppletMetadataRepository : IBisMetadataRepository, IDaemonService
+    public class AppletMetadataRepository : IBisMetadataRepository
     {
 
         // Tracer for this repository
@@ -25,12 +28,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Definition cache 
         /// </summary>
-        private Dictionary<Type, Dictionary<String, BisDefinition>> m_definitionCache;
-
-        /// <summary>
-        /// True when the service is running
-        /// </summary>
-        public bool IsRunning => this.m_definitionCache != null;
+        private Dictionary<Type, Dictionary<String, BisDefinition>> m_definitionCache = new Dictionary<Type, Dictionary<string, BisDefinition>>();
 
         /// <summary>
         /// Gets the service name
@@ -38,29 +36,14 @@ namespace SanteDB.BI.Services.Impl
         public string ServiceName => "Applet Based BIS Repository";
 
         /// <summary>
-        /// Fired when the service is starting
-        /// </summary>
-        public event EventHandler Starting;
-        /// <summary>
-        /// Fired when the service has started
-        /// </summary>
-        public event EventHandler Started;
-        /// <summary>
-        /// Fired when the service is stopping
-        /// </summary>
-        public event EventHandler Stopping;
-        /// <summary>
-        /// Fired when the service has stopped
-        /// </summary>
-        public event EventHandler Stopped;
-
-        /// <summary>
         /// Gets the specified object from the specified type repository 
         /// </summary>
         public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BisDefinition
         {
+            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
             Dictionary<String, BisDefinition> definitions = null;
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions) &&
+                definitions[id]?.Demands.All(o=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true)
                 return definitions[id] as TBisDefinition;
             return null;
         }
@@ -70,6 +53,12 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BisDefinition
         {
+            // Demand unrestricted metadata
+            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
+            var outcome = pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            if (outcome != Core.Model.Security.PolicyGrantType.Grant)
+                throw new PolicyViolationException(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata, outcome);
+
             // Locate type definitions
             Dictionary<String, BisDefinition> typeDefinitions = null;
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out typeDefinitions))
@@ -80,7 +69,7 @@ namespace SanteDB.BI.Services.Impl
 
             // Add the defintiion
             if (typeDefinitions.ContainsKey(metadata.Id))
-                throw new InvalidOperationException($"Definition {metadata.Id} of type {metadata.GetType().Name} already exists!");
+                typeDefinitions[metadata.Id] = metadata;
             else
                 typeDefinitions.Add(metadata.Id, metadata);
 
@@ -92,9 +81,16 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BisDefinition
         {
+            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
+
             Dictionary<String, BisDefinition> definitions = null;
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
-                definitions.Values.OfType<TBisDefinition>().Where(filter.Compile()).Skip(offset).Take(count ?? 100);
+                return definitions.Values
+                    .OfType<TBisDefinition>()
+                    .Where(filter.Compile())
+                    .Where(o=>o.Demands?.All(d=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                    .Skip(offset)
+                    .Take(count ?? 100);
             return new TBisDefinition[0];
         }
 
@@ -103,6 +99,12 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public void Remove<TBisDefinition>(string id) where TBisDefinition : BisDefinition
         {
+            // Demand unrestricted metadata
+            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
+            var outcome = pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            if (outcome != Core.Model.Security.PolicyGrantType.Grant)
+                throw new PolicyViolationException(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata, outcome);
+
             Dictionary<String, BisDefinition> definitions = null;
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
                 definitions.Remove(id);
@@ -113,9 +115,8 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void LoadAllDefinitions()
         {
+            AuthenticationContext.Current = new AuthenticationContext(AuthenticationContext.SystemPrincipal);
             this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
-            this.m_definitionCache?.Clear();
-            this.m_definitionCache = new Dictionary<Type, Dictionary<string, BisDefinition>>();
 
             var appletCollection = ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets;
 
@@ -175,35 +176,20 @@ namespace SanteDB.BI.Services.Impl
         }
 
         /// <summary>
-        /// Start the service 
+        /// Applet metadata repository
         /// </summary>
-        public bool Start()
+        public AppletMetadataRepository()
         {
-            this.Starting?.Invoke(this, EventArgs.Empty);
-
-            // Re-scans the loaded applets for definitions when the collection has changed
-            ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.CollectionChanged += (o, e) =>
+            ApplicationServiceContext.Current.Started += (o, e) =>
             {
+                // Re-scans the loaded applets for definitions when the collection has changed
+                ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.CollectionChanged += (oa, ea) =>
+                {
+                    this.LoadAllDefinitions();
+                };
+
                 this.LoadAllDefinitions();
             };
-
-            this.LoadAllDefinitions();
-            this.Started?.Invoke(this, EventArgs.Empty);
-            return true;
-        }
-
-        /// <summary>
-        /// Stop the service
-        /// </summary>
-        public bool Stop()
-        {
-            this.Stopping?.Invoke(this, EventArgs.Empty);
-
-            this.m_definitionCache.Clear();
-            this.m_definitionCache = null;
-
-            this.Stopped?.Invoke(this, EventArgs.Empty);
-            return true;
         }
     }
 }
