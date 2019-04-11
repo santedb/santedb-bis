@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://santedb.org/bi" elementFormDefault="qualified" targetNamespace="http://santedb.org/bi" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="xhtml.xsd" namespace="http://www.w3.org/1999/xhtml" />
+  <xs:element name="BisDefinition" nillable="true" type="tns:BisDefinition" />
+  <xs:element name="BisParameterDataType" type="tns:BisParameterDataType" />
+  <xs:element name="BisAnnotation" nillable="true" type="tns:BisAnnotation" />
+  <xs:element name="BisDataSourceDefinition" nillable="true" type="tns:BisDataSourceDefinition" />
+  <xs:complexType name="BisAnnotation">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" xmlns:q1="http://www.w3.org/1999/xhtml" ref="q1:div" />
+    </xs:sequence>
+    <xs:attribute name="lang" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="BisDataSourceDefinition">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:attribute name="provider" type="xs:string" />
+        <xs:attribute name="connectionString" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="BisDefinition" abstract="true">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="policies" type="tns:ArrayOfString" />
+      <xs:element minOccurs="0" maxOccurs="1" name="annotation" type="tns:BisAnnotation" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="id" type="xs:string" />
+    <xs:attribute name="label" type="xs:string" />
+    <xs:attribute name="ref" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="ArrayOfString">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="demand" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="BisParameterDataType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="uuid" />
+      <xs:enumeration value="string" />
+      <xs:enumeration value="int" />
+      <xs:enumeration value="bool" />
+      <xs:enumeration value="date" />
+      <xs:enumeration value="date-time" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="BisParameterDefinition" nillable="true" type="tns:BisParameterDefinition" />
+  <xs:complexType name="BisParameterDefinition">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="values" type="tns:ArrayOfBisQueryDefinition" />
+        </xs:sequence>
+        <xs:attribute name="type" type="tns:BisParameterDataType" use="required" />
+        <xs:attribute name="min" type="xs:string" />
+        <xs:attribute name="max" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisQueryDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisQueryDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BisQueryDefinition">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="dataSources" type="tns:ArrayOfBisDataSourceDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="parameters" type="tns:ArrayOfBisParameterDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="definitions" type="tns:ArrayOfBisSqlDefinition" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisDataSourceDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisDataSourceDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisParameterDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisParameterDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisSqlDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisSqlDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BisSqlDefinition" mixed="true">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="1" name="providers" type="tns:ArrayOfString1" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfString1">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="invariant" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="BisQueryDefinition" nillable="true" type="tns:BisQueryDefinition" />
+  <xs:element name="BisRenderFormatDefinition" nillable="true" type="tns:BisRenderFormatDefinition" />
+  <xs:complexType name="BisRenderFormatDefinition">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:attribute name="extension" type="xs:string" />
+        <xs:attribute name="contentType" type="xs:string" />
+        <xs:attribute name="renderer" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BisReportDefinition" nillable="true" type="tns:BisReportDefinition" />
+  <xs:complexType name="BisReportDefinition">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="queries" type="tns:ArrayOfBisQueryDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="views" type="tns:ArrayOfBisViewDefinition" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisViewDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisViewDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="BisViewDefinition">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" xmlns:q2="http://www.w3.org/1999/xhtml" ref="q2:div" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="BisSqlDefinition" nillable="true" type="tns:BisSqlDefinition" />
+  <xs:element name="BisViewDefinition" nillable="true" type="tns:BisViewDefinition" />
+  <xs:element name="BisPackage" nillable="true" type="tns:BisPackage" />
+  <xs:complexType name="BisPackage">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BisDefinition">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="1" name="sources" type="tns:ArrayOfBisDataSourceDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="formats" type="tns:ArrayOfBisRenderFormatDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="parameters" type="tns:ArrayOfBisParameterDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="queries" type="tns:ArrayOfBisQueryDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="views" type="tns:ArrayOfBisViewDefinition" />
+          <xs:element minOccurs="0" maxOccurs="1" name="reports" type="tns:ArrayOfBisReportDefinition" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisRenderFormatDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisRenderFormatDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ArrayOfBisReportDefinition">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BisReportDefinition" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

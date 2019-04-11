@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -8,13 +9,14 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BisDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BisDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
+    [JsonObject]
     public class BisDataSourceDefinition : BisDefinition
     {
 
         /// <summary>
         /// Gets or sets the instance of the provider
         /// </summary>
-        [XmlAttribute("provider")]
+        [XmlAttribute("provider"), JsonProperty("provider")]
         public String ProviderTypeXml {
             get => this.ProviderType?.AssemblyQualifiedName;
             set
@@ -29,13 +31,13 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the C# type of the provider
         /// </summary>
-        [XmlIgnore]
+        [XmlIgnore, JsonIgnore]
         public Type ProviderType { get; set; }
 
         /// <summary>
         /// Gets or sets the connection string
         /// </summary>
-        [XmlAttribute("connectionString")]
+        [XmlAttribute("connectionString"), JsonProperty("connectionString")]
         public String ConnectionString { get; set; }
 
     }

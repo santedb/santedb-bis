@@ -1,4 +1,6 @@
-﻿using System.Xml.Serialization;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
@@ -13,8 +15,8 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the invariant of SQL dialect
         /// </summary>
-        [XmlAttribute("invariant")]
-        public string Invariant { get; set; }
+        [XmlArray("providers"), XmlArrayItem("invariant")]
+        public List<string> Invariants { get; set; }
 
         /// <summary>
         /// Gets or sets the SQL

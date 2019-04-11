@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,25 +13,26 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BisRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BisRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
+    [JsonObject]
     public class BisRenderFormatDefinition : BisDefinition
     {
 
         /// <summary>
         /// Gets the render format
         /// </summary>
-        [XmlAttribute("extension")]
+        [XmlAttribute("extension"), JsonProperty("extension")]
         public String FormatExtension { get; set; }
 
         /// <summary>
         /// Gets or sets the mime encoding for the formatting
         /// </summary>
-        [XmlAttribute("contentType")]
+        [XmlAttribute("contentType"), JsonProperty("contentType")]
         public String ContentType { get; set; }
 
         /// <summary>
         /// Gets or sets the rendere xml format
         /// </summary>
-        [XmlAttribute("renderer")]
+        [XmlAttribute("renderer"), JsonProperty("renderer")]
         public String TypeXml {
             get => this.Type?.AssemblyQualifiedName;
             set
