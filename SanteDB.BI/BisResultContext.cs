@@ -13,6 +13,21 @@ namespace SanteDB.BI
     /// </summary>
     public class BisResultContext
     {
+        public BisResultContext(BisQueryDefinition definition, 
+            IDictionary<String, Object> arguments,
+            IBisDataSource source,
+            IEnumerable<dynamic> results,
+            DateTime startTime
+            )
+        {
+            this.Arguments = arguments;
+            this.Dataset = results;
+            this.DataSource = source;
+            this.QueryDefinition = definition;
+            this.StartTime = startTime;
+            this.StopTime = DateTime.Now;
+        }
+
         /// <summary>
         /// Gets the arguments used 
         /// </summary>

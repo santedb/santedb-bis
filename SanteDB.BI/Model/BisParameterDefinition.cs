@@ -75,6 +75,12 @@ namespace SanteDB.BI.Model
         public Object Values { get; set; }
 
         /// <summary>
+        /// Gets or sets the default value
+        /// </summary>
+        [XmlAttribute("default"), JsonProperty("default")]
+        public string DefaultValue { get; set; }
+
+        /// <summary>
         /// Required value
         /// </summary>
         [XmlAttribute("required"), JsonProperty("required")]
