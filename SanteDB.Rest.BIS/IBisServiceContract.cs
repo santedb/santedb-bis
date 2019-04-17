@@ -40,7 +40,7 @@ namespace SanteDB.Rest.BIS
         /// Executes the specified query 
         /// </summary>
         [Get("/Query/{id}")]
-        IEnumerable<dynamic> RenderQuery(String id, String format);
+        IEnumerable<dynamic> RenderQuery(String id);
 
         /// <summary>
         /// Options for this instance of the BIS service

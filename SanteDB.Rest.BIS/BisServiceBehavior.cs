@@ -21,6 +21,8 @@ using SanteDB.Core.Model.Query;
 using RestSrvr;
 using System.Collections;
 using SanteDB.BI.Util;
+using SanteDB.Core.Services;
+using System.Globalization;
 
 namespace SanteDB.Rest.BIS
 {
@@ -30,6 +32,16 @@ namespace SanteDB.Rest.BIS
     [ServiceBehavior(Name = "BIS", InstanceMode = ServiceInstanceMode.Singleton)]
     public class BisServiceBehavior : IBisServiceContract
     {
+
+        // Context parameters
+        protected Dictionary<String, Func<Object>> m_contextParams = new Dictionary<string, Func<object>>()
+        {
+            { "Context.UserName", () => AuthenticationContext.Current.Principal.Identity.Name },
+            { "Context.UserId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUser(AuthenticationContext.Current.Principal.Identity)?.Key },
+            { "Context.UserEntityId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUserEntity(AuthenticationContext.Current.Principal.Identity)?.Key },
+            { "Context.ProviderId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetProviderEntity(AuthenticationContext.Current.Principal.Identity)?.Key },
+            { "Context.Language", () => CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
+        };
 
         // Default tracer
         private Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
@@ -85,7 +97,6 @@ namespace SanteDB.Rest.BIS
                 throw;
             }
         }
-
 
         /// <summary>
         /// Get the specified resource type
@@ -148,16 +159,50 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Render the specified query
         /// </summary>
-        [Demand(PermissionPolicyIdentifiers.QueryWarehouseData)]
-        public IEnumerable<dynamic> RenderQuery(string id, string format)
+        /// Policies controlled by query implementation
+        public IEnumerable<dynamic> RenderQuery(string id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                // First we want to grab the appropriate source for this ID
+                var queryDef = this.m_metadataRepository.Get<BisQueryDefinition>(id);
+                if (queryDef == null)
+                    throw new KeyNotFoundException(id);
+                queryDef = SanteDB.BI.Util.BiUtils.ResolveRefs(queryDef) as BisQueryDefinition;
+                var dsource = queryDef.DataSources.FirstOrDefault(o => o.Name == "main") ?? queryDef.DataSources.FirstOrDefault();
+                if (dsource == null)
+                    throw new KeyNotFoundException("Query does not contain a data source");
+                var providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBisDataSource;
+
+                // Parameters
+                Dictionary<String, object> parameters = new Dictionary<string, object>();
+                foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
+                    parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString[kv].FirstOrDefault());
+
+                // Context parameters
+                foreach (var kv in this.m_contextParams)
+                    if (!parameters.ContainsKey(kv.Key))
+                        parameters.Add(kv.Key, kv.Value());
+
+                var queryData = providerImplementation.ExecuteQuery(queryDef, parameters);
+                RestOperationContext.Current.OutgoingResponse.Headers.Add("X-SanteDB-QueryTime", (queryData.StopTime - queryData.StartTime).TotalMilliseconds.ToString());
+                return queryData.Dataset;
+            }
+            catch(KeyNotFoundException)
+            {
+                throw;
+            }
+            catch(Exception e)
+            {
+                this.m_tracer.TraceError("Error rendering query: {0}", e);
+                throw new FaultException(500, $"Error rendering query {id}", e);
+            }
         }
 
         /// <summary>
         /// Render the specified query
         /// </summary>
-        [Demand(PermissionPolicyIdentifiers.QueryWarehouseData)]
+        /// Policies controlled by query implementation
         public Stream RenderView(string id, string format)
         {
             throw new NotImplementedException();
