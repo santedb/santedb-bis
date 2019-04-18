@@ -1,0 +1,27 @@
+﻿<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>1.42.0.0</version>
+    <title>$title$</title>
+    <authors>Mohawk College of Applied Arts and Technology &amp; Fyfe Software Inc.</authors>
+    <owners>Mohawk College of Applied Arts and Technology &amp; Fyfe Software Inc.</owners>
+    <licenseUrl>https://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://santesuite.org</projectUrl>
+    <iconUrl>http://santesuite.org/assets/img/logo.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>SanteDB Business Intelligence Service for Reports, Views and Queries</description>
+    <releaseNotes>Alpha version</releaseNotes>
+    <copyright>Copyright 2015-2019, SanteSuite Community Partners (see: http://santesuite.org)</copyright>
+    <tags>WCF SanteSuite</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="11.0.2.0"/>
+      <dependency id="SanteDB.Rest.Common" version="1.42.0.0"/>
+      <dependency id="SanteDB.BI" version="1.42.0.0"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\$configuration$\SanteDB.Rest.BIS.dll" target="lib\net45"/>
+    <file src="bin\$configuration$\SanteDB.Rest.BIS.dll" target="lib\monoandroid"/>
+  </files>
+</package>
