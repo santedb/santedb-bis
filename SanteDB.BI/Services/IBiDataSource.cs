@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace SanteDB.BI.Services
 {
     /// <summary>
-    /// Represents a data source which can execute specified <see cref="SanteDB.BI.Model.BisQueryDefinition"/> and return results
+    /// Represents a data source which can execute specified <see cref="SanteDB.BI.Model.BiQueryDefinition"/> and return results
     /// </summary>
-    public interface IBisDataSource
+    public interface IBiDataSource
     {
 
         /// <summary>
@@ -19,7 +19,7 @@ namespace SanteDB.BI.Services
         /// <param name="queryDefinition">The query definition to be executed</param>
         /// <param name="parameters">The parameter values to supply</param>
         /// <returns>A query result indicating the results of the query</returns>
-        BisResultContext ExecuteQuery(BisQueryDefinition queryDefinition, Dictionary<String, Object> parameters);
+        BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, Dictionary<String, Object> parameters);
 
         /// <summary>
         /// Executes the specified <paramref name="queryDefinition"/> using the specified <paramref name="parameters"/>

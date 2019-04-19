@@ -7,10 +7,10 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a BIS datasource definition
     /// </summary>
-    [XmlType(nameof(BisDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BisDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisDataSourceDefinition : BisDefinition
+    public class BiDataSourceDefinition : BiDefinition
     {
 
         /// <summary>

@@ -28,9 +28,9 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a collection of simple value elements
     /// </summary>
-    [XmlType(nameof(BisParameterValueCollection), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiParameterValueCollection), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisParameterValueCollection
+    public class BiParameterValueCollection
     {
         /// <summary>
         /// Add parameter value

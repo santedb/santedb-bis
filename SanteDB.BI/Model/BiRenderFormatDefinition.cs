@@ -11,10 +11,10 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Documents the render formatters
     /// </summary>
-    [XmlType(nameof(BisRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BisRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisRenderFormatDefinition : BisDefinition
+    public class BiRenderFormatDefinition : BiDefinition
     {
 
         /// <summary>

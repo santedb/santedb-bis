@@ -7,10 +7,10 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a view
     /// </summary>
-    [XmlType(nameof(BisViewDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BisViewDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiViewDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiViewDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisViewDefinition : BisDefinition
+    public class BiViewDefinition : BiDefinition
     {
 
         /// <summary>

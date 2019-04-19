@@ -12,57 +12,57 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a BI package
     /// </summary>
-    [XmlRoot(nameof(BisPackage), Namespace = BiConstants.XmlNamespace)]
-    [XmlType(nameof(BisPackage), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisPackage : BisDefinition
+    public class BiPackage : BiDefinition
     {
 
-        public BisPackage()
+        public BiPackage()
         {
-            this.DataSources = new List<BisDataSourceDefinition>();
-            this.Formats = new List<BisRenderFormatDefinition>();
-            this.Parameters = new List<BisParameterDefinition>();
-            this.Queries = new List<BisQueryDefinition>();
-            this.Views = new List<BisViewDefinition>();
-            this.Reports = new List<BisReportDefinition>();
+            this.DataSources = new List<BiDataSourceDefinition>();
+            this.Formats = new List<BiRenderFormatDefinition>();
+            this.Parameters = new List<BiParameterDefinition>();
+            this.Queries = new List<BiQueryDefinition>();
+            this.Views = new List<BiViewDefinition>();
+            this.Reports = new List<BiReportDefinition>();
         }
 
         /// <summary>
         /// Gets or sets the list of data sources
         /// </summary>
         [XmlArray("sources"), XmlArrayItem("add"), JsonProperty("sources")]
-        public List<BisDataSourceDefinition> DataSources { get; set; }
+        public List<BiDataSourceDefinition> DataSources { get; set; }
 
         /// <summary>
         /// Gets or sets the list of data sources
         /// </summary>
         [XmlArray("formats"), XmlArrayItem("add"), JsonProperty("formats")]
-        public List<BisRenderFormatDefinition> Formats { get; set; }
+        public List<BiRenderFormatDefinition> Formats { get; set; }
 
         /// <summary>
         /// Gets or sets the list of parameter definitions
         /// </summary>
         [XmlArray("parameters"), XmlArrayItem("add"), JsonProperty("parameters")]
-        public List<BisParameterDefinition> Parameters { get; set; }
+        public List<BiParameterDefinition> Parameters { get; set; }
 
         /// <summary>
         /// Gets or sets the list of query definitions
         /// </summary>
         [XmlArray("queries"), XmlArrayItem("add"), JsonProperty("queries")]
-        public List<BisQueryDefinition> Queries { get; set; }
+        public List<BiQueryDefinition> Queries { get; set; }
 
         /// <summary>
         /// Gets or sets the list of view defintiions
         /// </summary>
         [XmlArray("views"), XmlArrayItem("add"), JsonProperty("views")]
-        public List<BisViewDefinition> Views { get; set; }
+        public List<BiViewDefinition> Views { get; set; }
 
         /// <summary>
         /// Gets or set sthe list of report definitions
         /// </summary>
         [XmlArray("reports"), XmlArrayItem("add"), JsonProperty("reports")]
-        public List<BisReportDefinition> Reports { get; set; }
+        public List<BiReportDefinition> Reports { get; set; }
 
         /// <summary>
         /// Saves the specified BIS Package
@@ -79,10 +79,10 @@ namespace SanteDB.BI.Model
                 itm.ShouldSerializeDefinitions = true;
             foreach (var itm in this.Views)
                 itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Parameters.Select(p => p.Values).OfType<BisQueryDefinition>())
+            foreach (var itm in this.Parameters.Select(p => p.Values).OfType<BiQueryDefinition>())
                 itm.ShouldSerializeDefinitions = true;
 
-            new XmlSerializer(typeof(BisPackage)).Serialize(s, this);
+            new XmlSerializer(typeof(BiPackage)).Serialize(s, this);
         }
     }
 }

@@ -23,6 +23,8 @@ using System.Collections;
 using SanteDB.BI.Util;
 using SanteDB.Core.Services;
 using System.Globalization;
+using SanteDB.Core.Security.Audit;
+using SanteDB.Core.Auditing;
 
 namespace SanteDB.Rest.BIS
 {
@@ -47,21 +49,21 @@ namespace SanteDB.Rest.BIS
         private Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
 
         // Metadata repository
-        private IBisMetadataRepository m_metadataRepository = ApplicationServiceContext.Current.GetService<IBisMetadataRepository>();
+        private IBiMetadataRepository m_metadataRepository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
 
         /// <summary>
         /// Get resource type
         /// </summary>
         private Type GetResourceType (String resourceTypeName)
         {
-            return typeof(BisDefinition).Assembly.ExportedTypes.FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
+            return typeof(BiDefinition).Assembly.ExportedTypes.FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
         }
 
         /// <summary>
         /// Create the specified BIS metadata object
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
-        public BisDefinition Create(string resourceType, BisDefinition body)
+        public BiDefinition Create(string resourceType, BiDefinition body)
         {
             try
             {
@@ -82,14 +84,14 @@ namespace SanteDB.Rest.BIS
         /// Delete the specified resource type
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
-        public BisDefinition Delete(string resourceType, string id)
+        public BiDefinition Delete(string resourceType, string id)
         {
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                return this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBisMetadataRepository.Remove),
+                return this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Remove),
                     new Type[] { rt },
-                    new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BisDefinition;
+                    new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BiDefinition;
             }
             catch (Exception e)
             {
@@ -102,14 +104,14 @@ namespace SanteDB.Rest.BIS
         /// Get the specified resource type
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public BisDefinition Get(string resourceType, string id)
+        public BiDefinition Get(string resourceType, string id)
         {
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                var retVal = this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBisMetadataRepository.Get),
+                var retVal = this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
                     new Type[] { rt },
-                    new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BisDefinition;
+                    new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BiDefinition;
 
                 // Resolve any refs in the object
                 if (retVal == null)
@@ -162,22 +164,34 @@ namespace SanteDB.Rest.BIS
         /// Policies controlled by query implementation
         public IEnumerable<dynamic> RenderQuery(string id)
         {
+            AuditData audit = new AuditData(DateTime.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.Query));
             try
             {
                 // First we want to grab the appropriate source for this ID
-                var queryDef = this.m_metadataRepository.Get<BisQueryDefinition>(id);
+                var queryDef = this.m_metadataRepository.Get<BiQueryDefinition>(id);
                 if (queryDef == null)
                     throw new KeyNotFoundException(id);
-                queryDef = SanteDB.BI.Util.BiUtils.ResolveRefs(queryDef) as BisQueryDefinition;
+                queryDef = SanteDB.BI.Util.BiUtils.ResolveRefs(queryDef) as BiQueryDefinition;
                 var dsource = queryDef.DataSources.FirstOrDefault(o => o.Name == "main") ?? queryDef.DataSources.FirstOrDefault();
                 if (dsource == null)
                     throw new KeyNotFoundException("Query does not contain a data source");
-                var providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBisDataSource;
+                var providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
 
                 // Parameters
                 Dictionary<String, object> parameters = new Dictionary<string, object>();
                 foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
                     parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString[kv].FirstOrDefault());
+
+                // Populate data about the query
+                audit.AuditableObjects.Add(new AuditableObject()
+                {
+                    IDTypeCode = AuditableObjectIdType.ReportNumber,
+                    LifecycleType = AuditableObjectLifecycle.Report,
+                    ObjectId = id,
+                    QueryData = RestOperationContext.Current.IncomingRequest.Url.Query,
+                    Role = AuditableObjectRole.Query,
+                    Type = AuditableObjectType.SystemObject
+                });
 
                 // Context parameters
                 foreach (var kv in this.m_contextParams)
@@ -186,16 +200,26 @@ namespace SanteDB.Rest.BIS
 
                 var queryData = providerImplementation.ExecuteQuery(queryDef, parameters);
                 RestOperationContext.Current.OutgoingResponse.Headers.Add("X-SanteDB-QueryTime", (queryData.StopTime - queryData.StartTime).TotalMilliseconds.ToString());
+                
                 return queryData.Dataset;
             }
             catch(KeyNotFoundException)
             {
+                audit.Outcome = OutcomeIndicator.MinorFail;
                 throw;
             }
             catch(Exception e)
             {
+                audit.Outcome = OutcomeIndicator.MinorFail;
                 this.m_tracer.TraceError("Error rendering query: {0}", e);
                 throw new FaultException(500, $"Error rendering query {id}", e);
+            }
+            finally
+            {
+                AuditUtil.AddLocalDeviceActor(audit);
+                AuditUtil.AddRemoteDeviceActor(audit, RestOperationContext.Current.IncomingRequest.RemoteEndPoint.ToString());
+                AuditUtil.AddUserActor(audit);
+                AuditUtil.SendAudit(audit);
             }
         }
 
@@ -212,7 +236,7 @@ namespace SanteDB.Rest.BIS
         /// Search for BIS definitions
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public List<BisDefinition> Search(string resourceType)
+        public List<BiDefinition> Search(string resourceType)
         {
             try
             {
@@ -225,10 +249,10 @@ namespace SanteDB.Rest.BIS
                 int offset = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0"),
                     count = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100");
                 // Execute the query
-                return (this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBisMetadataRepository.Query),
+                return (this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
                     new Type[] { rt },
                     new Type[] { expression.GetType(), typeof(int), typeof(int?) })
-                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BisDefinition>().ToList();
+                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BiDefinition>().ToList();
             }
             catch (Exception e)
             {
@@ -240,7 +264,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Update the specfied resource (delete/create)
         /// </summary>
-        public BisDefinition Update(string resourceType, string id, BisDefinition body)
+        public BiDefinition Update(string resourceType, string id, BiDefinition body)
         {
             this.Delete(resourceType, id);
             return this.Create(resourceType, body);

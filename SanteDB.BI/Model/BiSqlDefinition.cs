@@ -7,9 +7,9 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a basic SQL definition
     /// </summary>
-    [XmlType(nameof(BisSqlDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BisSqlDefinition), Namespace = BiConstants.XmlNamespace)]
-    public class BisSqlDefinition 
+    [XmlType(nameof(BiSqlDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiSqlDefinition), Namespace = BiConstants.XmlNamespace)]
+    public class BiSqlDefinition 
     {
 
         /// <summary>

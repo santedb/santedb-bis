@@ -22,12 +22,12 @@ namespace SanteDB.BI.Util
         /// <summary>
         /// Resolves all references to their proper objects
         /// </summary>
-        public static BisDefinition ResolveRefs(BisDefinition definition)
+        public static BiDefinition ResolveRefs(BiDefinition definition)
         {
             // Create new instance
             if (definition == null)
                 return null;
-            var newDef = Activator.CreateInstance(definition.GetType()) as BisDefinition;
+            var newDef = Activator.CreateInstance(definition.GetType()) as BiDefinition;
             newDef.CopyObjectData(definition);
             definition = newDef;
 
@@ -38,11 +38,11 @@ namespace SanteDB.BI.Util
                 definition.Ref = null;
                 if (refId.StartsWith("#")) refId = refId.Substring(1);
 
-                var repository = ApplicationServiceContext.Current.GetService<IBisMetadataRepository>();
+                var repository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
                 // Attempt to lookup
-                return ResolveRefs(repository.GetType().GetGenericMethod(nameof(IBisMetadataRepository.Get),
+                return ResolveRefs(repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
                     new Type[] { definition.GetType() },
-                    new Type[] { typeof(String) }).Invoke(repository, new object[] { refId }) as BisDefinition);
+                    new Type[] { typeof(String) }).Invoke(repository, new object[] { refId }) as BiDefinition);
             }
             else  // Cascade
                 foreach (var pi in definition.GetType().GetRuntimeProperties())
@@ -52,8 +52,8 @@ namespace SanteDB.BI.Util
                     {
                         var nvList = Activator.CreateInstance(val.GetType()) as IList;
                         foreach (var itm in val as IList)
-                            if (itm is BisDefinition)
-                                nvList.Add(ResolveRefs(itm as BisDefinition));
+                            if (itm is BiDefinition)
+                                nvList.Add(ResolveRefs(itm as BiDefinition));
                             else
                                 nvList.Add(itm);
                         pi.SetValue(definition, nvList);

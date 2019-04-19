@@ -8,32 +8,32 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a report definition
     /// </summary>
-    [XmlType(nameof(BisReportDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BisReportDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiReportDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiReportDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisReportDefinition : BisDefinition
+    public class BiReportDefinition : BiDefinition
     {
 
         /// <summary>
         /// Default ctor
         /// </summary>
-        public BisReportDefinition()
+        public BiReportDefinition()
         {
-            this.Queries = new List<BisQueryDefinition>();
-            this.Views = new List<BisViewDefinition>();
+            this.Queries = new List<BiQueryDefinition>();
+            this.Views = new List<BiViewDefinition>();
         }
 
         /// <summary>
         /// Gets or sets the queries which feed this report
         /// </summary>
         [XmlArray("queries"), XmlArrayItem("add"), JsonProperty("queries")]
-        public List<BisQueryDefinition> Queries { get; set; }
+        public List<BiQueryDefinition> Queries { get; set; }
 
         /// <summary>
         /// Gets or sets the views
         /// </summary>
         [XmlArray("views"), XmlArrayItem("add"), JsonProperty("views")]
-        public List<BisViewDefinition> Views { get; set; }
+        public List<BiViewDefinition> Views { get; set; }
 
     }
 }

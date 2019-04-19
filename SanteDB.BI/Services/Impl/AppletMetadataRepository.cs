@@ -19,7 +19,7 @@ namespace SanteDB.BI.Services.Impl
     /// <summary>
     /// Represents a default implementation of a BIS metadata repository which loads definitions from loaded applets
     /// </summary>
-    public class AppletMetadataRepository : IBisMetadataRepository
+    public class AppletMetadataRepository : IBiMetadataRepository
     {
 
         // Tracer for this repository
@@ -28,7 +28,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Definition cache 
         /// </summary>
-        private Dictionary<Type, Dictionary<String, BisDefinition>> m_definitionCache = new Dictionary<Type, Dictionary<string, BisDefinition>>();
+        private Dictionary<Type, Dictionary<String, BiDefinition>> m_definitionCache = new Dictionary<Type, Dictionary<string, BiDefinition>>();
 
         /// <summary>
         /// Gets the service name
@@ -38,10 +38,10 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Gets the specified object from the specified type repository 
         /// </summary>
-        public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BisDefinition
+        public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-            Dictionary<String, BisDefinition> definitions = null;
+            Dictionary<String, BiDefinition> definitions = null;
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions) &&
                 definitions[id]?.Demands.All(o=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true)
                 return definitions[id] as TBisDefinition;
@@ -51,7 +51,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Inserts the specified definition into the cache
         /// </summary>
-        public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BisDefinition
+        public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
@@ -60,10 +60,10 @@ namespace SanteDB.BI.Services.Impl
                 throw new PolicyViolationException(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata, outcome);
 
             // Locate type definitions
-            Dictionary<String, BisDefinition> typeDefinitions = null;
+            Dictionary<String, BiDefinition> typeDefinitions = null;
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out typeDefinitions))
             {
-                typeDefinitions = new Dictionary<string, BisDefinition>();
+                typeDefinitions = new Dictionary<string, BiDefinition>();
                 this.m_definitionCache.Add(metadata.GetType(), typeDefinitions);
             }
 
@@ -79,11 +79,11 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Queries the specified definition type
         /// </summary>
-        public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BisDefinition
+        public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition
         {
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
 
-            Dictionary<String, BisDefinition> definitions = null;
+            Dictionary<String, BiDefinition> definitions = null;
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
                 return definitions.Values
                     .OfType<TBisDefinition>()
@@ -97,7 +97,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Remove the specified object from the repository
         /// </summary>
-        public void Remove<TBisDefinition>(string id) where TBisDefinition : BisDefinition
+        public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
@@ -105,7 +105,7 @@ namespace SanteDB.BI.Services.Impl
             if (outcome != Core.Model.Security.PolicyGrantType.Grant)
                 throw new PolicyViolationException(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata, outcome);
 
-            Dictionary<String, BisDefinition> definitions = null;
+            Dictionary<String, BiDefinition> definitions = null;
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
                 definitions.Remove(id);
         }
@@ -128,7 +128,7 @@ namespace SanteDB.BI.Services.Impl
                     {
                         this.m_tracer.TraceVerbose("Attempting to load {0}", o.Name);
                         using(var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
-                            return BisDefinition.Load(ms);
+                            return BiDefinition.Load(ms);
                     }
                     catch (Exception e)
                     {
@@ -136,7 +136,7 @@ namespace SanteDB.BI.Services.Impl
                         return null;
                     }
                 })
-                .OfType<BisDefinition>()
+                .OfType<BiDefinition>()
                 .ToArray();
 
             // Process contents
@@ -148,18 +148,18 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Process the BIS definition item
         /// </summary>
-        private void ProcessBisDefinition(BisDefinition definition)
+        private void ProcessBisDefinition(BiDefinition definition)
         {
-            if(definition is BisPackage)
+            if(definition is BiPackage)
             {
                 this.m_tracer.TraceInfo("Processing BIS Package: {0}", definition.Id);
-                var pkg = definition as BisPackage;
-                var objs = pkg.DataSources.OfType<BisDefinition>()
-                    .Union(pkg.Formats.OfType<BisDefinition>())
-                    .Union(pkg.Parameters.OfType<BisDefinition>())
-                    .Union(pkg.Queries.OfType<BisDefinition>())
-                    .Union(pkg.Reports.OfType<BisDefinition>())
-                    .Union(pkg.Views.OfType<BisDefinition>());
+                var pkg = definition as BiPackage;
+                var objs = pkg.DataSources.OfType<BiDefinition>()
+                    .Union(pkg.Formats.OfType<BiDefinition>())
+                    .Union(pkg.Parameters.OfType<BiDefinition>())
+                    .Union(pkg.Queries.OfType<BiDefinition>())
+                    .Union(pkg.Reports.OfType<BiDefinition>())
+                    .Union(pkg.Views.OfType<BiDefinition>());
 
                 foreach (var itm in objs)
                 {

@@ -11,7 +11,7 @@ namespace SanteDB.BI.Services
     /// <summary>
     /// Represents a view renderer which can render a particular view given a particular context
     /// </summary>
-    public interface IBisViewRenderer
+    public interface IBiViewRenderer
     {
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace SanteDB.BI.Services
         /// <param name="resultContext">The results</param>
         /// <param name="viewDefinition">The view definition</param>
         /// <returns>The rendered output stream</returns>
-        Stream Render(BisResultContext resultContext, BisViewDefinition viewDefinition);
+        Stream Render(BisResultContext resultContext, BiViewDefinition viewDefinition);
 
     }
 }

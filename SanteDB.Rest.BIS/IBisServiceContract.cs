@@ -15,13 +15,13 @@ namespace SanteDB.Rest.BIS
     /// Represents a service contract
     /// </summary>
     [ServiceContract(Name = "BIS")]
-    [ServiceKnownResource(typeof(BisPackage))]
-    [ServiceKnownResource(typeof(BisDataSourceDefinition))]
-    [ServiceKnownResource(typeof(BisParameterDefinition))]
-    [ServiceKnownResource(typeof(BisQueryDefinition))]
-    [ServiceKnownResource(typeof(BisReportDefinition))]
-    [ServiceKnownResource(typeof(BisViewDefinition))]
-    [ServiceKnownResource(typeof(BisRenderFormatDefinition))]
+    [ServiceKnownResource(typeof(BiPackage))]
+    [ServiceKnownResource(typeof(BiDataSourceDefinition))]
+    [ServiceKnownResource(typeof(BiParameterDefinition))]
+    [ServiceKnownResource(typeof(BiQueryDefinition))]
+    [ServiceKnownResource(typeof(BiReportDefinition))]
+    [ServiceKnownResource(typeof(BiViewDefinition))]
+    [ServiceKnownResource(typeof(BiRenderFormatDefinition))]
     [ServiceProduces("application/json")]
     [ServiceProduces("application/xml")]
     public interface IBisServiceContract
@@ -58,32 +58,32 @@ namespace SanteDB.Rest.BIS
         /// Searches the specified resource at endpoint
         /// </summary>
         [Get("/{resourceType}")]
-        List<BisDefinition> Search(String resourceType);
+        List<BiDefinition> Search(String resourceType);
 
         /// <summary>
         /// Gets the specified resource at the endpoint
         /// </summary>
         /// <returns></returns>
         [Get("/{resourceType}/{id}")]
-        BisDefinition Get(String resourceType, String id);
+        BiDefinition Get(String resourceType, String id);
 
         /// <summary>
         /// Creates a new instance of a BIS resource
         /// </summary>
         [Post("/{resourceType}")]
-        BisDefinition Create(String resourceType, BisDefinition body);
+        BiDefinition Create(String resourceType, BiDefinition body);
 
         /// <summary>
         /// Deletes the specified BIS resource
         /// </summary>
         [Delete("/{resourceType}/{id}")]
-        BisDefinition Delete(String resourceType, String id);
+        BiDefinition Delete(String resourceType, String id);
 
         /// <summary>
         /// Updates the specified BIS resource
         /// </summary>
         [Put("/{resourceType}/{id}")]
-        BisDefinition Update(String resourceType, String id, BisDefinition body);
+        BiDefinition Update(String resourceType, String id, BiDefinition body);
 
     }
 }

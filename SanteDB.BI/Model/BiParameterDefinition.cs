@@ -31,16 +31,16 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents a parameter definition
     /// </summary>
-    [XmlType(nameof(BisParameterDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BisParameterDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiParameterDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiParameterDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisParameterDefinition : BisDefinition
+    public class BiParameterDefinition : BiDefinition
     {
 
         /// <summary>
         /// Default ctor
         /// </summary>
-        public BisParameterDefinition()
+        public BiParameterDefinition()
         {
         }
 
@@ -69,8 +69,8 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the values for the parameter
         /// </summary>
-        [XmlElement("query", typeof(BisQueryDefinition)),
-         XmlElement("values", typeof(BisParameterValueCollection)),
+        [XmlElement("query", typeof(BiQueryDefinition)),
+         XmlElement("values", typeof(BiParameterValueCollection)),
          JsonProperty("values")]
         public Object Values { get; set; }
 

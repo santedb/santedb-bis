@@ -8,9 +8,9 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents an annotation for the object
     /// </summary>
-    [XmlType(nameof(BisAnnotation), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiAnnotation), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BisAnnotation 
+    public class BiAnnotation 
     {
         /// <summary>
         /// Represents the body of the annotation

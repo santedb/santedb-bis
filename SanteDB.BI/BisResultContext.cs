@@ -13,9 +13,9 @@ namespace SanteDB.BI
     /// </summary>
     public class BisResultContext
     {
-        public BisResultContext(BisQueryDefinition definition, 
+        public BisResultContext(BiQueryDefinition definition, 
             IDictionary<String, Object> arguments,
-            IBisDataSource source,
+            IBiDataSource source,
             IEnumerable<dynamic> results,
             DateTime startTime
             )
@@ -36,7 +36,7 @@ namespace SanteDB.BI
         /// <summary>
         /// Gets the query definition
         /// </summary>
-        public BisQueryDefinition QueryDefinition { get; private set; }
+        public BiQueryDefinition QueryDefinition { get; private set; }
 
         /// <summary>
         /// Gets the dataset
@@ -46,7 +46,7 @@ namespace SanteDB.BI
         /// <summary>
         /// Gets the data source
         /// </summary>
-        public IBisDataSource DataSource { get; private set; }
+        public IBiDataSource DataSource { get; private set; }
 
         /// <summary>
         /// Gets the start time
