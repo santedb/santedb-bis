@@ -7,7 +7,7 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Represents Aggregate functions
     /// </summary>
-    [XmlType(nameof(BiAggregationDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiAggregateFunction), Namespace = BiConstants.XmlNamespace)]
     public enum BiAggregateFunction
     {
         /// <summary>
