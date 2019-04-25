@@ -21,7 +21,6 @@ namespace SanteDB.BI.Model
         /// </summary>
         public BiDefinition()
         {
-            this.Demands = new List<string>();
         }
 
         // Serializer
@@ -50,18 +49,17 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("ref"), JsonProperty("$ref")]
         public String Ref { get; set; }
+        /// <summary>
+        /// Represents BI metadata about the object
+        /// </summary>
+        [XmlElement("meta"), JsonProperty("meta")]
+        public BiMetadata MetaData { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of demand policies
+        /// Allows for the association of an external identifier
         /// </summary>
-        [XmlArray("policies"), XmlArrayItem("demand"), JsonProperty("policies")]
-        public List<String> Demands { get; set; }
-
-        /// <summary>
-        /// Gets or sets the documentation for this object
-        /// </summary>
-        [XmlElement("annotation"), JsonProperty("doc")]
-        public BiAnnotation Annotation { get; set; }
+        [XmlElement("identifier"), JsonProperty("identifier")]
+        public BiIdentity Identifier { get; set; }
 
         /// <summary>
         /// Load the specified object
@@ -75,7 +73,7 @@ namespace SanteDB.BI.Model
                     typeof(BiDataSourceDefinition),
                     typeof(BiParameterDefinition),
                     typeof(BiReportDefinition),
-                    typeof(BiViewDefinition)
+                    typeof(BiReportViewDefinition)
                 });
             // Attempt to load the appropriate serializer
             using (var xr = XmlReader.Create(s))

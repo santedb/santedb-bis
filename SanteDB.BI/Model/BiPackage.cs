@@ -73,7 +73,7 @@ namespace SanteDB.BI.Model
             // First we need to enable the saving of definitions data 
             foreach (var itm in this.Reports.SelectMany(r => r.Views))
                 itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Reports.SelectMany(q => q.Queries))
+            foreach (var itm in this.Reports.SelectMany(q => q.Views))
                 itm.ShouldSerializeDefinitions = true;
             foreach (var itm in this.Queries)
                 itm.ShouldSerializeDefinitions = true;

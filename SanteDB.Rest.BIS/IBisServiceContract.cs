@@ -20,7 +20,7 @@ namespace SanteDB.Rest.BIS
     [ServiceKnownResource(typeof(BiParameterDefinition))]
     [ServiceKnownResource(typeof(BiQueryDefinition))]
     [ServiceKnownResource(typeof(BiReportDefinition))]
-    [ServiceKnownResource(typeof(BiViewDefinition))]
+    [ServiceKnownResource(typeof(BiReportViewDefinition))]
     [ServiceKnownResource(typeof(BiRenderFormatDefinition))]
     [ServiceProduces("application/json")]
     [ServiceProduces("application/xml")]

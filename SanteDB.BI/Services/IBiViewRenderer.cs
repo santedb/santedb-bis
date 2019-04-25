@@ -20,7 +20,7 @@ namespace SanteDB.BI.Services
         /// <param name="resultContext">The results</param>
         /// <param name="viewDefinition">The view definition</param>
         /// <returns>The rendered output stream</returns>
-        Stream Render(BisResultContext resultContext, BiViewDefinition viewDefinition);
+        Stream Render(BisResultContext resultContext, BiReportViewDefinition viewDefinition);
 
     }
 }

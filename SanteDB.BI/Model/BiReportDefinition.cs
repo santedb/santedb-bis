@@ -19,21 +19,24 @@ namespace SanteDB.BI.Model
         /// </summary>
         public BiReportDefinition()
         {
-            this.Queries = new List<BiQueryDefinition>();
-            this.Views = new List<BiViewDefinition>();
+            this.DataSource = new List<BiDefinition>();
+            this.Views = new List<BiReportViewDefinition>();
         }
 
         /// <summary>
-        /// Gets or sets the queries which feed this report
+        /// Gets or sets the data sources which feed this DIV
         /// </summary>
-        [XmlArray("queries"), XmlArrayItem("add"), JsonProperty("queries")]
-        public List<BiQueryDefinition> Queries { get; set; }
+        [XmlArray("dataSources"),
+            XmlArrayItem("query", typeof(BiQueryDefinition)),
+            XmlArrayItem("view", typeof(BiViewDefinition)),
+            JsonProperty("dataSources")]
+        public List<BiDefinition> DataSource { get; set; }
 
         /// <summary>
         /// Gets or sets the views
         /// </summary>
         [XmlArray("views"), XmlArrayItem("add"), JsonProperty("views")]
-        public List<BiViewDefinition> Views { get; set; }
+        public List<BiReportViewDefinition> Views { get; set; }
 
     }
 }

@@ -43,7 +43,7 @@ namespace SanteDB.BI.Services.Impl
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
             Dictionary<String, BiDefinition> definitions = null;
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions) &&
-                definitions[id]?.Demands.All(o=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                definitions[id]?.MetaData?.Demands.All(o=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true)
                 return definitions[id] as TBisDefinition;
             return null;
         }
@@ -88,7 +88,7 @@ namespace SanteDB.BI.Services.Impl
                 return definitions.Values
                     .OfType<TBisDefinition>()
                     .Where(filter.Compile())
-                    .Where(o=>o.Demands?.All(d=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                    .Where(o=>o.MetaData?.Demands?.All(d=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
                     .Skip(offset)
                     .Take(count ?? 100);
             return new TBisDefinition[0];
@@ -163,7 +163,7 @@ namespace SanteDB.BI.Services.Impl
 
                 foreach (var itm in objs)
                 {
-                    itm.Demands.AddRange(pkg.Demands);
+                    itm.MetaData?.Demands.AddRange(pkg.MetaData?.Demands);
                     this.ProcessBisDefinition(itm);
                 }
             }

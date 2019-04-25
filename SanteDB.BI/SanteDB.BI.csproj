@@ -39,17 +39,23 @@
   <ItemGroup>
     <Compile Include="BiConstants.cs" />
     <Compile Include="BisResultContext.cs" />
+    <Compile Include="Model\BiAggregationDefinition.cs" />
     <Compile Include="Model\BiAnnotation.cs" />
     <Compile Include="Model\BiDataSourceDefinition.cs" />
     <Compile Include="Model\BiDefinition.cs" />
+    <Compile Include="Model\BiIdentity.cs" />
+    <Compile Include="Model\BiMetadata.cs" />
     <Compile Include="Model\BiParameterDefinition.cs" />
     <Compile Include="Model\BiParameterValueCollection.cs" />
     <Compile Include="Model\BiQueryDefinition.cs" />
     <Compile Include="Model\BiRenderFormatDefinition.cs" />
     <Compile Include="Model\BiReportDefinition.cs" />
+    <Compile Include="Model\BiSqlColumnReference.cs" />
     <Compile Include="Model\BiSqlDefinition.cs" />
-    <Compile Include="Model\BiViewDefinition.cs" />
+    <Compile Include="Model\BiReportViewDefinition.cs" />
     <Compile Include="Model\BiPackage.cs" />
+    <Compile Include="Model\BiViewDefinition.cs" />
+    <Compile Include="Model\BiViewPivotDefinition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IBiDataSource.cs" />
     <Compile Include="Services\IBiMetadataRepository.cs" />
