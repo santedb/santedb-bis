@@ -59,8 +59,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IBiDataSource.cs" />
     <Compile Include="Services\IBiMetadataRepository.cs" />
+    <Compile Include="Services\IBiPivotProvider.cs" />
     <Compile Include="Services\IBiViewRenderer.cs" />
     <Compile Include="Services\Impl\AppletMetadataRepository.cs" />
+    <Compile Include="Services\Impl\InMemoryPivotProvider.cs" />
     <Compile Include="Util\BiUtils.cs" />
   </ItemGroup>
   <ItemGroup>

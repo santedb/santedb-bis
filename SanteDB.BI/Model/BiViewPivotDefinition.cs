@@ -13,20 +13,26 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the rows
         /// </summary>
-        [XmlArray("rows"), XmlArrayItem("add"), JsonProperty("rows")]
-        public List<string> Rows { get; set; }
+        [XmlAttribute("key"), JsonProperty("key")]
+        public string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the columns of the pivots
         /// </summary>
-        [XmlArray("columns"), XmlArrayItem("add"), JsonProperty("columns")]
-        public List<string> Columns { get; set; }
+        [XmlAttribute("columnDef"), JsonProperty("columnDef")]
+        public string Columns { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the pivots
         /// </summary>
-        [XmlElement("value"), JsonProperty("value")]
+        [XmlAttribute("value"), JsonProperty("value")]
         public string Value { get; set; }
+
+        /// <summary>
+        /// BI Aggregate function
+        /// </summary>
+        [XmlAttribute("fn"), JsonProperty("fn")]
+        public BiAggregateFunction AggregateFunction { get; set; }
 
     }
 }

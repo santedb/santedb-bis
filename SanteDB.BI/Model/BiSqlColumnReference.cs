@@ -92,7 +92,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the aggregation function
         /// </summary>
-        [XmlAttribute("aggregator"), JsonProperty("aggregator")]
+        [XmlAttribute("fn"), JsonProperty("fn")]
         public BiAggregateFunction Aggregation { get; set; }
     }
 }

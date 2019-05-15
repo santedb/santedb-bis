@@ -25,6 +25,8 @@ using SanteDB.Core.Services;
 using System.Globalization;
 using SanteDB.Core.Security.Audit;
 using SanteDB.Core.Auditing;
+using System.Text.RegularExpressions;
+using SanteDB.BI;
 
 namespace SanteDB.Rest.BIS
 {
@@ -159,20 +161,30 @@ namespace SanteDB.Rest.BIS
         }
 
         /// <summary>
-        /// Render the specified query
+        /// Hydrate the query
         /// </summary>
-        /// Policies controlled by query implementation
-        public IEnumerable<dynamic> RenderQuery(string id)
+        /// <param name="queryId"></param>
+        /// <returns></returns>
+        private BisResultContext HydrateQuery(String queryId)
         {
             AuditData audit = new AuditData(DateTime.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.Query));
             try
             {
                 // First we want to grab the appropriate source for this ID
-                var queryDef = this.m_metadataRepository.Get<BiQueryDefinition>(id);
-                if (queryDef == null)
-                    throw new KeyNotFoundException(id);
-                queryDef = SanteDB.BI.Util.BiUtils.ResolveRefs(queryDef) as BiQueryDefinition;
-                var dsource = queryDef.DataSources.FirstOrDefault(o => o.Name == "main") ?? queryDef.DataSources.FirstOrDefault();
+                var viewDef = this.m_metadataRepository.Get<BiViewDefinition>(queryId);
+                if (viewDef == null)
+                {
+                    var queryDef = this.m_metadataRepository.Get<BiQueryDefinition>(queryId);
+                    if (queryDef == null)
+                        throw new KeyNotFoundException(queryId);
+                    viewDef = new BiViewDefinition()
+                    {
+                        Query = queryDef
+                    };
+                }
+
+                viewDef = SanteDB.BI.Util.BiUtils.ResolveRefs(viewDef) as BiViewDefinition;
+                var dsource = viewDef.Query?.DataSources.FirstOrDefault(o => o.Name == "main") ?? viewDef.Query?.DataSources.FirstOrDefault();
                 if (dsource == null)
                     throw new KeyNotFoundException("Query does not contain a data source");
                 var providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
@@ -180,14 +192,13 @@ namespace SanteDB.Rest.BIS
                 // Parameters
                 Dictionary<String, object> parameters = new Dictionary<string, object>();
                 foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
-                    parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString[kv].FirstOrDefault());
-
+                    parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString[kv]);
                 // Populate data about the query
                 audit.AuditableObjects.Add(new AuditableObject()
                 {
                     IDTypeCode = AuditableObjectIdType.ReportNumber,
                     LifecycleType = AuditableObjectLifecycle.Report,
-                    ObjectId = id,
+                    ObjectId = queryId,
                     QueryData = RestOperationContext.Current.IncomingRequest.Url.Query,
                     Role = AuditableObjectRole.Query,
                     Type = AuditableObjectType.SystemObject
@@ -198,21 +209,47 @@ namespace SanteDB.Rest.BIS
                     if (!parameters.ContainsKey(kv.Key))
                         parameters.Add(kv.Key, kv.Value());
 
-                var queryData = providerImplementation.ExecuteQuery(queryDef, parameters);
-                RestOperationContext.Current.OutgoingResponse.Headers.Add("X-SanteDB-QueryTime", (queryData.StopTime - queryData.StartTime).TotalMilliseconds.ToString());
-                
-                return queryData.Dataset;
+                // Aggregations and groups?
+                if (RestOperationContext.Current.IncomingRequest.QueryString["_groupBy"] != null)
+                {
+                    var aggRx = new Regex(@"(\w*)\((.*?)\)");
+                    viewDef.AggregationDefinitions = new List<BiAggregationDefinition>()
+                    {
+                        new BiAggregationDefinition()
+                        {
+                            Groupings = RestOperationContext.Current.IncomingRequest.QueryString.GetValues("_groupBy").Select(o=>new BiSqlColumnReference()
+                            {
+                                ColumnSelector = o,
+                                Name = o
+                            }).ToList(),
+                            Columns = RestOperationContext.Current.IncomingRequest.QueryString.GetValues("_select").Select(o=>{
+                                var match = aggRx.Match(o);
+                                if(!match.Success)
+                                    throw new InvalidOperationException("Aggregation function must be in format AGGREGATOR(COLUMN)");
+                                return new BiAggregateSqlColumnReference()
+                                {
+                                    Aggregation = (BiAggregateFunction)Enum.Parse(typeof(BiAggregateFunction), match.Groups[1].Value),
+                                    ColumnSelector = match.Groups[2].Value,
+                                    Name = match.Groups[2].Value
+                                };
+                            }).ToList()
+                        }
+                    };
+                }
+
+                var queryData = providerImplementation.ExecuteView(viewDef, parameters);
+                return queryData;
             }
-            catch(KeyNotFoundException)
+            catch (KeyNotFoundException)
             {
                 audit.Outcome = OutcomeIndicator.MinorFail;
                 throw;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 audit.Outcome = OutcomeIndicator.MinorFail;
                 this.m_tracer.TraceError("Error rendering query: {0}", e);
-                throw new FaultException(500, $"Error rendering query {id}", e);
+                throw new FaultException(500, $"Error rendering query {queryId}", e);
             }
             finally
             {
@@ -221,6 +258,15 @@ namespace SanteDB.Rest.BIS
                 AuditUtil.AddUserActor(audit);
                 AuditUtil.SendAudit(audit);
             }
+        }
+        /// <summary>
+        /// Render the specified query
+        /// </summary>
+        /// Policies controlled by query implementation
+        public IEnumerable<dynamic> RenderQuery(string id)
+        {
+            var retVal = this.HydrateQuery(id);
+            return retVal.Dataset;
         }
 
         /// <summary>
