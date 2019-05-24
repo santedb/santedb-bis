@@ -33,7 +33,7 @@ namespace SanteDB.Rest.BIS
         /// <param name="id"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        [Get("/View/{id}.{format}")]
+        [Get("/View/{id}")]
         Stream RenderView(String id, String format);
 
         /// <summary>
