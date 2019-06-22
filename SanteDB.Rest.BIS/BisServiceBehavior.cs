@@ -263,19 +263,11 @@ namespace SanteDB.Rest.BIS
         /// Render the specified query
         /// </summary>
         /// Policies controlled by query implementation
+        [Demand(PermissionPolicyIdentifiers.Login)]
         public IEnumerable<dynamic> RenderQuery(string id)
         {
             var retVal = this.HydrateQuery(id);
             return retVal.Dataset;
-        }
-
-        /// <summary>
-        /// Render the specified query
-        /// </summary>
-        /// Policies controlled by query implementation
-        public Stream RenderView(string id, string format)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -314,6 +306,17 @@ namespace SanteDB.Rest.BIS
         {
             this.Delete(resourceType, id);
             return this.Create(resourceType, body);
+        }
+
+        /// <summary>
+        /// Render a report
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public Stream RenderReport(string id, string format)
+        {
+            throw new NotImplementedException();
         }
     }
 }

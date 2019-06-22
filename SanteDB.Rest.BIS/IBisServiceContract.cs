@@ -20,12 +20,13 @@ namespace SanteDB.Rest.BIS
     [ServiceKnownResource(typeof(BiParameterDefinition))]
     [ServiceKnownResource(typeof(BiQueryDefinition))]
     [ServiceKnownResource(typeof(BiReportDefinition))]
-    [ServiceKnownResource(typeof(BiReportViewDefinition))]
+    [ServiceKnownResource(typeof(BiViewDefinition))]
     [ServiceKnownResource(typeof(BiRenderFormatDefinition))]
     [ServiceProduces("application/json")]
     [ServiceProduces("application/xml")]
     public interface IBisServiceContract
     {
+
 
         /// <summary>
         /// Renders the specified BIS view in the specified format
@@ -33,8 +34,8 @@ namespace SanteDB.Rest.BIS
         /// <param name="id"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        [Get("/View/{id}")]
-        Stream RenderView(String id, String format);
+        [Get("/Report/{id}")]
+        Stream RenderReport(String id, String format);
 
         /// <summary>
         /// Executes the specified query 

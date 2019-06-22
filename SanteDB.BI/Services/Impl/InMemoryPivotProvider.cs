@@ -55,12 +55,12 @@ namespace SanteDB.BI.Services.Impl
 
             var ftype = bucket.First().GetType();
             var aggMethod = typeof(Enumerable).GetGenericMethod(aggFn,
-                new Type[] { ftype.GetType() },
+                new Type[] { ftype },
                 new Type[] { typeof(IEnumerable<>).MakeGenericType(ftype), typeof(Func<,>).MakeGenericType(ftype, ftype) });
 
             // We want to convert all values 
             var convertMethod = typeof(Enumerable).GetGenericMethod(nameof(Enumerable.Select),
-                new Type[] { typeof(Object) },
+                new Type[] { typeof(Object), ftype },
                 new Type[] { typeof(IEnumerable<Object>), typeof(Func<,>).MakeGenericType(typeof(Object), ftype) });
             var parm = Expression.Parameter(typeof(Object));
             var selectorFn = Expression.Lambda(Expression.Convert(parm, ftype), parm);
@@ -78,6 +78,9 @@ namespace SanteDB.BI.Services.Impl
         public BisResultContext Pivot(BisResultContext context, BiViewPivotDefinition pivot)
         {
             var buckets = new List<ExpandoObject>();
+            // First we must order by the pivot 
+            context.Dataset.OrderBy(o => (o as IDictionary<String, Object>)[pivot.Key]);
+
             // Algorithm for pivoting : 
             IDictionary<String, Object> cobject = null;
             foreach (IDictionary<String, Object> itm in context.Dataset)
@@ -85,10 +88,9 @@ namespace SanteDB.BI.Services.Impl
                 var key = itm[pivot.Key];
                 if (cobject == null || !key.Equals(cobject[pivot.Key]) && cobject.Count > 0)
                 {
-                    if (cobject != null)
-                        buckets.Add(cobject as ExpandoObject);
                     cobject = new ExpandoObject();
                     cobject.Add(pivot.Key, key);
+                    buckets.Add(cobject as ExpandoObject);
                 }
 
                 // Same key, so lets create or accumulate
@@ -104,6 +106,7 @@ namespace SanteDB.BI.Services.Impl
             }
 
             // Now we have our buckets, we want to apply our aggregation function
+            var colNames = new List<String>();
             foreach (IDictionary<String, Object> itm in buckets)
                 foreach (var value in itm)
                 {
@@ -111,13 +114,25 @@ namespace SanteDB.BI.Services.Impl
 
                     var bucket = (value.Value as IEnumerable<Object>);
                     itm[value.Key] = this.Aggregate((value.Value as List<Object>), pivot.AggregateFunction);
+                    if(!colNames.Contains(value.Key)) colNames.Add(value.Key);
                 }
-            return new BisResultContext(context.QueryDefinition, context.Arguments, context.DataSource, buckets, context.StartTime.DateTime);
+
+            // Add where necessary
+            var output = new List<ExpandoObject>();
+            foreach (IDictionary<String, Object> itm in buckets)
+            {
+                var tuple = (new ExpandoObject() as IDictionary<String, Object>);
+                tuple[pivot.Key] = itm[pivot.Key];
+                foreach (var col in colNames)
+                    if (itm.ContainsKey(col))
+                        tuple[col] = itm[col];
+                    else
+                        tuple[col] = null;
+                output.Add(tuple as ExpandoObject);
+            }
+
+            return new BisResultContext(context.QueryDefinition, context.Arguments, context.DataSource, output, context.StartTime.DateTime);
         }
 
-        private T List<T>(T v)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

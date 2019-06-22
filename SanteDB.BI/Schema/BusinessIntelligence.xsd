@@ -36,7 +36,7 @@
   <xs:complexType name="BiAggregateSqlColumnReference">
     <xs:simpleContent>
       <xs:extension base="tns:BiSqlColumnReference">
-        <xs:attribute name="aggregator" type="tns:BiAggregateFunction" use="required" />
+        <xs:attribute name="fn" type="tns:BiAggregateFunction" use="required" />
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -229,11 +229,10 @@
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="BiViewPivotDefinition">
-    <xs:sequence>
-      <xs:element minOccurs="0" maxOccurs="1" name="rows" type="tns:ArrayOfString1" />
-      <xs:element minOccurs="0" maxOccurs="1" name="columns" type="tns:ArrayOfString1" />
-      <xs:element minOccurs="0" maxOccurs="1" name="value" type="xs:string" />
-    </xs:sequence>
+    <xs:attribute name="key" type="xs:string" />
+    <xs:attribute name="columnDef" type="xs:string" />
+    <xs:attribute name="value" type="xs:string" />
+    <xs:attribute name="fn" type="tns:BiAggregateFunction" use="required" />
   </xs:complexType>
   <xs:complexType name="ArrayOfBiReportViewDefinition">
     <xs:sequence>

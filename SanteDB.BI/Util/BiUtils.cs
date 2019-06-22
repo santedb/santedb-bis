@@ -58,6 +58,8 @@ namespace SanteDB.BI.Util
                                 nvList.Add(itm);
                         pi.SetValue(definition, nvList);
                     }
+                    else if (val is BiDefinition)
+                        pi.SetValue(definition, ResolveRefs(val as BiDefinition));
                 }
             return definition;
         }

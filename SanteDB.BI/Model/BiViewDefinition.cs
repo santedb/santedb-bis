@@ -8,6 +8,7 @@ namespace SanteDB.BI.Model
     /// Represents a view on data in the BI package
     /// </summary>
     [XmlType(nameof(BiViewDefinition), Namespace = BiConstants.XmlNamespace), JsonObject(nameof(BiViewDefinition))]
+    [XmlRoot(nameof(BiViewDefinition), Namespace = BiConstants.XmlNamespace)]
     public class BiViewDefinition : BiDefinition
     {
 
