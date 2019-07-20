@@ -71,6 +71,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="SanteDB.BI.nuspec" />
     <None Include="Schema\BusinessIntelligence.xsd">
       <SubType>Designer</SubType>
     </None>
