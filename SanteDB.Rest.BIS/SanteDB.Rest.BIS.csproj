@@ -74,7 +74,7 @@
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="SanteDB.Rest.Common">
-          <Version>1.67.0</Version>
+          <Version>1.68.0</Version>
         </PackageReference>
       </ItemGroup>
     </Otherwise>
