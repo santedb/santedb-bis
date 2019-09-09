@@ -4,8 +4,7 @@ The SanteDB leverages several third party artifacts to do its job. This file lis
 
 ## 1.1 Primary Copyright Notice
 
-SanteDB, Copyright (C) 2015-2019 Mohawk College of Applied Arts And Technology
-SanteDB, Copyright (C) 2019 SanteSuite Contributors
+SanteDB Business Intelligence Serivcs (BIS), Copyright (C) 2019 Fyfe Software Inc.
 
 This product includes software developed by Borland Software Corp.
 
