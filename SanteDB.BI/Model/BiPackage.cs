@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,9 +16,28 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [XmlType(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BiPackage : BiDefinition
+    public class BiPackage : BiDefinition, IEnumerable<BiDefinition>
     {
 
+        /// <summary>
+        /// Gets the specified definition from this package regardless of type
+        /// </summary>
+        public BiDefinition this[string id]
+        {
+            get
+            {
+                return (BiDefinition)this.DataSources.FirstOrDefault(o => o.Id == id) ??
+                    (BiDefinition)this.Formats.FirstOrDefault(o => o.Id == id) ??
+                    (BiDefinition)this.Parameters.FirstOrDefault(o => o.Id == id) ??
+                    (BiDefinition)this.Queries.FirstOrDefault(o => o.Id == id) ??
+                    (BiDefinition)this.Reports.FirstOrDefault(o => o.Id == id) ??
+                    (BiDefinition)this.Views.FirstOrDefault(o => o.Id == id);
+            }
+        }
+
+        /// <summary>
+        /// Constructor for bi package
+        /// </summary>
         public BiPackage()
         {
             this.DataSources = new List<BiDataSourceDefinition>();
@@ -83,6 +103,27 @@ namespace SanteDB.BI.Model
                 itm.ShouldSerializeDefinitions = true;
 
             new XmlSerializer(typeof(BiPackage)).Serialize(s, this);
+        }
+
+        /// <summary>
+        /// Get enumerator
+        /// </summary>
+        public IEnumerator<BiDefinition> GetEnumerator()
+        {
+            return this.DataSources.OfType<BiDefinition>()
+                .Union(this.Formats.OfType<BiDefinition>())
+                .Union(this.Parameters.OfType<BiDefinition>())
+                .Union(this.Queries.OfType<BiDefinition>())
+                .Union(this.Reports.OfType<BiDefinition>())
+                .Union(this.Views.OfType<BiDefinition>()).GetEnumerator();
+        }
+
+        /// <summary>
+        /// Get enumerator
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

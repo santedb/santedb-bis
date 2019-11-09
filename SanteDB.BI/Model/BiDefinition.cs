@@ -62,6 +62,23 @@ namespace SanteDB.BI.Model
         public BiIdentity Identifier { get; set; }
 
         /// <summary>
+        /// Saves this metadata definition to the specified stream
+        /// </summary>
+        public void Save(Stream s)
+        {
+            if (m_serializer == null)
+                m_serializer = new XmlSerializer(typeof(BiPackage), new Type[]
+                {
+                    typeof(BiQueryDefinition),
+                    typeof(BiDataSourceDefinition),
+                    typeof(BiParameterDefinition),
+                    typeof(BiReportDefinition),
+                    typeof(BiReportViewDefinition)
+                });
+            m_serializer.Serialize(s, this);
+        }
+
+        /// <summary>
         /// Load the specified object
         /// </summary>
         public static BiDefinition Load(Stream s)
@@ -83,5 +100,19 @@ namespace SanteDB.BI.Model
                     throw new InvalidDataException("Stream does not contain a valid BIS definition");
         }
 
+        /// <summary>
+        /// Load the specified object
+        /// </summary>
+        public static TBiDefinition Load<TBiDefinition>(Stream s)
+        {
+            if (m_serializer == null)
+                m_serializer = new XmlSerializer(typeof(TBiDefinition));
+            // Attempt to load the appropriate serializer
+            using (var xr = XmlReader.Create(s))
+                if (m_serializer.CanDeserialize(xr))
+                    return (TBiDefinition)m_serializer.Deserialize(xr);
+                else
+                    throw new InvalidDataException("Stream does not contain a valid BIS definition");
+        }
     }
 }

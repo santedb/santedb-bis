@@ -208,8 +208,8 @@
   </xs:complexType>
   <xs:complexType name="ArrayOfChoice1">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
-      <xs:element minOccurs="1" maxOccurs="1" name="query" nillable="true" type="tns:BiQueryDefinition" />
       <xs:element minOccurs="1" maxOccurs="1" name="view" nillable="true" type="tns:BiViewDefinition" />
+      <xs:element minOccurs="1" maxOccurs="1" name="query" nillable="true" type="tns:BiQueryDefinition" />
     </xs:choice>
   </xs:complexType>
   <xs:complexType name="BiViewDefinition">
@@ -285,4 +285,5 @@
       <xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiReportDefinition" />
     </xs:sequence>
   </xs:complexType>
+  <xs:element name="BiViewDefinition" nillable="true" type="tns:BiViewDefinition" />
 </xs:schema>
