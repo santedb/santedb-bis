@@ -15,11 +15,6 @@ namespace SanteDB.BI.Model
     {
 
         /// <summary>
-        /// Gets or sets whether serialization should occur for definitional objects
-        /// </summary>
-        internal bool ShouldSerializeDefinitions { get; set; }
-
-        /// <summary>
         /// Gets or sets the body of the element
         /// </summary>
         [XmlElement("div", Namespace = BiConstants.HtmlNamespace), JsonIgnore]

@@ -14,7 +14,7 @@ namespace SanteDB.BI.Services
     /// </summary>
     public interface IBiMetadataRepository : IServiceImplementation
     {
-
+       
         /// <summary>
         /// Query metadata repository for 
         /// </summary>

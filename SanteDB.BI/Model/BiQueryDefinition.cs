@@ -23,12 +23,6 @@ namespace SanteDB.BI.Model
         }
 
         /// <summary>
-        /// Gets or sets the serialization definitions
-        /// </summary>
-        [XmlIgnore, JsonIgnore]
-        internal bool ShouldSerializeDefinitions { get; set; }
-
-        /// <summary>
         /// Gets or sets the data sources
         /// </summary>
         [XmlArray("dataSources"), XmlArrayItem("add"), JsonProperty("dataSources")]

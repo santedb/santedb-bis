@@ -45,6 +45,7 @@
     <Compile Include="Model\BiDefinition.cs" />
     <Compile Include="Model\BiIdentity.cs" />
     <Compile Include="Model\BiMetadata.cs" />
+    <Compile Include="Model\BiPackageEnumerator.cs" />
     <Compile Include="Model\BiParameterDefinition.cs" />
     <Compile Include="Model\BiParameterValueCollection.cs" />
     <Compile Include="Model\BiQueryDefinition.cs" />

@@ -40,11 +40,6 @@ namespace SanteDB.BI.Model
         /// </summary>
         public bool ShouldSerializePivot() => this.ShouldSerializeDefinitions;
 
-        /// <summary>
-        /// Gets or sets the serialization definitions
-        /// </summary>
-        [XmlIgnore, JsonIgnore]
-        internal bool ShouldSerializeDefinitions { get; set; }
 
     }
 }

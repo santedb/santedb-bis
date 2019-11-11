@@ -240,7 +240,7 @@ namespace SanteDB.Rest.BIS
                 int offset = 0, count = 100;
                 if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0", out offset))
                     throw new FormatException("_offset is not in the correct format");
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100", out offset))
+                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100", out count))
                     throw new FormatException("_count is not in the correct format");
 
 

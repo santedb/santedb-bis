@@ -10,13 +10,14 @@ using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
+
     /// <summary>
     /// Represents a BI package
     /// </summary>
     [XmlRoot(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [XmlType(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BiPackage : BiDefinition, IEnumerable<BiDefinition>
+    public class BiPackage : BiDefinition
     {
 
         /// <summary>
@@ -85,45 +86,17 @@ namespace SanteDB.BI.Model
         public List<BiReportDefinition> Reports { get; set; }
 
         /// <summary>
-        /// Saves the specified BIS Package
+        /// True if the definitions should be serialized
         /// </summary>
-        public void Save(Stream s)
-        {
-
-            // First we need to enable the saving of definitions data 
-            foreach (var itm in this.Reports.SelectMany(r => r.Views))
-                itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Reports.SelectMany(q => q.Views))
-                itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Queries)
-                itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Views)
-                itm.ShouldSerializeDefinitions = true;
-            foreach (var itm in this.Parameters.Select(p => p.Values).OfType<BiQueryDefinition>())
-                itm.ShouldSerializeDefinitions = true;
-
-            new XmlSerializer(typeof(BiPackage)).Serialize(s, this);
+        internal override bool ShouldSerializeDefinitions {
+            get => base.ShouldSerializeDefinitions;
+            set
+            {
+                base.ShouldSerializeDefinitions = value;
+                foreach (var itm in new BiPackageEnumerator(this))
+                    itm.ShouldSerializeDefinitions = value;
+            }
         }
 
-        /// <summary>
-        /// Get enumerator
-        /// </summary>
-        public IEnumerator<BiDefinition> GetEnumerator()
-        {
-            return this.DataSources.OfType<BiDefinition>()
-                .Union(this.Formats.OfType<BiDefinition>())
-                .Union(this.Parameters.OfType<BiDefinition>())
-                .Union(this.Queries.OfType<BiDefinition>())
-                .Union(this.Reports.OfType<BiDefinition>())
-                .Union(this.Views.OfType<BiDefinition>()).GetEnumerator();
-        }
-
-        /// <summary>
-        /// Get enumerator
-        /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
     }
 }

@@ -10,7 +10,6 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiAggregationDefinition), Namespace = BiConstants.XmlNamespace), JsonObject]
     public class BiAggregationDefinition : BiSqlDefinition
     {
-
         /// <summary>
         /// Gets or sets the groupings
         /// </summary>

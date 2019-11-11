@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.Model.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +14,13 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [XmlInclude(typeof(BiViewDefinition))]
+    [XmlInclude(typeof(BiQueryDefinition))]
+    [XmlInclude(typeof(BiParameterDefinition))]
+    [XmlInclude(typeof(BiReportDefinition))]
+    [XmlInclude(typeof(BiRenderFormatDefinition))]
+    [XmlInclude(typeof(BiDataSourceDefinition))]
+    [XmlInclude(typeof(BiPackage))]
     public abstract class BiDefinition
     {
 
@@ -23,19 +31,16 @@ namespace SanteDB.BI.Model
         {
         }
 
-        // Serializer
-        private static XmlSerializer m_serializer;
-
         /// <summary>
         /// Gets or sets the alias name
         /// </summary>
-        [XmlAttribute("name"), JsonProperty("name")]
+        [XmlAttribute("name"), JsonProperty("name"), QueryParameter("name")]
         public String Name { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier
         /// </summary>
-        [XmlAttribute("id"), JsonProperty("id")]
+        [XmlAttribute("id"), JsonProperty("id"), QueryParameter("id")]
         public String Id { get; set; }
 
         /// <summary>
@@ -47,7 +52,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the reference
         /// </summary>
-        [XmlAttribute("ref"), JsonProperty("$ref")]
+        [XmlAttribute("ref"), JsonProperty("$ref"), QueryParameter("ref")]
         public String Ref { get; set; }
         /// <summary>
         /// Represents BI metadata about the object
@@ -66,16 +71,8 @@ namespace SanteDB.BI.Model
         /// </summary>
         public void Save(Stream s)
         {
-            if (m_serializer == null)
-                m_serializer = new XmlSerializer(typeof(BiPackage), new Type[]
-                {
-                    typeof(BiQueryDefinition),
-                    typeof(BiDataSourceDefinition),
-                    typeof(BiParameterDefinition),
-                    typeof(BiReportDefinition),
-                    typeof(BiReportViewDefinition)
-                });
-            m_serializer.Serialize(s, this);
+            this.ShouldSerializeDefinitions = true;
+            new XmlSerializer(this.GetType()).Serialize(s, this);
         }
 
         /// <summary>
@@ -83,36 +80,33 @@ namespace SanteDB.BI.Model
         /// </summary>
         public static BiDefinition Load(Stream s)
         {
-            if(m_serializer == null)
-                m_serializer = new XmlSerializer(typeof(BiPackage), new Type[]
-                {
-                    typeof(BiQueryDefinition),
-                    typeof(BiDataSourceDefinition),
-                    typeof(BiParameterDefinition),
-                    typeof(BiReportDefinition),
-                    typeof(BiReportViewDefinition)
-                });
+            var types = new Type[]
+                    {
+                                    typeof(BiPackage),
+                                    typeof(BiQueryDefinition),
+                                    typeof(BiDataSourceDefinition),
+                                    typeof(BiParameterDefinition),
+                                    typeof(BiReportDefinition),
+                                    typeof(BiViewDefinition),
+                                    typeof(BiReportViewDefinition)
+                    };
             // Attempt to load the appropriate serializer
             using (var xr = XmlReader.Create(s))
-                if (m_serializer.CanDeserialize(xr))
-                    return m_serializer.Deserialize(xr) as BiDefinition;
-                else
-                    throw new InvalidDataException("Stream does not contain a valid BIS definition");
+                foreach (var t in types)
+                {
+
+                    var ser = new XmlSerializer(t, types);
+                    if (ser.CanDeserialize(xr))
+                        return ser.Deserialize(xr) as BiDefinition;
+                }
+                throw new InvalidDataException("Stream does not contain a valid BIS definition");
         }
 
+
         /// <summary>
-        /// Load the specified object
+        /// Gets or sets the serialization definitions
         /// </summary>
-        public static TBiDefinition Load<TBiDefinition>(Stream s)
-        {
-            if (m_serializer == null)
-                m_serializer = new XmlSerializer(typeof(TBiDefinition));
-            // Attempt to load the appropriate serializer
-            using (var xr = XmlReader.Create(s))
-                if (m_serializer.CanDeserialize(xr))
-                    return (TBiDefinition)m_serializer.Deserialize(xr);
-                else
-                    throw new InvalidDataException("Stream does not contain a valid BIS definition");
-        }
+        [XmlIgnore, JsonIgnore]
+        internal virtual bool ShouldSerializeDefinitions { get; set; }
     }
 }
