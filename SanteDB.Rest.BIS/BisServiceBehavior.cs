@@ -281,7 +281,7 @@ namespace SanteDB.Rest.BIS
         /// Search for BIS definitions
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public List<BiDefinition> Search(string resourceType)
+        public BiDefinitionCollection Search(string resourceType)
         {
             try
             {
@@ -294,10 +294,10 @@ namespace SanteDB.Rest.BIS
                 int offset = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0"),
                     count = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100");
                 // Execute the query
-                return (this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
+                return new BiDefinitionCollection((this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
                     new Type[] { rt },
                     new Type[] { expression.GetType(), typeof(int), typeof(int?) })
-                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BiDefinition>().ToList();
+                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BiDefinition>());
             }
             catch (Exception e)
             {

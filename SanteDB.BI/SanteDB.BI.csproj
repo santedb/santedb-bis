@@ -43,6 +43,7 @@
     <Compile Include="Model\BiAnnotation.cs" />
     <Compile Include="Model\BiDataSourceDefinition.cs" />
     <Compile Include="Model\BiDefinition.cs" />
+    <Compile Include="Model\BiDefinitionCollection.cs" />
     <Compile Include="Model\BiIdentity.cs" />
     <Compile Include="Model\BiMetadata.cs" />
     <Compile Include="Model\BiPackageEnumerator.cs" />

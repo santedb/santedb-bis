@@ -59,7 +59,7 @@ namespace SanteDB.Rest.BIS
         /// Searches the specified resource at endpoint
         /// </summary>
         [Get("/{resourceType}")]
-        List<BiDefinition> Search(String resourceType);
+        BiDefinitionCollection Search(String resourceType);
 
         /// <summary>
         /// Gets the specified resource at the endpoint
