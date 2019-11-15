@@ -187,7 +187,12 @@ namespace SanteDB.Rest.BIS
                 var dsource = viewDef.Query?.DataSources.FirstOrDefault(o => o.Name == "main") ?? viewDef.Query?.DataSources.FirstOrDefault();
                 if (dsource == null)
                     throw new KeyNotFoundException("Query does not contain a data source");
-                var providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
+
+                IBiDataSource providerImplementation = null;
+                if (dsource.ProviderType != null)
+                    providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
+                else
+                    providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
 
                 // Parameters
                 Dictionary<String, object> parameters = new Dictionary<string, object>();
