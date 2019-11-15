@@ -21,7 +21,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiPackage))]
-    public class BiDefinitionCollection : List<BiDefinition>
+    public class BiDefinitionCollection 
     {
 
         /// <summary>
@@ -35,9 +35,15 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Collection ctor with objects 
         /// </summary>
-        public BiDefinitionCollection(IEnumerable<BiDefinition> items) : base(items)
+        public BiDefinitionCollection(IEnumerable<BiDefinition> items) 
         {
-
+            this.Items = new List<BiDefinition>(items);
         }
+
+        /// <summary>
+        /// Gets or sets the items part of this collection
+        /// </summary>
+        [XmlElement("item"), JsonProperty("item")]
+        public List<BiDefinition> Items { get; set; }
     }
 }
