@@ -56,7 +56,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Get resource type
         /// </summary>
-        private Type GetResourceType (String resourceTypeName)
+        private Type GetResourceType(String resourceTypeName)
         {
             return typeof(BiDefinition).Assembly.ExportedTypes.FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
         }
@@ -75,7 +75,7 @@ namespace SanteDB.Rest.BIS
                     throw new FaultException(400, "Invalid resource type");
                 return this.m_metadataRepository.Insert(body);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this.m_tracer.TraceError("Error executing BIS Create: {0}", e);
                 throw;
@@ -212,7 +212,14 @@ namespace SanteDB.Rest.BIS
                 // Context parameters
                 foreach (var kv in this.m_contextParams)
                     if (!parameters.ContainsKey(kv.Key))
-                        parameters.Add(kv.Key, kv.Value());
+                        try
+                        {
+                            parameters.Add(kv.Key, kv.Value());
+                        }
+                        catch (Exception e)
+                        {
+                            this.m_tracer.TraceWarning("Cannot hydrate parameter {0} : {1}", kv.Key, e);
+                        }
 
                 // Aggregations and groups?
                 if (RestOperationContext.Current.IncomingRequest.QueryString["_groupBy"] != null)
@@ -249,7 +256,7 @@ namespace SanteDB.Rest.BIS
                     throw new FormatException("_count is not in the correct format");
 
 
-                    var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
+                var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
                 return queryData;
             }
             catch (KeyNotFoundException)
