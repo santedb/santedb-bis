@@ -232,24 +232,19 @@ namespace SanteDB.Rest.BIS
                         {
                             Groupings = RestOperationContext.Current.IncomingRequest.QueryString.GetValues("_groupBy").Select(o=>new BiSqlColumnReference()
                             {
-                                ColumnSelector = o,
-                                Name = o
+                                ColumnSelector = o.Contains("::")  ? $"CAST({o.Substring(0, o.IndexOf(":"))} AS {o.Substring(o.IndexOf(":") + 2)})" : o,
+                                Name = o.Contains("::") ? o.Substring(0, o.IndexOf(":")) : o
                             }).ToList(),
                             Columns = RestOperationContext.Current.IncomingRequest.QueryString.GetValues("_select").Select(o=>{
                                 var match = aggRx.Match(o);
                                 if(!match.Success)
-                                        return new BiAggregateSqlColumnReference()
-                                    {
-                                        ColumnSelector = match.Groups[2].Value,
-                                        Name = match.Groups[2].Value
-                                    };
-                                else
-                                    return new BiAggregateSqlColumnReference()
-                                    {
-                                        Aggregation = (BiAggregateFunction)Enum.Parse(typeof(BiAggregateFunction), match.Groups[1].Value, true),
-                                        ColumnSelector = match.Groups[2].Value,
-                                        Name = match.Groups[2].Value
-                                    };
+                                    throw new InvalidOperationException("Aggregation function must be in format AGGREGATOR(COLUMN)");
+                                return new BiAggregateSqlColumnReference()
+                                {
+                                    Aggregation = (BiAggregateFunction)Enum.Parse(typeof(BiAggregateFunction), match.Groups[1].Value, true),
+                                    ColumnSelector = match.Groups[2].Value,
+                                    Name = match.Groups[2].Value
+                                };
                             }).ToList()
                         }
                     };
