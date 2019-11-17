@@ -179,6 +179,7 @@ namespace SanteDB.Rest.BIS
                         throw new KeyNotFoundException(queryId);
                     viewDef = new BiViewDefinition()
                     {
+                        Id = queryDef.Id,
                         Query = queryDef
                     };
                 }
@@ -197,7 +198,7 @@ namespace SanteDB.Rest.BIS
                 // Parameters
                 Dictionary<String, object> parameters = new Dictionary<string, object>();
                 foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
-                    parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString[kv]);
+                    parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString.GetValues(kv).ToList());
                 // Populate data about the query
                 audit.AuditableObjects.Add(new AuditableObject()
                 {
@@ -237,13 +238,18 @@ namespace SanteDB.Rest.BIS
                             Columns = RestOperationContext.Current.IncomingRequest.QueryString.GetValues("_select").Select(o=>{
                                 var match = aggRx.Match(o);
                                 if(!match.Success)
-                                    throw new InvalidOperationException("Aggregation function must be in format AGGREGATOR(COLUMN)");
-                                return new BiAggregateSqlColumnReference()
-                                {
-                                    Aggregation = (BiAggregateFunction)Enum.Parse(typeof(BiAggregateFunction), match.Groups[1].Value),
-                                    ColumnSelector = match.Groups[2].Value,
-                                    Name = match.Groups[2].Value
-                                };
+                                        return new BiAggregateSqlColumnReference()
+                                    {
+                                        ColumnSelector = match.Groups[2].Value,
+                                        Name = match.Groups[2].Value
+                                    };
+                                else
+                                    return new BiAggregateSqlColumnReference()
+                                    {
+                                        Aggregation = (BiAggregateFunction)Enum.Parse(typeof(BiAggregateFunction), match.Groups[1].Value, true),
+                                        ColumnSelector = match.Groups[2].Value,
+                                        Name = match.Groups[2].Value
+                                    };
                             }).ToList()
                         }
                     };
