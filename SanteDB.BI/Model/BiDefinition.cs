@@ -24,6 +24,28 @@ namespace SanteDB.BI.Model
     public abstract class BiDefinition
     {
 
+        // Serializers
+        private static List<XmlSerializer> m_serializer = new List<XmlSerializer>();
+
+        /// <summary>
+        /// BI Definition
+        /// </summary>
+        static BiDefinition()
+        {
+            var types = new Type[]
+            {
+                                        typeof(BiPackage),
+                                        typeof(BiQueryDefinition),
+                                        typeof(BiDataSourceDefinition),
+                                        typeof(BiParameterDefinition),
+                                        typeof(BiReportDefinition),
+                                        typeof(BiViewDefinition),
+                                        typeof(BiReportViewDefinition)
+            };
+            foreach (var t in types)
+                m_serializer.Add(new XmlSerializer(t, types));
+
+        }
         /// <summary>
         /// Default ctor
         /// </summary>
@@ -80,26 +102,13 @@ namespace SanteDB.BI.Model
         /// </summary>
         public static BiDefinition Load(Stream s)
         {
-            var types = new Type[]
-                    {
-                                    typeof(BiPackage),
-                                    typeof(BiQueryDefinition),
-                                    typeof(BiDataSourceDefinition),
-                                    typeof(BiParameterDefinition),
-                                    typeof(BiReportDefinition),
-                                    typeof(BiViewDefinition),
-                                    typeof(BiReportViewDefinition)
-                    };
+
             // Attempt to load the appropriate serializer
             using (var xr = XmlReader.Create(s))
-                foreach (var t in types)
-                {
-
-                    var ser = new XmlSerializer(t, types);
+                foreach (var ser in m_serializer)
                     if (ser.CanDeserialize(xr))
                         return ser.Deserialize(xr) as BiDefinition;
-                }
-                throw new InvalidDataException("Stream does not contain a valid BIS definition");
+            throw new InvalidDataException("Stream does not contain a valid BIS definition");
         }
 
 
