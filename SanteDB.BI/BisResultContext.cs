@@ -13,6 +13,8 @@ namespace SanteDB.BI
     /// </summary>
     public class BisResultContext
     {
+
+        
         public BisResultContext(BiQueryDefinition definition, 
             IDictionary<String, Object> arguments,
             IBiDataSource source,

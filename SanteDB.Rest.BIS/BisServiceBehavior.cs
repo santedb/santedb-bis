@@ -27,6 +27,7 @@ using SanteDB.Core.Security.Audit;
 using SanteDB.Core.Auditing;
 using System.Text.RegularExpressions;
 using SanteDB.BI;
+using SanteDB.Core.Security.Services;
 
 namespace SanteDB.Rest.BIS
 {
@@ -195,10 +196,7 @@ namespace SanteDB.Rest.BIS
                 else
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
 
-                // Parameters
-                Dictionary<String, object> parameters = new Dictionary<string, object>();
-                foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
-                    parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString.GetValues(kv).ToList());
+                
                 // Populate data about the query
                 audit.AuditableObjects.Add(new AuditableObject()
                 {
@@ -210,17 +208,7 @@ namespace SanteDB.Rest.BIS
                     Type = AuditableObjectType.SystemObject
                 });
 
-                // Context parameters
-                foreach (var kv in this.m_contextParams)
-                    if (!parameters.ContainsKey(kv.Key))
-                        try
-                        {
-                            parameters.Add(kv.Key, kv.Value());
-                        }
-                        catch (Exception e)
-                        {
-                            this.m_tracer.TraceWarning("Cannot hydrate parameter {0} : {1}", kv.Key, e);
-                        }
+                var parameters = this.CreateParameterDictionary();
 
                 // Aggregations and groups?
                 if (RestOperationContext.Current.IncomingRequest.QueryString["_groupBy"] != null)
@@ -279,6 +267,34 @@ namespace SanteDB.Rest.BIS
                 AuditUtil.SendAudit(audit);
             }
         }
+
+        /// <summary>
+        /// Creates a parameter dictionary from the HTTP request context
+        /// </summary>
+        private IDictionary<String, Object> CreateParameterDictionary()
+        {
+            // Parameters
+            Dictionary<String, object> parameters = new Dictionary<string, object>();
+
+            foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
+                parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString.GetValues(kv).ToList().First());
+           
+
+            // Context parameters
+            foreach (var kv in this.m_contextParams)
+                if (!parameters.ContainsKey(kv.Key))
+                    try
+                    {
+                        parameters.Add(kv.Key, kv.Value());
+                    }
+                    catch (Exception e)
+                    {
+                        this.m_tracer.TraceWarning("Cannot hydrate parameter {0} : {1}", kv.Key, e);
+                    }
+
+            return parameters;
+        }
+
         /// <summary>
         /// Render the specified query
         /// </summary>
@@ -334,9 +350,37 @@ namespace SanteDB.Rest.BIS
         /// <param name="id"></param>
         /// <param name="format"></param>
         /// <returns></returns>
+        [Demand(PermissionPolicyIdentifiers.Login)]
         public Stream RenderReport(string id, string format)
         {
-            throw new NotImplementedException();
+            try
+            {
+
+                // Get the report format 
+                var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == format, 0, 1).FirstOrDefault();
+                if (formatDefinition == null)
+                    throw new KeyNotFoundException($"Report format {format} is not registered");
+
+                var reportDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Get<BiReportDefinition>(id);
+                if (reportDefinition == null)
+                    throw new KeyNotFoundException($"Report {id} is not registered");
+
+                // Render the report
+                var renderer = Activator.CreateInstance(formatDefinition.Type) as IBiReportRenderer;
+                var parameters = this.CreateParameterDictionary();
+
+                // Get the view name
+                var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"] ?? reportDefinition.Views.FirstOrDefault().Name;
+
+                // Set output headers
+                RestOperationContext.Current.OutgoingResponse.ContentType = formatDefinition.ContentType;
+                return renderer.Render(reportDefinition, view, parameters);
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceError("Error rendering BIS report: {0} : {1}", id, e);
+                throw new Exception($"Error rendering BIS report: {id}", e);
+            }
         }
     }
 }

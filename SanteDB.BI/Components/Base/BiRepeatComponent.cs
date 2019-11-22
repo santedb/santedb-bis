@@ -25,7 +25,7 @@ namespace SanteDB.BI.Components.Base
         /// <summary>
         /// Render the specified element
         /// </summary>
-        public void Render(XElement element, XmlWriter writer, RenderContext context)
+        public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
             // Run dataset and start context
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
@@ -33,33 +33,9 @@ namespace SanteDB.BI.Components.Base
 
             writer.WriteComment($"start repeat : {dataSource.QueryDefinition.Id}");
 
-            foreach(var itm in dataSource.Dataset)
-                foreach(var el in element.Elements())
-                {
-                    // TODO get helper here
-                    IBiViewComponent component = null; // ComponentUtil.GetRenderer()
-
-                    if(component.Validate(el, thisContext))
-                        component.Render(el, writer, thisContext);
-                    else
-                    {
-#if DEBUG
-                        throw new ViewValidationException(el, $"Component {component.ComponentName} failed validation");
-#else
-                        writer.WriteStartElement("em", BiConstants.HtmlNamespace);
-                        writer.WriteAttributeString("style", "color: #f00");
-                        StringBuilder path = new StringBuilder($"/{el.Name}");
-                        var p = el.Parent;
-                        while (p != el.Document.Root && p != null) {
-                            path.Insert(0, $"/{p.Name}");
-                            p = p.Parent;
-                        }
-                        writer.WriteString($"Component {component.ComponentName} failed validation at {path}");
-                        writer.WriteEndElement(); // em
-#endif
-                    }
-
-                }
+            foreach (var itm in dataSource.Dataset)
+                foreach (var el in element.Elements())
+                    ReportViewUtil.Write(writer, el, context);
 
             writer.WriteComment($"end repeat : {dataSource.QueryDefinition.Id}");
         }
@@ -67,7 +43,7 @@ namespace SanteDB.BI.Components.Base
         /// <summary>
         /// Validate that this component is correctly represented prior to calling render
         /// </summary>
-        public bool Validate(XElement element, RenderContext context)
+        public bool Validate(XElement element, IRenderContext context)
         {
             return element.HasAttributes && element.Attribute("source") != null &&
                 (context.Root as RootRenderContext).HasDataSource(element.Attribute("source").Value);

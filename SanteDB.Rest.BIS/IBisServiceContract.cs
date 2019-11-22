@@ -34,7 +34,7 @@ namespace SanteDB.Rest.BIS
         /// <param name="id"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        [Get("/Report/{id}")]
+        [Get("/Report/{format}/{id}")]
         Stream RenderReport(String id, String format);
 
         /// <summary>

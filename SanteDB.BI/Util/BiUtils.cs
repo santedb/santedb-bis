@@ -27,6 +27,8 @@ namespace SanteDB.BI.Util
             // Create new instance
             if (definition == null)
                 return null;
+            else if (definition is BiReportViewDefinition) // Report views cannot be resolved
+                return definition;
             var newDef = Activator.CreateInstance(definition.GetType()) as BiDefinition;
             newDef.CopyObjectData(definition);
             definition = newDef;

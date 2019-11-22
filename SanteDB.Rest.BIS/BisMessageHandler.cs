@@ -89,7 +89,7 @@ namespace SanteDB.Rest.BIS
                 {
                     this.m_tracer.TraceInfo("Starting BIS on {0}...", endpoint.Description.ListenUri);
                 }
-
+                
                 // Start the webhost
                 this.m_webHost.Start();
 

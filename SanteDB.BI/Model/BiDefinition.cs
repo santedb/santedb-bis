@@ -40,7 +40,8 @@ namespace SanteDB.BI.Model
                                         typeof(BiParameterDefinition),
                                         typeof(BiReportDefinition),
                                         typeof(BiViewDefinition),
-                                        typeof(BiReportViewDefinition)
+                                        typeof(BiReportViewDefinition),
+                                        typeof(BiRenderFormatDefinition)
             };
             foreach (var t in types)
                 m_serializer.Add(new XmlSerializer(t, types));

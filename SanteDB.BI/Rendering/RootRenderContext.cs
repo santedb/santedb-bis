@@ -1,5 +1,6 @@
 ﻿using SanteDB.BI.Model;
 using SanteDB.BI.Services;
+using SanteDB.BI.Util;
 using SanteDB.Core;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace SanteDB.BI.Rendering
         private BiReportDefinition m_report;
 
         // The data sources
-        private Dictionary<String, BisResultContext> m_dataSources;
+        private Dictionary<String, BisResultContext> m_dataSources = new Dictionary<string, BisResultContext>();
 
         // The name of the view being executed
         private string m_viewName;
@@ -55,14 +56,26 @@ namespace SanteDB.BI.Rendering
             BisResultContext retVal = null;
             if(!this.m_dataSources.TryGetValue(name, out retVal))
             {
-                var dataSourceDefinition = this.m_report.DataSource.FirstOrDefault(o => o.Name == name);
-                if (dataSourceDefinition == null)
+                var viewDef = this.m_report.DataSource.FirstOrDefault(o => o.Name == name);
+                if (viewDef == null)
                     throw new KeyNotFoundException($"Datasource {name} not found");
 
-                if (dataSourceDefinition is BiViewDefinition)
-                    retVal = ApplicationServiceContext.Current.GetService<IBiDataSource>().ExecuteView(dataSourceDefinition as BiViewDefinition, this.Parameters, 0, null);
-                else if (dataSourceDefinition is BiQueryDefinition)
-                    retVal = ApplicationServiceContext.Current.GetService<IBiDataSource>().ExecuteQuery(dataSourceDefinition as BiQueryDefinition, this.Parameters, null, 0, null);
+                viewDef = BiUtils.ResolveRefs(viewDef);
+
+                // Get the datasource for the execution engine
+                var dsource = (viewDef as BiViewDefinition)?.Query?.DataSources.FirstOrDefault(o => o.Name == "main") ?? (viewDef as BiViewDefinition)?.Query?.DataSources.FirstOrDefault() ??
+                    (viewDef as BiQueryDefinition)?.DataSources.FirstOrDefault(o => o.Name == "main") ?? (viewDef as BiQueryDefinition)?.DataSources.FirstOrDefault();
+
+                IBiDataSource providerImplementation = null;
+                if (dsource.ProviderType != null)
+                    providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
+                else
+                    providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
+
+                if (viewDef is BiViewDefinition)
+                    retVal = providerImplementation.ExecuteView(viewDef as BiViewDefinition, this.Parameters, 0, null);
+                else if (viewDef is BiQueryDefinition)
+                    retVal = providerImplementation.ExecuteQuery(viewDef as BiQueryDefinition, this.Parameters, null, 0, null);
                 else
                     throw new InvalidOperationException($"Cannot determine data source type of {name}");
 
