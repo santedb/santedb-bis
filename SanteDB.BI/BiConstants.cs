@@ -20,5 +20,10 @@ namespace SanteDB.BI
         /// Represents the HtmlNAmespace for the BI project
         /// </summary>
         public const string HtmlNamespace = "http://www.w3.org/1999/xhtml";
+
+        /// <summary>
+        /// XML View component namespace
+        /// </summary>
+        public const string ComponentNamespace = "http://santedb.org/bi/view";
     }
 }
