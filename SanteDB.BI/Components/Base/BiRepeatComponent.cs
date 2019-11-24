@@ -39,7 +39,7 @@ namespace SanteDB.BI.Components.Base
 
             foreach (var itm in dataSource.Dataset)
                 foreach (var el in element.Elements())
-                    ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                    ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
 
             writer.WriteComment($"end repeat : {dataSource.QueryDefinition.Id}");
         }
