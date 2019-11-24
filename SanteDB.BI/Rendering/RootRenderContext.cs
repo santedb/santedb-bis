@@ -36,6 +36,7 @@ namespace SanteDB.BI.Rendering
             this.Parameters = parameters;
             this.m_viewName = viewName;
             this.m_report = report;
+            this.Tags = new Dictionary<String, Object>();
         }
 
         /// <summary>
@@ -53,6 +54,7 @@ namespace SanteDB.BI.Rendering
         /// </summary>
         public BisResultContext GetOrExecuteQuery(string name)
         {
+
             BisResultContext retVal = null;
             if(!this.m_dataSources.TryGetValue(name, out retVal))
             {
@@ -103,5 +105,10 @@ namespace SanteDB.BI.Rendering
         /// Gets or sets the context parameters for the render
         /// </summary>
         public IDictionary<string, object> Parameters { get; }
+
+        /// <summary>
+        /// Report watches for this instance of the report
+        /// </summary>
+        public IDictionary<String, Object> Tags { get; }
     }
 }

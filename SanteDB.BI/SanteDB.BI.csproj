@@ -39,7 +39,9 @@
   <ItemGroup>
     <Compile Include="BiConstants.cs" />
     <Compile Include="BisResultContext.cs" />
+    <Compile Include="Components\Base\BiLocaleComponent.cs" />
     <Compile Include="Components\Base\BiRepeatComponent.cs" />
+    <Compile Include="Components\Base\BiValue.cs" />
     <Compile Include="Components\Base\HtmlElementComponent.cs" />
     <Compile Include="Components\ReportViewUtil.cs" />
     <Compile Include="Exceptions\ViewValidationException.cs" />
@@ -89,6 +91,14 @@
     <None Include="Schema\xhtml.xsd">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime">
+      <HintPath>..\Solution Items\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="ExpressionEvaluator">
+      <HintPath>..\Solution Items\ExpressionEvaluator.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="$(SolutionName.Contains('-ext'))">

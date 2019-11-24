@@ -22,6 +22,7 @@ namespace SanteDB.BI.Rendering
         {
             this.Parent = parent;
             this.ScopedObject = scopedObject;
+            this.Tags = new Dictionary<String, Object>();
         }
 
         /// <summary>
@@ -38,5 +39,10 @@ namespace SanteDB.BI.Rendering
         /// Gets the scoped object
         /// </summary>
         public dynamic ScopedObject { get; }
+
+        /// <summary>
+        /// Report watches for this instance of the report
+        /// </summary>
+        public IDictionary<String, Object> Tags { get; }
     }
 }

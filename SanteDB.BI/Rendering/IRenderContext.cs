@@ -27,5 +27,9 @@ namespace SanteDB.BI.Rendering
         /// </summary>
         dynamic ScopedObject { get; }
 
+        /// <summary>
+        /// Get a report tag
+        /// </summary>
+        IDictionary<String, Object> Tags { get; }
     }
 }

@@ -31,11 +31,15 @@ namespace SanteDB.BI.Components.Base
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
             var thisContext = new RenderContext(context, dataSource.Dataset);
 
+            // Add watches and expressions
+            thisContext.Tags.Add("watches", new Dictionary<String, Object>());
+            thisContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
+
             writer.WriteComment($"start repeat : {dataSource.QueryDefinition.Id}");
 
             foreach (var itm in dataSource.Dataset)
                 foreach (var el in element.Elements())
-                    ReportViewUtil.Write(writer, el, context);
+                    ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
 
             writer.WriteComment($"end repeat : {dataSource.QueryDefinition.Id}");
         }
