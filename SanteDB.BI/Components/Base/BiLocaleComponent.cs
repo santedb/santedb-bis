@@ -17,6 +17,7 @@ namespace SanteDB.BI.Components.Base
     /// </summary>
     public class BiLocaleComponent : IBiViewComponent
     {
+
         /// <summary>
         /// Gets the component name
         /// </summary>

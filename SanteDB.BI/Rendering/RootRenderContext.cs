@@ -4,9 +4,8 @@ using SanteDB.BI.Util;
 using SanteDB.Core;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.BI.Rendering
 {
@@ -24,6 +23,9 @@ namespace SanteDB.BI.Rendering
 
         // The name of the view being executed
         private string m_viewName;
+
+        // Scoped object
+        private ExpandoObject m_scopedObject;
 
         /// <summary>
         /// Cretaes a new root rendering context
@@ -99,7 +101,23 @@ namespace SanteDB.BI.Rendering
         /// <summary>
         /// The scoped object is the report
         /// </summary>
-        public dynamic ScopedObject => new { Report = this.m_report, View = this.m_viewName };
+        public dynamic ScopedObject
+        {
+            get
+            {
+                if(this.m_scopedObject == null)
+                {
+                    this.m_scopedObject = new ExpandoObject();
+                    (this.m_scopedObject as IDictionary<String, Object>).Add("Report", this.m_report);
+                    (this.m_scopedObject as IDictionary<String, Object>).Add("View", this.m_viewName);
+                    (this.m_scopedObject as IDictionary<String, Object>).Add("Parameters", this.Parameters);
+                    Func<String, BisResultContext> getOrCreateQuery = (qname) => this.GetOrExecuteQuery(qname);
+                    (this.m_scopedObject as IDictionary<String, Object>).Add("DataSource", getOrCreateQuery);
+                }
+                return this.m_scopedObject;
+            }
+        }
+
 
         /// <summary>
         /// Gets or sets the context parameters for the render

@@ -32,8 +32,17 @@ namespace SanteDB.BI.Components.Base
                 writer.WriteAttributeString(itm.Name.LocalName, itm.Value);
 
             // Render children
-            foreach (var el in element.Elements())
-                ReportViewUtil.Write(writer, el, context);
+            foreach (var node in element.Nodes())
+            {
+                if (node is XElement)
+                    ReportViewUtil.Write(writer, node as XElement, context);
+                else if (node is XText)
+                {
+                    var text = (node as XText).Value;
+                    if(!String.IsNullOrWhiteSpace(text))
+                        writer.WriteString(text);
+                }
+            }
             writer.WriteEndElement();
 
         }

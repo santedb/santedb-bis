@@ -39,9 +39,11 @@
   <ItemGroup>
     <Compile Include="BiConstants.cs" />
     <Compile Include="BisResultContext.cs" />
+    <Compile Include="Components\Base\BiAggregateComponent.cs" />
     <Compile Include="Components\Base\BiLocaleComponent.cs" />
     <Compile Include="Components\Base\BiRepeatComponent.cs" />
-    <Compile Include="Components\Base\BiValue.cs" />
+    <Compile Include="Components\Base\BiSwitchComponent.cs" />
+    <Compile Include="Components\Base\BiValueComponent.cs" />
     <Compile Include="Components\Base\HtmlElementComponent.cs" />
     <Compile Include="Components\ReportViewUtil.cs" />
     <Compile Include="Exceptions\ViewValidationException.cs" />

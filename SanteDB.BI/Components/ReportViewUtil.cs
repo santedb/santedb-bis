@@ -1,12 +1,15 @@
-﻿using SanteDB.BI.Exceptions;
+﻿using ExpressionEvaluator;
+using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
 using SanteDB.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -18,6 +21,9 @@ namespace SanteDB.BI.Components
     /// </summary>
     internal static class ReportViewUtil
     {
+
+        // Expression regex
+        private static Regex m_exprRegex = new Regex(@"^[\w_\s]+$");
 
         // Component cache
         private static Dictionary<XName, IBiViewComponent> m_componentCache;
@@ -32,6 +38,67 @@ namespace SanteDB.BI.Components
                 .Where(o => typeof(IBiViewComponent).GetTypeInfo().IsAssignableFrom(o.GetTypeInfo()) && !o.GetTypeInfo().IsInterface && !o.GetTypeInfo().IsAbstract)
                 .Select(o => Activator.CreateInstance(o) as IBiViewComponent)
                 .ToDictionary(o => o.ComponentName, o => o);
+        }
+
+        /// <summary>
+        /// Gets the value of the specified context
+        /// </summary>
+        /// <param name="context">The context from which the value/expression should be extracted</param>
+        /// <param name="expressionText">The expression to evaluate</param>
+        /// <returns>The extracted value</returns>
+        public static object GetValue(IRenderContext context, string expressionText)
+        {
+            // First, find the current data context
+            var field = expressionText;
+            object value = null;
+
+            // Is there an expression?
+            if (m_exprRegex.IsMatch(field))
+            {
+                var scopedExpando = (context.ScopedObject as IDictionary<String, Object>);
+                var currentContext = context;
+                while ((scopedExpando == null || !scopedExpando.TryGetValue(field, out value)) && currentContext != null)
+                {
+                    currentContext = currentContext.Parent;
+                    scopedExpando = currentContext.ScopedObject as IDictionary<String, Object>;
+                }
+                return value;
+            }
+            else // complex expression
+            {
+                Delegate evaluator = context.CompileExpression(field);
+                return evaluator.DynamicInvoke(context.ScopedObject);
+            }
+        }
+
+        /// <summary>
+        /// Compile the specified expression
+        /// </summary>
+        /// <param name="me"></param>
+        /// <param name="fieldOrExpression"></param>
+        /// <returns></returns>
+        public static Delegate CompileExpression(this IRenderContext me, String fieldOrExpression)
+        {
+            IDictionary<String, Delegate> exprs = me.Parent?.Tags["expressions"] as IDictionary<String, Delegate>;
+
+            Delegate evaluator = null;
+            if (exprs?.TryGetValue(fieldOrExpression, out evaluator) != true)
+            {
+
+                var expression = new CompiledExpression(fieldOrExpression);
+                expression.TypeRegistry = new TypeRegistry();
+                expression.TypeRegistry.RegisterDefaultTypes();
+                expression.TypeRegistry.RegisterType<Guid>();
+                expression.TypeRegistry.RegisterType<DateTimeOffset>();
+                expression.TypeRegistry.RegisterType<TimeSpan>();
+
+                evaluator = expression.ScopeCompile<ExpandoObject>();
+
+                exprs?.Add(fieldOrExpression, evaluator);
+
+            }
+
+            return evaluator;
         }
 
         /// <summary>
