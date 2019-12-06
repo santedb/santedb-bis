@@ -34,7 +34,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <Folder Include="Components\Chart\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BiConstants.cs" />
@@ -45,6 +44,7 @@
     <Compile Include="Components\Base\BiSwitchComponent.cs" />
     <Compile Include="Components\Base\BiValueComponent.cs" />
     <Compile Include="Components\Base\HtmlElementComponent.cs" />
+    <Compile Include="Components\Chart\BiChartComponent.cs" />
     <Compile Include="Components\ReportViewUtil.cs" />
     <Compile Include="Exceptions\ViewValidationException.cs" />
     <Compile Include="Model\BiAggregationDefinition.cs" />

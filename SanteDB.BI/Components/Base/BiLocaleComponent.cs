@@ -29,7 +29,7 @@ namespace SanteDB.BI.Components.Base
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
             // Get the application manager
-            writer.WriteString(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.SelectMany(o => o.Strings).Where(o => o.Language == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName).SelectMany(o => o.String).FirstOrDefault(o => o.Key == element.Value)?.Value ?? element.Value);
+            writer.WriteString(ReportViewUtil.GetString(element.Value));
         }
 
         /// <summary>

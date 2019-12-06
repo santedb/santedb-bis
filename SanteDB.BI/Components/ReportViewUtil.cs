@@ -2,10 +2,12 @@
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
+using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -38,6 +40,18 @@ namespace SanteDB.BI.Components
                 .Where(o => typeof(IBiViewComponent).GetTypeInfo().IsAssignableFrom(o.GetTypeInfo()) && !o.GetTypeInfo().IsInterface && !o.GetTypeInfo().IsAbstract)
                 .Select(o => Activator.CreateInstance(o) as IBiViewComponent)
                 .ToDictionary(o => o.ComponentName, o => o);
+        }
+
+        /// <summary>
+        /// Get localized string
+        /// </summary>
+        public static string GetString(string key)
+        {
+            return ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets
+                .SelectMany(o => o.Strings)
+                .Where(o => o.Language == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)
+                .SelectMany(o => o.String)
+                .FirstOrDefault(o => o.Key == key)?.Value ?? key;
         }
 
         /// <summary>
