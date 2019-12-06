@@ -118,5 +118,6 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlIgnore, JsonIgnore]
         internal virtual bool ShouldSerializeDefinitions { get; set; }
+
     }
 }

@@ -24,5 +24,11 @@ namespace SanteDB.BI.Model
         /// Gets whether the body should be serialized
         /// </summary>
         public bool ShouldSerializeBody() => this.ShouldSerializeDefinitions;
+
+        /// <summary>
+        /// Include body in serialization
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool IncludeBody { get => this.ShouldSerializeDefinitions; set => this.ShouldSerializeDefinitions = value; }
     }
 }

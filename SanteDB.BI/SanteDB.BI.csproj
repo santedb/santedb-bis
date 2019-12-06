@@ -75,9 +75,11 @@
     <Compile Include="Services\IBiMetadataRepository.cs" />
     <Compile Include="Services\IBiPivotProvider.cs" />
     <Compile Include="Components\IBiViewComponent.cs" />
-    <Compile Include="Services\IBiReportRenderer.cs" />
+    <Compile Include="Services\IBiRenderService.cs" />
+    <Compile Include="Services\IBiReportFormatProvider.cs" />
     <Compile Include="Services\Impl\AppletMetadataRepository.cs" />
     <Compile Include="Services\Impl\InMemoryPivotProvider.cs" />
+    <Compile Include="Services\Impl\LocalRenderService.cs" />
     <Compile Include="Util\BiUtils.cs" />
   </ItemGroup>
   <ItemGroup>

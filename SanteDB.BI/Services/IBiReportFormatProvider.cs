@@ -11,7 +11,7 @@ namespace SanteDB.BI.Services
     /// <summary>
     /// Represents a view renderer which can render a particular view given a particular context
     /// </summary>
-    public interface IBiReportRenderer
+    public interface IBiReportFormatProvider
     {
 
         /// <summary>

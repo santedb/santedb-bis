@@ -121,7 +121,9 @@ namespace SanteDB.Rest.BIS
                     throw new KeyNotFoundException(id);
                 else
                 {
-                    return BiUtils.ResolveRefs(retVal);
+                    retVal = BiUtils.ResolveRefs(retVal);
+                    (retVal as BiReportDefinition)?.Views?.ForEach(o => o.IncludeBody = true);
+                    return retVal;
                 }
             }
             catch (Exception e)
@@ -196,7 +198,7 @@ namespace SanteDB.Rest.BIS
                 else
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
 
-                
+
                 // Populate data about the query
                 audit.AuditableObjects.Add(new AuditableObject()
                 {
@@ -278,7 +280,7 @@ namespace SanteDB.Rest.BIS
 
             foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
                 parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString.GetValues(kv).ToList().First());
-           
+
 
             // Context parameters
             foreach (var kv in this.m_contextParams)
@@ -356,25 +358,16 @@ namespace SanteDB.Rest.BIS
             try
             {
 
-                // Get the report format 
-                var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == format, 0, 1).FirstOrDefault();
-                if (formatDefinition == null)
-                    throw new KeyNotFoundException($"Report format {format} is not registered");
-
-                var reportDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Get<BiReportDefinition>(id);
-                if (reportDefinition == null)
-                    throw new KeyNotFoundException($"Report {id} is not registered");
-
                 // Render the report
-                var renderer = Activator.CreateInstance(formatDefinition.Type) as IBiReportRenderer;
                 var parameters = this.CreateParameterDictionary();
 
                 // Get the view name
-                var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"] ?? reportDefinition.Views.FirstOrDefault().Name;
+                var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"];
 
+                var retVal = ApplicationServiceContext.Current.GetService<IBiRenderService>().Render(id, view, format, this.CreateParameterDictionary(), out string mimeType);
                 // Set output headers
-                RestOperationContext.Current.OutgoingResponse.ContentType = formatDefinition.ContentType;
-                return renderer.Render(reportDefinition, view, parameters);
+                RestOperationContext.Current.OutgoingResponse.ContentType = mimeType;
+                return retVal;
             }
             catch (Exception e)
             {

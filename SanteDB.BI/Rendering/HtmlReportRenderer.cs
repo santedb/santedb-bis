@@ -18,7 +18,7 @@ namespace SanteDB.BI.Rendering
     /// <summary>
     /// An report renderer which renders its output as HTML
     /// </summary>
-    public class HtmlReportRenderer : IBiReportRenderer
+    public class HtmlReportRenderer : IBiReportFormatProvider
     {
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace SanteDB.BI.Rendering
             }
 
             // Get the view 
-            var view = reportDefinition.Views.FirstOrDefault(o => o.Name == viewName);
+            var view = string.IsNullOrEmpty(viewName) ? reportDefinition.Views.First() : reportDefinition.Views.FirstOrDefault(o => o.Name == viewName);
             if (view == null)
                 throw new KeyNotFoundException($"Report view {viewName} does not exist in {reportDefinition.Id}");
 
