@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.Core.Model.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,13 +21,13 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets the render format
         /// </summary>
-        [XmlAttribute("extension"), JsonProperty("extension")]
+        [XmlAttribute("extension"), JsonProperty("extension"), QueryParameter("extension")]
         public String FormatExtension { get; set; }
 
         /// <summary>
         /// Gets or sets the mime encoding for the formatting
         /// </summary>
-        [XmlAttribute("contentType"), JsonProperty("contentType")]
+        [XmlAttribute("contentType"), JsonProperty("contentType"), QueryParameter("contentType")]
         public String ContentType { get; set; }
 
         /// <summary>
