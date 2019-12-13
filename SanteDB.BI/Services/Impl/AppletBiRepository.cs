@@ -19,11 +19,11 @@ namespace SanteDB.BI.Services.Impl
     /// <summary>
     /// Represents a default implementation of a BIS metadata repository which loads definitions from loaded applets
     /// </summary>
-    public class AppletMetadataRepository : IBiMetadataRepository
+    public class AppletBiRepository : IBiMetadataRepository
     {
 
         // Tracer for this repository
-        private Tracer m_tracer = Tracer.GetTracer(typeof(AppletMetadataRepository));
+        private Tracer m_tracer = Tracer.GetTracer(typeof(AppletBiRepository));
 
         /// <summary>
         /// Definition cache 
@@ -183,7 +183,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Applet metadata repository
         /// </summary>
-        public AppletMetadataRepository()
+        public AppletBiRepository()
         {
             ApplicationServiceContext.Current.Started += (o, e) =>
             {

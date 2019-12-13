@@ -12,7 +12,7 @@ namespace SanteDB.BI.Services.Impl
     /// <summary>
     /// Rendering service which renders reports locally
     /// </summary>
-    public class LocalRenderService : IBiRenderService
+    public class LocalBiRenderService : IBiRenderService
     {
 
         /// <summary>
