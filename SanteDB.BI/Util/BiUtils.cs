@@ -42,9 +42,12 @@ namespace SanteDB.BI.Util
 
                 var repository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
                 // Attempt to lookup
-                return ResolveRefs(repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
+                var retVal = ResolveRefs(repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
                     new Type[] { definition.GetType() },
                     new Type[] { typeof(String) }).Invoke(repository, new object[] { refId }) as BiDefinition);
+                if (retVal == null)
+                    throw new KeyNotFoundException($"{newDef.GetType().Name} #{refId} does not exist or you do not have permission");
+                return retVal;
             }
             else  // Cascade
                 foreach (var pi in definition.GetType().GetRuntimeProperties())
