@@ -107,19 +107,28 @@ namespace SanteDB.BI.Services.Impl
 
             // Now we have our buckets, we want to apply our aggregation function
             var colNames = new List<String>();
-            foreach (IDictionary<String, Object> itm in buckets)
+            var aggBuckets = new List<ExpandoObject>();
+            foreach (IDictionary<String, Object> itm in buckets.ToArray())
+            {
+                var newItm = new ExpandoObject() as IDictionary<String, Object>;
                 foreach (var value in itm)
                 {
-                    if (value.Key == pivot.Key) continue; // Don't de-bucket the object
+                    if (value.Key == pivot.Key)
+                    {
+                        newItm[pivot.Key] = value.Value;
+                        continue; // Don't de-bucket the object
+                    }
 
                     var bucket = (value.Value as IEnumerable<Object>);
-                    itm[value.Key] = this.Aggregate((value.Value as List<Object>), pivot.AggregateFunction);
-                    if(!colNames.Contains(value.Key)) colNames.Add(value.Key);
+                    newItm[value.Key] = this.Aggregate((value.Value as List<Object>), pivot.AggregateFunction);
+                    if (!colNames.Contains(value.Key)) colNames.Add(value.Key);
                 }
+                aggBuckets.Add(newItm as ExpandoObject);
+            }
 
             // Add where necessary
             var output = new List<ExpandoObject>();
-            foreach (IDictionary<String, Object> itm in buckets)
+            foreach (IDictionary<String, Object> itm in aggBuckets)
             {
                 var tuple = (new ExpandoObject() as IDictionary<String, Object>);
                 tuple[pivot.Key] = itm[pivot.Key];
