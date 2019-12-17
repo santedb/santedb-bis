@@ -264,7 +264,6 @@ namespace SanteDB.Rest.BIS
             finally
             {
                 AuditUtil.AddLocalDeviceActor(audit);
-                AuditUtil.AddRemoteDeviceActor(audit);
                 AuditUtil.AddUserActor(audit);
                 AuditUtil.SendAudit(audit);
             }
