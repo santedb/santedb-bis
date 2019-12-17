@@ -170,7 +170,7 @@ namespace SanteDB.Rest.BIS
         /// <returns></returns>
         private BisResultContext HydrateQuery(String queryId)
         {
-            AuditData audit = new AuditData(DateTime.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.Query));
+            AuditData audit = new AuditData(DateTime.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.SecondaryUseQuery));
             try
             {
                 // First we want to grab the appropriate source for this ID
