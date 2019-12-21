@@ -58,10 +58,7 @@ namespace SanteDB.BI.Services.Impl
         public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
-            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-            var outcome = pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata);
-            if (outcome != Core.Model.Security.PolicyGrantType.Grant)
-                throw new PolicyViolationException(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata, outcome);
+            ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             // Locate type definitions
             Dictionary<String, BiDefinition> typeDefinitions = null;
@@ -73,7 +70,11 @@ namespace SanteDB.BI.Services.Impl
 
             // Add the defintiion
             if (typeDefinitions.ContainsKey(metadata.Id))
-                typeDefinitions[metadata.Id] = metadata;
+            {
+                // Not allowed to update ds def
+                if(!typeDefinitions[metadata.Id].IsSystemObject)
+                    typeDefinitions[metadata.Id] = metadata;
+            }
             else
                 typeDefinitions.Add(metadata.Id, metadata);
 
@@ -104,14 +105,13 @@ namespace SanteDB.BI.Services.Impl
         public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
-            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-            var outcome = pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata);
-            if (outcome != Core.Model.Security.PolicyGrantType.Grant)
-                throw new PolicyViolationException(AuthenticationContext.Current.Principal, PermissionPolicyIdentifiers.UnrestrictedMetadata, outcome);
+            ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
-            Dictionary<String, BiDefinition> definitions = null;
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, BiDefinition> definitions) && 
+                definitions.TryGetValue(id, out BiDefinition existing) &&
+                !existing.IsSystemObject) 
                 definitions.Remove(id);
+
         }
 
         /// <summary>

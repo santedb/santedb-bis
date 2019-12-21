@@ -47,12 +47,19 @@ namespace SanteDB.BI.Model
                 m_serializer.Add(new XmlSerializer(t, types));
 
         }
+
         /// <summary>
         /// Default ctor
         /// </summary>
         public BiDefinition()
         {
         }
+
+        /// <summary>
+        /// When true identifies the object as a system object
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool IsSystemObject = false;
 
         /// <summary>
         /// Gets or sets the alias name

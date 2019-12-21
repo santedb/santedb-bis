@@ -132,7 +132,6 @@ namespace SanteDB.BI.Components
         /// </summary>
         internal static void Write(XmlWriter writer, XElement el, IRenderContext context)
         {
-            {
                 // TODO get helper here
                 IBiViewComponent component = ReportViewUtil.GetViewComponent(el.Name);
                 
@@ -158,7 +157,6 @@ namespace SanteDB.BI.Components
                         writer.WriteString($"Component {component.ComponentName} failed validation at {path}");
                         writer.WriteEndElement(); // em
 #endif
-                }
 
             }
         }

@@ -31,14 +31,8 @@ namespace SanteDB.BI.Rendering
         public Stream Render(BiReportDefinition reportDefinition, string viewName, IDictionary<string, object> parameters)
         {
 
-            var pdpService = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-
             foreach (var pol in reportDefinition.MetaData.Demands ?? new List<string>())
-            {
-                var outcome = pdpService.GetPolicyOutcome(AuthenticationContext.Current.Principal, pol);
-                if (outcome != Core.Model.Security.PolicyGrantType.Grant)
-                    throw new PolicyViolationException(AuthenticationContext.Current.Principal, pol, outcome);
-            }
+                ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(pol);
 
             // Get the view 
             var view = string.IsNullOrEmpty(viewName) ? reportDefinition.Views.First() : reportDefinition.Views.FirstOrDefault(o => o.Name == viewName);
