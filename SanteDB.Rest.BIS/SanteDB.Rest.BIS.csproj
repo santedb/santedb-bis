@@ -91,6 +91,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\SanteDB.licenseheader">
+      <Link>SanteDB.licenseheader</Link>
+    </None>
     <None Include="SanteDB.Rest.BIS.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
