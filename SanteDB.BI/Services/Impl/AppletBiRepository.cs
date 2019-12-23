@@ -26,6 +26,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SanteDB.BI.Model;
 using SanteDB.Core;
+using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
@@ -141,7 +142,28 @@ namespace SanteDB.BI.Services.Impl
             AuthenticationContext.Current = new AuthenticationContext(AuthenticationContext.SystemPrincipal);
             this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
 
-            var appletCollection = ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets;
+            var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
+
+            // Doesn't have a solution manager
+            if (solutions == null)
+                this.ProcessApplet(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets);
+            else
+            {
+                solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
+                foreach (var s in solutions)
+                {
+                    var appletCollection = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>().GetApplets(s.Meta.Id);
+                    this.ProcessApplet(appletCollection);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Process an applet collection
+        /// </summary>
+        private void ProcessApplet(ReadonlyAppletCollection appletCollection)
+        {
 
             var bisDefinitions = appletCollection.SelectMany(o => o.Assets)
                 .Where(o => o.Name.StartsWith("bi/") && o.Name.EndsWith(".xml"))
@@ -150,7 +172,7 @@ namespace SanteDB.BI.Services.Impl
                     try
                     {
                         this.m_tracer.TraceVerbose("Attempting to load {0}", o.Name);
-                        using(var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
+                        using (var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
                             return BiDefinition.Load(ms);
                     }
                     catch (Exception e)
@@ -162,10 +184,10 @@ namespace SanteDB.BI.Services.Impl
                 .OfType<BiDefinition>()
                 .ToArray();
 
-            // Process contents
-            foreach(var itm in bisDefinitions)
-                this.ProcessBisDefinition(itm);
 
+            // Process contents
+            foreach (var itm in bisDefinitions)
+                this.ProcessBisDefinition(itm);
         }
 
         /// <summary>
