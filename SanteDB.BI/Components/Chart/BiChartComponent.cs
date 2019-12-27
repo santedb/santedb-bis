@@ -50,11 +50,12 @@ namespace SanteDB.BI.Components.Chart
             // Render the object 
             writer.WriteStartElement("chart", BiConstants.HtmlNamespace);
             writer.WriteAttributeString("type", $"'{element.Attribute("type").Value}'");
+            writer.WriteAttributeString("legend", $"{element.Attribute("legend")?.Value ?? "false" }");
 
             var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
             if (title != null)
                 writer.WriteAttributeString("title", $"'{title.Value}'");
-
+            
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
             var chartContext = new RenderContext(context, dataSource.Dataset);
             chartContext.Tags.Add("expressions", new Dictionary<String, Delegate>());

@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using SanteDB.BI.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets;
+using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
@@ -48,7 +49,10 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Definition cache 
         /// </summary>
-        private Dictionary<Type, Dictionary<String, BiDefinition>> m_definitionCache = new Dictionary<Type, Dictionary<string, BiDefinition>>();
+        private Dictionary<Type, Dictionary<String, Object>> m_definitionCache = new Dictionary<Type, Dictionary<string, Object>>();
+
+        // Lock object
+        private object m_lockObject = new object();
 
         /// <summary>
         /// Gets the service name
@@ -61,14 +65,19 @@ namespace SanteDB.BI.Services.Impl
         public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-            Dictionary<String, BiDefinition> definitions = null;
-            BiDefinition definition = null;
 
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions) &&
-                definitions.TryGetValue(id, out definition) &&
-                ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
-                definition?.MetaData?.Demands.All(o=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true))
-                return definition as TBisDefinition;
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions) &&
+                definitions.TryGetValue(id, out Object asset))
+            {
+                if (asset is AppletAsset)
+                    using (var ms = new MemoryStream(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.RenderAssetContent(asset as AppletAsset)))
+                        asset = BiDefinition.Load(ms);
+
+                var definition = asset as BiDefinition;
+                if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
+                definition?.MetaData?.Demands.All(o => pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                    return (TBisDefinition)definition;
+            }
             return null;
         }
 
@@ -81,18 +90,19 @@ namespace SanteDB.BI.Services.Impl
             ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             // Locate type definitions
-            Dictionary<String, BiDefinition> typeDefinitions = null;
-            if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out typeDefinitions))
+            if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object>  typeDefinitions))
             {
-                typeDefinitions = new Dictionary<string, BiDefinition>();
+                typeDefinitions = new Dictionary<string, Object>();
                 this.m_definitionCache.Add(metadata.GetType(), typeDefinitions);
             }
 
             // Add the defintiion
-            if (typeDefinitions.ContainsKey(metadata.Id))
+            if (typeDefinitions.TryGetValue(metadata.Id, out object existing))
             {
-                // Not allowed to update ds def
-                if(!typeDefinitions[metadata.Id].IsSystemObject)
+                // Can't replace sys object
+                if(existing is BiDefinition && !(existing as BiDefinition).IsSystemObject)
+                    typeDefinitions[metadata.Id] = metadata;
+                else if (existing is AppletAsset && metadata is BiDefinition) // cant downgrade but can upgrade
                     typeDefinitions[metadata.Id] = metadata;
             }
             else
@@ -108,12 +118,12 @@ namespace SanteDB.BI.Services.Impl
         {
             var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
 
-            Dictionary<String, BiDefinition> definitions = null;
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out definitions))
+            // TODO: If the definition is an applet asset then load it
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
                 return definitions.Values
                     .OfType<TBisDefinition>()
                     .Where(filter.Compile())
-                    .Where(o=>(o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d=>pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
                     .Skip(offset)
                     .Take(count ?? 100);
             return new TBisDefinition[0];
@@ -127,9 +137,9 @@ namespace SanteDB.BI.Services.Impl
             // Demand unrestricted metadata
             ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, BiDefinition> definitions) && 
-                definitions.TryGetValue(id, out BiDefinition existing) &&
-                !existing.IsSystemObject) 
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, object> definitions) &&
+                definitions.TryGetValue(id, out object existing) &&
+                (existing is AppletAsset || (existing as BiDefinition).IsSystemObject))
                 definitions.Remove(id);
 
         }
@@ -141,7 +151,9 @@ namespace SanteDB.BI.Services.Impl
         {
             AuthenticationContext.Current = new AuthenticationContext(AuthenticationContext.SystemPrincipal);
             this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
-
+            this.m_definitionCache.Remove(typeof(BiQueryDefinition));
+            this.m_definitionCache.Remove(typeof(BiViewDefinition));
+            this.m_definitionCache.Remove(typeof(BiReportDefinition));
             var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
 
             // Doesn't have a solution manager
@@ -172,8 +184,9 @@ namespace SanteDB.BI.Services.Impl
                     try
                     {
                         this.m_tracer.TraceVerbose("Attempting to load {0}", o.Name);
+                        
                         using (var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
-                            return BiDefinition.Load(ms);
+                            return new { Definition = BiDefinition.Load(ms), Asset = o };
                     }
                     catch (Exception e)
                     {
@@ -181,13 +194,19 @@ namespace SanteDB.BI.Services.Impl
                         return null;
                     }
                 })
-                .OfType<BiDefinition>()
+                .OfType<dynamic>()
                 .ToArray();
 
 
             // Process contents
             foreach (var itm in bisDefinitions)
-                this.ProcessBisDefinition(itm);
+            {
+                this.ProcessBisDefinition(itm.Definition);
+#if DEBUG
+                if(itm.Definition is BiReportDefinition || itm.Definition is BiViewDefinition || itm.Definition is BiQueryDefinition)
+                    this.m_definitionCache[itm.Definition.GetType()][itm.Definition.Id] = itm.Asset;    
+#endif
+            }
         }
 
         /// <summary>
@@ -195,7 +214,7 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void ProcessBisDefinition(BiDefinition definition)
         {
-            if(definition is BiPackage)
+            if (definition is BiPackage)
             {
                 this.m_tracer.TraceInfo("Processing BIS Package: {0}", definition.Id);
                 var pkg = definition as BiPackage;
