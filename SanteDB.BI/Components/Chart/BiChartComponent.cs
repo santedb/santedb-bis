@@ -28,6 +28,8 @@ using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json;
 using SanteDB.BI.Rendering;
+using System.Reflection;
+using SanteDB.Core.Model;
 
 namespace SanteDB.BI.Components.Chart
 {
@@ -118,25 +120,25 @@ namespace SanteDB.BI.Components.Chart
                     switch (ds.Attribute("aggregate")?.Value ?? "sum")
                     {
                         case "count":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => dataSelector.DynamicInvoke(e) != null) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, e) != null) }).ToArray());
                             break;
                         case "sum":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)dataSelector.DynamicInvoke(e)) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
                             break;
                         case "avg":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)dataSelector.DynamicInvoke(e)) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
                             break;
                         case "min":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)dataSelector.DynamicInvoke(e)) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
                             break;
                         case "max":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)dataSelector.DynamicInvoke(e)) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
                             break;
                         case "first":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = dataSelector.DynamicInvoke(o.First()) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, o.First()) }).ToArray());
                             break;
                         case "last":
-                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = dataSelector.DynamicInvoke(o.Last()) }).ToArray());
+                            data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, o.Last()) }).ToArray());
                             break;
                     }
                 }
@@ -145,25 +147,25 @@ namespace SanteDB.BI.Components.Chart
                     switch (ds.Attribute("aggregate")?.Value ?? "sum")
                     {
                         case "count":
-                            data.Add("data", dataGroup.Select(o => o.Count(e => dataSelector.DynamicInvoke(e) != null)).ToArray());
+                            data.Add("data", dataGroup.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, e) != null)).ToArray());
                             break;
                         case "sum":
-                            data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)dataSelector.DynamicInvoke(e))).ToArray());
+                            data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
                             break;
                         case "avg":
-                            data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)dataSelector.DynamicInvoke(e))).ToArray());
+                            data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
                             break;
                         case "min":
-                            data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)dataSelector.DynamicInvoke(e))).ToArray());
+                            data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
                             break;
                         case "max":
-                            data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)dataSelector.DynamicInvoke(e))).ToArray());
+                            data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
                             break;
                         case "first":
-                            data.Add("data", dataGroup.Select(o => dataSelector.DynamicInvoke(o.First())).ToArray());
+                            data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, o.First())).ToArray());
                             break;
                         case "last":
-                            data.Add("data", dataGroup.Select(o => dataSelector.DynamicInvoke(o.Last())).ToArray());
+                            data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, o.Last())).ToArray());
                             break;
                     }
                 }
@@ -176,6 +178,15 @@ namespace SanteDB.BI.Components.Chart
             writer.WriteAttributeString("data", optionJson);
             writer.WriteEndElement(); // chart
 
+        }
+
+        /// <summary>
+        /// Safe invoke
+        /// </summary>
+        private object SafeInvoke(Delegate invokee, object defaultValue, params object[] args)
+        {
+            try { return invokee.DynamicInvoke(args); }
+            catch { return defaultValue; }
         }
 
         /// <summary>
