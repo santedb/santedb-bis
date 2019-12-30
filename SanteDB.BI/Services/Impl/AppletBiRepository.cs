@@ -87,7 +87,8 @@ namespace SanteDB.BI.Services.Impl
         public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
-            ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+                ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             // Locate type definitions
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object>  typeDefinitions))
@@ -135,7 +136,8 @@ namespace SanteDB.BI.Services.Impl
         public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
-            ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            if(AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+                ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, object> definitions) &&
                 definitions.TryGetValue(id, out object existing) &&

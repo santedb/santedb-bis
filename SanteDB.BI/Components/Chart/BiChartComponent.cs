@@ -64,7 +64,7 @@ namespace SanteDB.BI.Components.Chart
             // Now sort the result set by the key
             var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
             var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
-            var axisDataExpression = (labels ?? axis).Attribute("data").Value;
+            var axisDataExpression = (labels ?? axis).Value;
             var axisFormat = (labels ?? axis).Attribute("format")?.Value;
             var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
             var chartData = dataSource.Dataset.OrderBy(o => axisSelector.DynamicInvoke(o));
