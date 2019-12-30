@@ -59,19 +59,20 @@ namespace SanteDB.BI.Components.Chart
                 writer.WriteAttributeString("type", $"'{element.Attribute("type").Value}'");
                 writer.WriteAttributeString("legend", $"{element.Attribute("legend")?.Value ?? "false" }");
 
-                var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
-                if (title != null)
-                    writer.WriteAttributeString("title", $"'{title.Value}'");
-
-                var chartContext = new RenderContext(context, dataSource.Dataset);
-                chartContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
-                // Now sort the result set by the key
-                var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
-                var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
-                var axisDataExpression = (labels ?? axis).Attribute("data").Value;
-                var axisFormat = (labels ?? axis).Attribute("format")?.Value;
-                var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
-                var chartData = dataSource.Dataset.OrderBy(o => axisSelector.DynamicInvoke(o));
+            var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
+            if (title != null)
+                writer.WriteAttributeString("title", $"'{title.Value}'");
+            
+            var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
+            var chartContext = new RenderContext(context, dataSource.Dataset);
+            chartContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
+            // Now sort the result set by the key
+            var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
+            var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
+            var axisDataExpression = (labels ?? axis).Value;
+            var axisFormat = (labels ?? axis).Attribute("format")?.Value;
+            var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
+            var chartData = dataSource.Dataset.OrderBy(o => axisSelector.DynamicInvoke(o));
 
                 // If the axis is formatted, then group
 
