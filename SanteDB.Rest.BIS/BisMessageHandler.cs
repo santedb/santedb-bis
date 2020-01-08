@@ -22,6 +22,7 @@ using SanteDB.Core;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Interop;
 using SanteDB.Core.Services;
+using SanteDB.Rest.BIS.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// Represents a message handler for the BIS
     /// </summary>
+    [ApiServiceProvider("BIS REST Daemon", typeof(IBisServiceContract), configurationType: typeof(BisServiceConfigurationSection))]
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer

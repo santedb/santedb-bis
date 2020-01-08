@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="BisMessageHandler.cs" />
     <Compile Include="BisServiceBehavior.cs" />
+    <Compile Include="Configuration\BisServiceConfigurationSection.cs" />
     <Compile Include="IBisServiceContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -95,6 +96,9 @@
       <Link>SanteDB.licenseheader</Link>
     </None>
     <None Include="SanteDB.Rest.BIS.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Configuration\Default.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
