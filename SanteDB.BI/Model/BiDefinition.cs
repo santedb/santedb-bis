@@ -19,6 +19,7 @@
  */
 using Newtonsoft.Json;
 using SanteDB.Core.Model.Attributes;
+using SanteDB.Core.Model.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -53,17 +54,17 @@ namespace SanteDB.BI.Model
         {
             var types = new Type[]
             {
-                                        typeof(BiPackage),
-                                        typeof(BiQueryDefinition),
-                                        typeof(BiDataSourceDefinition),
-                                        typeof(BiParameterDefinition),
-                                        typeof(BiReportDefinition),
-                                        typeof(BiViewDefinition),
-                                        typeof(BiReportViewDefinition),
-                                        typeof(BiRenderFormatDefinition)
+                typeof(BiPackage),
+                typeof(BiQueryDefinition),
+                typeof(BiDataSourceDefinition),
+                typeof(BiParameterDefinition),
+                typeof(BiReportDefinition),
+                typeof(BiViewDefinition),
+                typeof(BiReportViewDefinition),
+                typeof(BiRenderFormatDefinition)
             };
             foreach (var t in types)
-                m_serializer.Add(new XmlSerializer(t, types));
+                m_serializer.Add(XmlModelSerializerFactory.Current.CreateSerializer(t, types));
 
         }
 
@@ -121,7 +122,7 @@ namespace SanteDB.BI.Model
         public void Save(Stream s)
         {
             this.ShouldSerializeDefinitions = true;
-            new XmlSerializer(this.GetType()).Serialize(s, this);
+            XmlModelSerializerFactory.Current.CreateSerializer(this.GetType()).Serialize(s, this);
         }
 
         /// <summary>
