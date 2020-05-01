@@ -95,6 +95,7 @@
     <None Include="..\SanteDB.licenseheader">
       <Link>SanteDB.licenseheader</Link>
     </None>
+    <None Include=".pkginfo" />
     <None Include="SanteDB.Rest.BIS.nuspec" />
   </ItemGroup>
   <ItemGroup>
