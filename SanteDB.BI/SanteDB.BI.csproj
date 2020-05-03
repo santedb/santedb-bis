@@ -120,7 +120,6 @@
     <None Include="..\SanteDB.licenseheader">
       <Link>SanteDB.licenseheader</Link>
     </None>
-    <None Include="SanteDB.BI.nuspec" />
     <None Include="Schema\BusinessIntelligence.xsd">
       <SubType>Designer</SubType>
     </None>

@@ -123,7 +123,6 @@
     <None Include="..\SanteDB.licenseheader">
       <Link>SanteDB.licenseheader</Link>
     </None>
-    <None Include=".pkginfo" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Configuration\Default.xml" />
