@@ -21,7 +21,7 @@
   <PropertyGroup>
     <PackageId>SanteDB.Rest.BIS</PackageId>
     <Title>SanteDB.Rest.BIS</Title>
-    <Version>2.0.30</Version>
+    <Version>2.0.31</Version>
     <Description>SanteDB Business Intelligence Service (BIS). Provides REST based interfaces for the SanteDB BI services such as rendering reports and datasets.</Description>
     <Authors>SanteSuite Contributors</Authors>
     <PackageTags>SanteDB</PackageTags>
@@ -103,7 +103,7 @@
     <Otherwise>
       <ItemGroup>
         <PackageReference Include="SanteDB.Rest.Common">
-          <Version>2.0.30</Version>
+          <Version>2.0.31</Version>
         </PackageReference>
       </ItemGroup>
     </Otherwise>

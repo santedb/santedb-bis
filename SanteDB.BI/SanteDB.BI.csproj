@@ -23,7 +23,7 @@
   <PropertyGroup>
     <PackageId>SanteDB.BI</PackageId>
     <Title>SanteDB.BI</Title>
-    <Version>2.0.30</Version>
+    <Version>2.0.31</Version>
     <Description>SanteDB Business Intelligence (BI) core logic. Provides structures for data sources, queries, reports, and report controls rendered in all SanteDB software solutions.</Description>
     <Authors>SanteSuite Contributors</Authors>
     <PackageTags>SanteDB</PackageTags>
@@ -154,7 +154,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <PackageReference Include="SanteDB.Core.Applets" Version="2.0.30.0" />
+        <PackageReference Include="SanteDB.Core.Applets" Version="2.0.31.0" />
       </ItemGroup>
     </Otherwise>
   </Choose>
