@@ -180,7 +180,7 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         public void Ping()
         {
-            RestOperationContext.Current.OutgoingResponse.StatusCode = (int)System.Net.HttpStatusCode.Continue;
+            RestOperationContext.Current.OutgoingResponse.StatusCode = (int)System.Net.HttpStatusCode.NoContent;
 
         }
 
