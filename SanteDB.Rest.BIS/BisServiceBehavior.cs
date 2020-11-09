@@ -47,6 +47,7 @@ using SanteDB.Core.Auditing;
 using System.Text.RegularExpressions;
 using SanteDB.BI;
 using SanteDB.Core.Security.Services;
+using SanteDB.Core.Security.Claims;
 
 namespace SanteDB.Rest.BIS
 {
@@ -64,7 +65,7 @@ namespace SanteDB.Rest.BIS
             { "Context.UserId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUser(AuthenticationContext.Current.Principal.Identity)?.Key },
             { "Context.UserEntityId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUserEntity(AuthenticationContext.Current.Principal.Identity)?.Key },
             { "Context.ProviderId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetProviderEntity(AuthenticationContext.Current.Principal.Identity)?.Key },
-            { "Context.Language", () => CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
+            { "Context.Language", () => AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
         };
 
         // Default tracer

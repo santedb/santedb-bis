@@ -23,6 +23,8 @@ using SanteDB.BI.Rendering;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Interfaces;
+using SanteDB.Core.Security;
+using SanteDB.Core.Security.Claims;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -68,7 +70,7 @@ namespace SanteDB.BI.Components
         {
             return ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets
                 .SelectMany(o => o.Strings)
-                .Where(o => o.Language == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)
+                .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
                 .SelectMany(o => o.String)
                 .FirstOrDefault(o => o.Key == key)?.Value ?? key;
         }
