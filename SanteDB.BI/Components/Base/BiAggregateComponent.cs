@@ -56,27 +56,26 @@ namespace SanteDB.BI.Components.Base
             if (String.IsNullOrEmpty(fieldOrExpression))
                 fieldOrExpression = "!null";
 
-            var expression = context.CompileExpression(fieldOrExpression);
             object value = null;
             switch(function)
             {
                 case "sum":
-                    value = dataSource.Dataset.Sum(o => (decimal)expression.DynamicInvoke(o));
+                    value = dataSource.Dataset.Sum(o => (decimal)ReportViewUtil.EvaluateExpression(fieldOrExpression, o));
                     break;
                 case "count":
-                    value = dataSource.Dataset.Count(o => expression.DynamicInvoke(o));
+                    value = dataSource.Dataset.Count(o => ReportViewUtil.EvaluateExpression(fieldOrExpression, o));
                     break;
                 case "count-distinct":
-                    value = dataSource.Dataset.Select(o=>expression.DynamicInvoke(o)).Distinct().Count();
+                    value = dataSource.Dataset.Select(o=> ReportViewUtil.EvaluateExpression(fieldOrExpression, o)).Distinct().Count();
                     break;
                 case "min":
-                    value = dataSource.Dataset.Min(o => (decimal)expression.DynamicInvoke(o));
+                    value = dataSource.Dataset.Min(o => (decimal)ReportViewUtil.EvaluateExpression(fieldOrExpression, o));
                     break;
                 case "max":
-                    value = dataSource.Dataset.Max(o => (decimal)expression.DynamicInvoke(o));
+                    value = dataSource.Dataset.Max(o => (decimal)ReportViewUtil.EvaluateExpression(fieldOrExpression, o));
                     break;
                 case "avg":
-                    value = dataSource.Dataset.Average(o => (decimal)expression.DynamicInvoke(o));
+                    value = dataSource.Dataset.Average(o => (decimal)ReportViewUtil.EvaluateExpression(fieldOrExpression, o));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"Aggregate function {function} is not known");

@@ -27,8 +27,8 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// Enumeration for the data types 
     /// </summary>
-    [XmlType(nameof(BisParameterDataType), Namespace = BiConstants.XmlNamespace)]
-    public enum BisParameterDataType
+    [XmlType(nameof(BiDataType), Namespace = BiConstants.XmlNamespace)]
+    public enum BiDataType
     {
         [XmlEnum("ref")]
         Ref,
@@ -66,7 +66,7 @@ namespace SanteDB.BI.Model
         /// Gets or sets the type of parameter
         /// </summary>
         [XmlAttribute("type"), JsonProperty("type")]
-        public BisParameterDataType Type
+        public BiDataType Type
         {
             get;
             set;

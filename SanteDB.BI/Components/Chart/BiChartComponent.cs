@@ -69,12 +69,11 @@ namespace SanteDB.BI.Components.Chart
                 var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
                 var axisDataExpression = (labels ?? axis).Value;
                 var axisFormat = (labels ?? axis).Attribute("format")?.Value;
-                var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
-                var chartData = dataSource.Dataset.OrderBy(o => axisSelector.DynamicInvoke(o));
+                var chartData = dataSource.Dataset.OrderBy(o => ReportViewUtil.EvaluateExpression(axisDataExpression, o));
 
                 // If the axis is formatted, then group
 
-                var axisElements = chartData.Select(o => axisSelector.DynamicInvoke(o)).Select(o => $"'{String.Format($"{{0:{axisFormat}}}", o)}'").Distinct();
+                var axisElements = chartData.Select(o => ReportViewUtil.EvaluateExpression(axisDataExpression, o)).Select(o => $"'{String.Format($"{{0:{axisFormat}}}", o)}'").Distinct();
 
                 // Is this a labeled data set?
                 if (labels != null)
@@ -87,7 +86,7 @@ namespace SanteDB.BI.Components.Chart
                     writer.WriteString("{ type: '");
 
                     // First determine type
-                    if (typeof(DateTime).GetTypeInfo().IsAssignableFrom(axisSelector.DynamicInvoke(chartData.First()).GetType()))
+                    if (typeof(DateTime).GetTypeInfo().IsAssignableFrom(ReportViewUtil.EvaluateExpression(axisDataExpression, chartData.First()).GetType()))
                         writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{(axis.Attribute("time-unit")?.Value ?? "day")}' }}");
                     else
                         writer.WriteString("linear'");
@@ -100,11 +99,11 @@ namespace SanteDB.BI.Components.Chart
 
                 // Now process datasets
                 List<ExpandoObject> dataSetOptions = new List<ExpandoObject>();
-                var dataGroup = chartData.GroupBy(o => $"'{String.Format($"{{0:{axisFormat}}}", axisSelector.DynamicInvoke(o))}'");
+                var dataGroup = chartData.GroupBy(o => $"'{String.Format($"{{0:{axisFormat}}}", ReportViewUtil.EvaluateExpression(axisDataExpression, o))}'");
 
                 foreach (var ds in element.Elements((XNamespace)BiConstants.ComponentNamespace + "dataset"))
                 {
-                    var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataGroup.First().First()), ds.Value);
+                    //var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataGroup.First().First()), ds.Value);
 
                     IDictionary<String, Object> data = new ExpandoObject();
                     data.Add("label", ReportViewUtil.GetString(ds.Attribute("label")?.Value ?? "unknown"));
@@ -123,25 +122,25 @@ namespace SanteDB.BI.Components.Chart
                         switch (ds.Attribute("aggregate")?.Value ?? "sum")
                         {
                             case "count":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, e) != null) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(ds.Value, null, e) != null) }).ToArray());
                                 break;
                             case "sum":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(ds.Value, 0, e)) }).ToArray());
                                 break;
                             case "avg":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(ds.Value, 0, e)) }).ToArray());
                                 break;
                             case "min":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(ds.Value, 0, e)) }).ToArray());
                                 break;
                             case "max":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, e)) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(ds.Value, 0, e)) }).ToArray());
                                 break;
                             case "first":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, o.First()) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(ds.Value, null, o.First()) }).ToArray());
                                 break;
                             case "last":
-                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, o.Last()) }).ToArray());
+                                data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(ds.Value, null, o.Last()) }).ToArray());
                                 break;
                         }
                     }
@@ -150,25 +149,25 @@ namespace SanteDB.BI.Components.Chart
                         switch (ds.Attribute("aggregate")?.Value ?? "sum")
                         {
                             case "count":
-                                data.Add("data", dataGroup.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, e) != null)).ToArray());
+                                data.Add("data", dataGroup.Select(o => o.Count(e => this.SafeInvoke(ds.Value, null, e) != null)).ToArray());
                                 break;
                             case "sum":
-                                data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
+                                data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(ds.Value, 0, e))).ToArray());
                                 break;
                             case "avg":
-                                data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
+                                data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)this.SafeInvoke(ds.Value, 0, e))).ToArray());
                                 break;
                             case "min":
-                                data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
+                                data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)this.SafeInvoke(ds.Value, 0, e))).ToArray());
                                 break;
                             case "max":
-                                data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, e))).ToArray());
+                                data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)this.SafeInvoke(ds.Value, 0, e))).ToArray());
                                 break;
                             case "first":
-                                data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, o.First())).ToArray());
+                                data.Add("data", dataGroup.Select(o => this.SafeInvoke(ds.Value, null, o.First())).ToArray());
                                 break;
                             case "last":
-                                data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, o.Last())).ToArray());
+                                data.Add("data", dataGroup.Select(o => this.SafeInvoke(ds.Value, null, o.Last())).ToArray());
                                 break;
                         }
                     }
@@ -187,9 +186,9 @@ namespace SanteDB.BI.Components.Chart
         /// <summary>
         /// Safe invoke
         /// </summary>
-        private object SafeInvoke(Delegate invokee, object defaultValue, params object[] args)
+        private object SafeInvoke(String expression, object defaultValue, dynamic args)
         {
-            try { return invokee.DynamicInvoke(args); }
+            try { return ReportViewUtil.EvaluateExpression(expression, args); }
             catch { return defaultValue; }
         }
 

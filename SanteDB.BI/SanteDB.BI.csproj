@@ -115,6 +115,7 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>11.0.2</Version>
     </PackageReference>
+    <PackageReference Include="NReco.LambdaParser" Version="1.0.12" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\SanteDB.licenseheader">
@@ -126,14 +127,6 @@
     <None Include="Schema\xhtml.xsd">
       <SubType>Designer</SubType>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Antlr3.Runtime">
-      <HintPath>..\Solution Items\Antlr3.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="ExpressionEvaluator">
-      <HintPath>..\Solution Items\ExpressionEvaluator.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="$(SolutionName.Contains('-ext'))">

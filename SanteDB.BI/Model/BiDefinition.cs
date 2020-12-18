@@ -39,6 +39,10 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiReportDefinition))]
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
+    [XmlInclude(typeof(BiDataFlowDefinition))]
+    [XmlInclude(typeof(BiSchemaTableDefinition))]
+    [XmlInclude(typeof(BiSchemaViewDefinition))]
+    [XmlInclude(typeof(BiTransformDefinition))]
     [XmlInclude(typeof(BiPackage))]
     public abstract class BiDefinition
     {
@@ -60,7 +64,11 @@ namespace SanteDB.BI.Model
                 typeof(BiReportDefinition),
                 typeof(BiViewDefinition),
                 typeof(BiReportViewDefinition),
-                typeof(BiRenderFormatDefinition)
+                typeof(BiRenderFormatDefinition),
+                typeof(BiTransformDefinition),
+                typeof(BiSchemaTableDefinition),
+                typeof(BiSchemaViewDefinition),
+                typeof(BiDataFlowDefinition)
             };
             foreach (var t in types)
                 m_serializer.Add(XmlModelSerializerFactory.Current.CreateSerializer(t, types));
@@ -103,6 +111,7 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("ref"), JsonProperty("$ref"), QueryParameter("ref")]
         public String Ref { get; set; }
+
         /// <summary>
         /// Represents BI metadata about the object
         /// </summary>
