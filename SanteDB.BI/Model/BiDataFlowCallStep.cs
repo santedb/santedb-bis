@@ -18,11 +18,11 @@ namespace SanteDB.BI.Model
         /// </summary>
         [JsonProperty("parameters")]
         [XmlArray("parameters")]
-        [XmlArrayItem("int", typeof(int))]
-        [XmlArrayItem("string", typeof(string))]
-        [XmlArrayItem("bool", typeof(bool))]
-        [XmlArrayItem("uuid", typeof(Guid))]
-        [XmlArrayItem("date-time", typeof(DateTime))]
+        [XmlArrayItem("int", typeof(BiDataCallParameter<Int32>))]
+        [XmlArrayItem("string", typeof(BiDataCallParameter<String>))]
+        [XmlArrayItem("bool", typeof(BiDataCallParameter<Boolean>))]
+        [XmlArrayItem("uuid", typeof(BiDataCallParameter<Guid>))]
+        [XmlArrayItem("date-time", typeof(BiDataCallParameter<DateTime>))]
         public List<object> Parameters { get; set; }
 
     }
