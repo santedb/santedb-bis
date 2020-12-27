@@ -44,6 +44,11 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiSchemaViewDefinition))]
     [XmlInclude(typeof(BiTransformDefinition))]
     [XmlInclude(typeof(BiPackage))]
+    [XmlInclude(typeof(BiReportViewDefinition))]
+    [XmlInclude(typeof(BiTransformDefinition))]
+    [XmlInclude(typeof(BiSchemaTableDefinition))]
+    [XmlInclude(typeof(BiSchemaViewDefinition))]
+    [XmlInclude(typeof(BiDataFlowDefinition))]
     public abstract class BiDefinition
     {
 

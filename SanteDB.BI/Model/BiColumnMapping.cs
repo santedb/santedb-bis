@@ -36,7 +36,7 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("transform", typeof(String))]
         [XmlElement("lookup", typeof(BiColumnMappingTransformJoin))]
-        public object TransformExpression { get; set; }
+        public Object TransformExpression { get; set; }
 
     }
 

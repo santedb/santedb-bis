@@ -23,7 +23,7 @@ namespace SanteDB.BI.Model
         [XmlArrayItem("bool", typeof(BiDataCallParameter<Boolean>))]
         [XmlArrayItem("uuid", typeof(BiDataCallParameter<Guid>))]
         [XmlArrayItem("date-time", typeof(BiDataCallParameter<DateTime>))]
-        public List<object> Parameters { get; set; }
+        public List<BiDataCallParameter> Parameters { get; set; }
 
     }
 }

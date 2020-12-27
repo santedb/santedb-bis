@@ -4,11 +4,11 @@ using System.Xml.Serialization;
 namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// Call parameter
+    /// Data Call Parameter
     /// </summary>
-    [XmlType(nameof(BiDataCallParameter<T>), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiDataCallParameter), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BiDataCallParameter<T>
+    public abstract class BiDataCallParameter
     {
 
         /// <summary>
@@ -17,6 +17,17 @@ namespace SanteDB.BI.Model
         [XmlAttribute("name"), JsonProperty("name")]
         public string Name { get; set; }
 
+    }
+
+    /// <summary>
+    /// Call parameter
+    /// </summary>
+    [XmlType(Namespace = BiConstants.XmlNamespace)]
+    [JsonObject]
+    public class BiDataCallParameter<T> : BiDataCallParameter
+    {
+
+       
         /// <summary>
         /// Gets or sets the value of the parameter
         /// </summary>

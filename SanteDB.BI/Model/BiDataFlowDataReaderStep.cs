@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -21,6 +22,6 @@ namespace SanteDB.BI.Model
         /// Gets or sets the definitions for the data source
         /// </summary>
         [XmlArray("definitions"), XmlArrayItem("add") , JsonProperty("definitions")]
-        public BiSqlDefinition Definitions { get; set; }
+        public List<BiSqlDefinition> Definition { get; set; }
     }
 }

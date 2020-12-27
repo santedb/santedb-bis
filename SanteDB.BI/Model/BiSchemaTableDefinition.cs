@@ -12,7 +12,7 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiSchemaTableDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlType(nameof(BiSchemaTableDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BiSchemaTableDefinition : BiDefinition
+    public class BiSchemaTableDefinition : BiSchemaObjectDefinition
     {
 
         /// <summary>
