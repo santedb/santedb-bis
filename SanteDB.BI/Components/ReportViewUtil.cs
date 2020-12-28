@@ -16,7 +16,7 @@
  * User: fyfej
  * Date: 2019-11-27
  */
-using NReco.Linq;
+using ExpressionEvaluator;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
@@ -29,25 +29,20 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using static NReco.Linq.LambdaParser;
 
 namespace SanteDB.BI.Components
 {
     /// <summary>
     /// Report view utility
     /// </summary>
-    public static class ReportViewUtil
+    internal static class ReportViewUtil
     {
-
-        // Parser
-        private static LambdaParser s_parser = new LambdaParser();
 
         // Expression regex
         private static Regex m_exprRegex = new Regex(@"^[\w_\s]+$");
@@ -60,7 +55,7 @@ namespace SanteDB.BI.Components
         /// </summary>
         static ReportViewUtil()
         {
-            m_componentCache = ApplicationServiceContext.Current?.GetService<IServiceManager>()
+            m_componentCache = ApplicationServiceContext.Current.GetService<IServiceManager>()
                 .GetAllTypes()
                 .Where(o => typeof(IBiViewComponent).GetTypeInfo().IsAssignableFrom(o.GetTypeInfo()) && !o.GetTypeInfo().IsInterface && !o.GetTypeInfo().IsAbstract)
                 .Select(o => Activator.CreateInstance(o) as IBiViewComponent)
@@ -88,14 +83,15 @@ namespace SanteDB.BI.Components
         public static object GetValue(IRenderContext context, string expressionText)
         {
             // First, find the current data context
+            var field = expressionText;
             object value = null;
 
             // Is there an expression?
-            if (m_exprRegex.IsMatch(expressionText))
+            if (m_exprRegex.IsMatch(field))
             {
                 var scopedExpando = (context.ScopedObject as IDictionary<String, Object>);
                 var currentContext = context;
-                while ((scopedExpando == null || !scopedExpando.TryGetValue(expressionText, out value)) && currentContext != null)
+                while ((scopedExpando == null || !scopedExpando.TryGetValue(field, out value)) && currentContext != null)
                 {
                     currentContext = currentContext.Parent;
                     scopedExpando = currentContext.ScopedObject as IDictionary<String, Object>;
@@ -104,7 +100,8 @@ namespace SanteDB.BI.Components
             }
             else // complex expression
             {
-                return s_parser.Eval(expressionText, context.ScopedObject as IDictionary<String, Object>);
+                Delegate evaluator = context.CompileExpression(field);
+                return evaluator.DynamicInvoke(context.ScopedObject);
             }
         }
 
@@ -114,9 +111,28 @@ namespace SanteDB.BI.Components
         /// <param name="me"></param>
         /// <param name="fieldOrExpression"></param>
         /// <returns></returns>
-        public static object EvaluateExpression(String fieldOrExpression, dynamic scope)
+        public static Delegate CompileExpression(this IRenderContext me, String fieldOrExpression)
         {
-            return s_parser.Eval(fieldOrExpression, scope as IDictionary<String, Object>);
+            IDictionary<String, Delegate> exprs = me.Parent?.Tags["expressions"] as IDictionary<String, Delegate>;
+
+            Delegate evaluator = null;
+            if (exprs?.TryGetValue(fieldOrExpression, out evaluator) != true)
+            {
+
+                var expression = new CompiledExpression(fieldOrExpression);
+                expression.TypeRegistry = new TypeRegistry();
+                expression.TypeRegistry.RegisterDefaultTypes();
+                expression.TypeRegistry.RegisterType<Guid>();
+                expression.TypeRegistry.RegisterType<DateTimeOffset>();
+                expression.TypeRegistry.RegisterType<TimeSpan>();
+
+                evaluator = expression.ScopeCompile<ExpandoObject>();
+
+                exprs?.Add(fieldOrExpression, evaluator);
+
+            }
+
+            return evaluator;
         }
 
         /// <summary>
@@ -136,19 +152,19 @@ namespace SanteDB.BI.Components
         /// </summary>
         internal static void Write(XmlWriter writer, XElement el, IRenderContext context)
         {
-                // TODO get helper here
-                IBiViewComponent component = ReportViewUtil.GetViewComponent(el.Name);
-                
-                if(component == null)
-                {
-                    writer.WriteComment($"WARNING: No component for {el.Name} is registered");
-                }
-                else if (component.Validate(el, context))
-                    component.Render(el, writer, context);
-                else
-                {
+            // TODO get helper here
+            IBiViewComponent component = ReportViewUtil.GetViewComponent(el.Name);
+
+            if (component == null)
+            {
+                writer.WriteComment($"WARNING: No component for {el.Name} is registered");
+            }
+            else if (component.Validate(el, context))
+                component.Render(el, writer, context);
+            else
+            {
 #if DEBUG
-                    throw new ViewValidationException(el, $"Component {component?.ComponentName} failed validation");
+                throw new ViewValidationException(el, $"Component {component?.ComponentName} failed validation");
 #else
                         writer.WriteStartElement("em", BiConstants.HtmlNamespace);
                         writer.WriteAttributeString("style", "color: #f00");
