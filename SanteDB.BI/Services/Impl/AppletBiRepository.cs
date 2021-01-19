@@ -121,6 +121,14 @@ namespace SanteDB.BI.Services.Impl
             // TODO: If the definition is an applet asset then load it
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
                 return definitions.Values
+                    .Select(o =>
+                    {
+                        if (o is AppletAsset)
+                            using (var ms = new MemoryStream(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.RenderAssetContent(o as AppletAsset)))
+                                return BiDefinition.Load(ms);
+                        else
+                            return o;
+                    })
                     .OfType<TBisDefinition>()
                     .Where(filter.Compile())
                     .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
@@ -128,8 +136,7 @@ namespace SanteDB.BI.Services.Impl
                     .Take(count ?? 100);
             return new TBisDefinition[0];
         }
-
-        /// <summary>
+                /// <summary>
         /// Remove the specified object from the repository
         /// </summary>
         public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
@@ -152,9 +159,7 @@ namespace SanteDB.BI.Services.Impl
         {
             AuthenticationContext.Current = new AuthenticationContext(AuthenticationContext.SystemPrincipal);
             this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
-            this.m_definitionCache.Remove(typeof(BiQueryDefinition));
-            this.m_definitionCache.Remove(typeof(BiViewDefinition));
-            this.m_definitionCache.Remove(typeof(BiReportDefinition));
+            this.m_definitionCache.Clear();
             var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
 
             // Doesn't have a solution manager
@@ -200,7 +205,7 @@ namespace SanteDB.BI.Services.Impl
 
 
             // Process contents
-            foreach (var itm in bisDefinitions)
+           foreach (var itm in bisDefinitions)
             {
                 this.ProcessBisDefinition(itm.Definition);
 #if DEBUG

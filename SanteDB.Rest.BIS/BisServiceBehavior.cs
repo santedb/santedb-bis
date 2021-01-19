@@ -199,8 +199,14 @@ namespace SanteDB.Rest.BIS
                 if (viewDef == null)
                 {
                     var queryDef = this.m_metadataRepository.Get<BiQueryDefinition>(queryId);
-                    if (queryDef == null)
-                        throw new KeyNotFoundException(queryId);
+                    if (queryDef == null) // Parameter value
+                    {
+                        var parmDef = this.m_metadataRepository.Get<BiParameterDefinition>(queryId);
+                        queryDef = parmDef?.Values as BiQueryDefinition;
+                        if (parmDef == null)
+                            throw new KeyNotFoundException($"Could not find a Parameter, Query or View to hydrate named {queryId}");
+                    }
+
                     viewDef = new BiViewDefinition()
                     {
                         Id = queryDef.Id,

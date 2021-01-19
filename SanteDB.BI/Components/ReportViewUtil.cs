@@ -71,7 +71,9 @@ namespace SanteDB.BI.Components
                 .SelectMany(o => o.Strings)
                 .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
                 .SelectMany(o => o.String)
-                .FirstOrDefault(o => o.Key == key)?.Value ?? key;
+                .Where(o => o.Key == key)
+                .OrderByDescending(o=>o.Priority)
+                .FirstOrDefault()?.Value ?? key;
         }
 
         /// <summary>

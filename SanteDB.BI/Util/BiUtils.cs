@@ -47,6 +47,10 @@ namespace SanteDB.BI.Util
                 return null;
             else if (definition is BiReportViewDefinition) // Report views cannot be resolved
                 return definition;
+
+            var localName = definition.Name;
+            var localLabel = definition.Label;
+            var localRequired = (definition as BiParameterDefinition)?.Required;
             var newDef = Activator.CreateInstance(definition.GetType()) as BiDefinition;
             newDef.CopyObjectData(definition);
             definition = newDef;
@@ -65,6 +69,13 @@ namespace SanteDB.BI.Util
                     new Type[] { typeof(String) }).Invoke(repository, new object[] { refId }) as BiDefinition);
                 if (retVal == null)
                     throw new KeyNotFoundException($"{newDef.GetType().Name} #{refId} does not exist or you do not have permission");
+
+                if (!String.IsNullOrEmpty(localName))
+                    retVal.Name = localName;
+                if (!String.IsNullOrEmpty(localLabel))
+                    retVal.Label = localLabel;
+                if (localRequired.HasValue)
+                    (retVal as BiParameterDefinition).Required = localRequired.Value;
                 return retVal;
             }
             else  // Cascade
@@ -84,6 +95,9 @@ namespace SanteDB.BI.Util
                     else if (val is BiDefinition)
                         pi.SetValue(definition, ResolveRefs(val as BiDefinition));
                 }
+
+            if (!String.IsNullOrEmpty(localName))
+                definition.Name = localName;
             return definition;
         }
     }

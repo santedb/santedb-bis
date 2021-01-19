@@ -64,7 +64,12 @@ namespace SanteDB.BI.Components.Base
                     value = dataSource.Dataset.Sum(o => (decimal)expression.DynamicInvoke(o));
                     break;
                 case "count":
-                    value = dataSource.Dataset.Count(o => expression.DynamicInvoke(o));
+                    if(expression.Method.ReturnType == typeof(bool))
+                        value = dataSource.Dataset.Count(o => expression.DynamicInvoke(o));
+                    else
+                    {
+                        value = dataSource.Dataset.Count(o => expression.DynamicInvoke(o) != null);
+                    }
                     break;
                 case "count-distinct":
                     value = dataSource.Dataset.Select(o => expression.DynamicInvoke(o)).Distinct().Count();

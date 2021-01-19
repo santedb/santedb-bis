@@ -48,6 +48,8 @@ namespace SanteDB.BI.Components.Base
 
             var fieldOrExpression = element.Value;
             var value = ReportViewUtil.GetValue(context, fieldOrExpression);
+            if (value == null && !String.IsNullOrEmpty(element.Attribute("default")?.Value))
+                value = ReportViewUtil.GetValue(context, element.Attribute("default")?.Value);
 
             // Is the required value a change?
             if (element.Attribute("when")?.Value == "changed")
@@ -61,10 +63,20 @@ namespace SanteDB.BI.Components.Base
             }
 
             // Is there a format?
-            if (!String.IsNullOrEmpty(element.Attribute("format")?.Value))
-                writer.WriteString(String.Format($"{{0:{element.Attribute("format").Value}}}", value));
-            else
-                writer.WriteString(value.ToString());
+            var format = element.Attribute("format")?.Value;
+            if (value != null)
+            {
+                if (!String.IsNullOrEmpty(format))
+                {
+                    if (format.Contains("{0}"))
+                        writer.WriteString(String.Format(format, value));
+                    else
+                        writer.WriteString(String.Format($"{{0:{format}}}", value));
+                }
+                else
+                    writer.WriteString(value.ToString());
+            }
+
         }
 
         /// <summary>
