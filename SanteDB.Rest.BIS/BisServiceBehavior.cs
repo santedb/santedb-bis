@@ -202,9 +202,10 @@ namespace SanteDB.Rest.BIS
                     if (queryDef == null) // Parameter value
                     {
                         var parmDef = this.m_metadataRepository.Get<BiParameterDefinition>(queryId);
-                        queryDef = parmDef?.Values as BiQueryDefinition;
                         if (parmDef == null)
                             throw new KeyNotFoundException($"Could not find a Parameter, Query or View to hydrate named {queryId}");
+                        queryDef = parmDef?.Values as BiQueryDefinition;
+                        queryDef.Id = queryDef.Id ?? queryId;
                     }
 
                     viewDef = new BiViewDefinition()
@@ -220,7 +221,7 @@ namespace SanteDB.Rest.BIS
                     throw new KeyNotFoundException("Query does not contain a data source");
 
                 IBiDataSource providerImplementation = null;
-                if (dsource.ProviderType != null)
+                if (dsource.ProviderType != null && this.m_metadataRepository.IsLocal)
                     providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
                 else
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default

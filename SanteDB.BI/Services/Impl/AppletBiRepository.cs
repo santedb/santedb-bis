@@ -59,6 +59,11 @@ namespace SanteDB.BI.Services.Impl
         public string ServiceName => "Applet Based BIS Repository";
 
         /// <summary>
+        /// Applet BI Repo is local repo
+        /// </summary>
+        public bool IsLocal => true;
+
+        /// <summary>
         /// Gets the specified object from the specified type repository 
         /// </summary>
         public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition

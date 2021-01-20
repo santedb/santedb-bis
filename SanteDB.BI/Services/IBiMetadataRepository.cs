@@ -32,7 +32,12 @@ namespace SanteDB.BI.Services
     /// </summary>
     public interface IBiMetadataRepository : IServiceImplementation
     {
-       
+
+        /// <summary>
+        /// True if the source of metadata is local
+        /// </summary>
+        bool IsLocal { get; }
+
         /// <summary>
         /// Query metadata repository for 
         /// </summary>
