@@ -136,7 +136,8 @@ namespace SanteDB.BI.Services.Impl
                     .Take(count ?? 100);
             return new TBisDefinition[0];
         }
-                /// <summary>
+               
+        /// <summary>
         /// Remove the specified object from the repository
         /// </summary>
         public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
@@ -159,7 +160,10 @@ namespace SanteDB.BI.Services.Impl
         {
             AuthenticationContext.Current = new AuthenticationContext(AuthenticationContext.SystemPrincipal);
             this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
-            this.m_definitionCache.Clear();
+            // We only want to clear those assets which can be defined in applets
+            this.m_definitionCache.Remove(typeof(BiReportDefinition));
+            this.m_definitionCache.Remove(typeof(BiQueryDefinition));
+            this.m_definitionCache.Remove(typeof(BiParameterDefinition));
             var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
 
             // Doesn't have a solution manager
