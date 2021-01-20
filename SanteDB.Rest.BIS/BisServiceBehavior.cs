@@ -391,8 +391,11 @@ namespace SanteDB.Rest.BIS
                 var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"];
 
                 var retVal = ApplicationServiceContext.Current.GetService<IBiRenderService>().Render(id, view, format, this.CreateParameterDictionary(), out string mimeType);
+                
                 // Set output headers
                 RestOperationContext.Current.OutgoingResponse.ContentType = mimeType;
+                if(RestOperationContext.Current.IncomingRequest.QueryString["_download"] == "true")
+                    RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment; filename=\"{id}-{view}-{DateTime.Now.ToString("yyyy-MM-ddTHH_mm_ss")}.{format}\"");
                 return retVal;
             }
             catch (Exception e)

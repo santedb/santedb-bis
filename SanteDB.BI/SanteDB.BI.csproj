@@ -39,7 +39,18 @@
     <Company>SanteSuite Contributors</Company>
     <PackageIconUrl>http://santesuite.org/assets/img/logo.png</PackageIconUrl>
     <PackageProjectUrl>http://santesuite.org</PackageProjectUrl>
-  </PropertyGroup>  
+  </PropertyGroup>
+    
+  <ItemGroup>
+    <None Remove="Model\csv.xsl" />
+    <None Remove="Resources\csv.xsl" />
+    <None Remove="Resources\excel-xml.xsl" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\excel-xml.xsl" />
+    <EmbeddedResource Include="Resources\csv.xsl" />
+  </ItemGroup>  
   <ItemGroup>
     <PackageReference Include="Antlr3.Runtime" Version="3.5.1" />
     <PackageReference Include="ExpressionEvaluator" Version="2.0.4" />
@@ -128,6 +139,9 @@
     <None Include="Schema\xhtml.xsd">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\csv.xsl" />
   </ItemGroup>
   <Choose>
     <When Condition="$(SolutionName.Contains('-ext'))">
