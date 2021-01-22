@@ -23,7 +23,7 @@ namespace SanteDB.BI.Rendering
         /// <summary>
         /// Create new report renderer
         /// </summary>
-        public CsvReportRenderer() : base(typeof(CsvReportRenderer).Assembly.GetManifestResourceStream("SanteDB.BI.Resources.csv.xsl"), false)
+        public CsvReportRenderer() : base(typeof(CsvReportRenderer).Assembly.GetManifestResourceStream("SanteDB.BI.Resources.csv.xsl"), true)
         { }
 
 
