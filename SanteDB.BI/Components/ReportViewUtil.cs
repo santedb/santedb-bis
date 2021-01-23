@@ -67,13 +67,32 @@ namespace SanteDB.BI.Components
         /// </summary>
         public static string GetString(string key)
         {
-            return ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets
-                .SelectMany(o => o.Strings)
-                .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
-                .SelectMany(o => o.String)
-                .Where(o => o.Key == key)
-                .OrderByDescending(o=>o.Priority)
-                .FirstOrDefault()?.Value ?? key;
+            // TODO: Replace with ILocalizationService call
+            var slnMgr = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>();
+            if(slnMgr?.Solutions?.Any() == true)
+            {
+                String retVal = null;
+                foreach(var solution in slnMgr.Solutions)
+                {
+                    
+                    retVal = slnMgr.GetApplets(solution.Meta.Id).SelectMany(o => o.Strings)
+                        .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
+                        .SelectMany(o => o.String)
+                        .Where(o => o.Key == key)
+                        .OrderByDescending(o => o.Priority)
+                        .FirstOrDefault()?.Value;
+                    if (retVal != null) break;
+                }
+                return retVal ?? key;
+            }
+            else 
+                return ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets
+                    .SelectMany(o => o.Strings)
+                    .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
+                    .SelectMany(o => o.String)
+                    .Where(o => o.Key == key)
+                    .OrderByDescending(o=>o.Priority)
+                    .FirstOrDefault()?.Value ?? key;
         }
 
         /// <summary>
