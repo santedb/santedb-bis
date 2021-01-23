@@ -303,11 +303,7 @@ namespace SanteDB.Rest.BIS
         private IDictionary<String, Object> CreateParameterDictionary()
         {
             // Parameters
-            Dictionary<String, object> parameters = new Dictionary<string, object>();
-
-            foreach (var kv in RestOperationContext.Current.IncomingRequest.QueryString.AllKeys)
-                parameters.Add(kv, RestOperationContext.Current.IncomingRequest.QueryString.GetValues(kv).ToList().First());
-
+            Dictionary<String, object> parameters = NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query).ToDictionary(o=>o.Key, o=>o.Value.Count == 1 ? o.Value.First() : (object)o.Value.ToArray());
 
             // Context parameters
             foreach (var kv in this.m_contextParams)

@@ -73,6 +73,12 @@ namespace SanteDB.BI.Model
         }
 
         /// <summary>
+        /// Allow the entry of multiple entries
+        /// </summary>
+        [XmlAttribute("multiple"), JsonProperty("multiple")]
+        public bool Multiple { get; set; }
+
+        /// <summary>
         /// Gets or set the min value
         /// </summary>
         [XmlAttribute("min"), JsonProperty("min")]
