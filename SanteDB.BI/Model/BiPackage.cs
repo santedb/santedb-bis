@@ -17,6 +17,7 @@
  * Date: 2019-11-27
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Util;
 using System;
 using System.Collections;
 using System.Collections.Generic;

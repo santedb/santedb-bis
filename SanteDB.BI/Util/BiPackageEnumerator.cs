@@ -16,6 +16,7 @@
  * User: fyfej
  * Date: 2019-11-27
  */
+using SanteDB.BI.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SanteDB.BI.Model
+namespace SanteDB.BI.Util
 {
     /// <summary>
     /// Represents an enumerator for a BiPackage

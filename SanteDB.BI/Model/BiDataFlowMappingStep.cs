@@ -7,7 +7,7 @@ namespace SanteDB.BI.Model
     /// <summary>
     /// A data flow which maps data from an input stream to an output stream
     /// </summary>
-    [XmlType(nameof(BiDataFlowMappingStep))]
+    [XmlType(nameof(BiDataFlowMappingStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     public class BiDataFlowMappingStep : BiDataFlowStreamStep
     {
