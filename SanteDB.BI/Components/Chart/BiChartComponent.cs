@@ -87,7 +87,7 @@ namespace SanteDB.BI.Components.Chart
                     writer.WriteString("{ type: '");
 
                     // First determine type
-                    if (typeof(DateTime).GetTypeInfo().IsAssignableFrom(axisSelector.DynamicInvoke(chartData.First()).GetType()))
+                    if (typeof(DateTime).IsAssignableFrom(axisSelector.DynamicInvoke(chartData.First()).GetType()))
                         writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{(axis.Attribute("time-unit")?.Value ?? "day")}' }}");
                     else
                         writer.WriteString("linear'");

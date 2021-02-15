@@ -57,7 +57,7 @@ namespace SanteDB.BI.Components
         {
             m_componentCache = ApplicationServiceContext.Current.GetService<IServiceManager>()
                 .GetAllTypes()
-                .Where(o => typeof(IBiViewComponent).GetTypeInfo().IsAssignableFrom(o.GetTypeInfo()) && !o.GetTypeInfo().IsInterface && !o.GetTypeInfo().IsAbstract)
+                .Where(o => typeof(IBiViewComponent).IsAssignableFrom(o) && !o.IsInterface && !o.IsAbstract)
                 .Select(o => Activator.CreateInstance(o) as IBiViewComponent)
                 .ToDictionary(o => o.ComponentName, o => o);
         }
