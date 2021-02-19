@@ -19,7 +19,7 @@
  -->
 <RestServiceConfiguration xmlns="http://santedb.org/configuration" name="BIS">
   <behaviors>
-    <add type="SanteDB.Core.Rest.Security.TokenAuthorizationAccessBehavior, SanteDB.Core, Version=1.10.0.0"/>
+    <add type="SanteDB.Server.Core.Rest.Security.TokenAuthorizationAccessBehavior, SanteDB.Server.Core, Version=1.10.0.0"/>
   </behaviors>
   <endpoint address="http://0.0.0.0:8080/bis" contract="SanteDB.Rest.BIS.IBisServiceContract, SanteDB.Rest.BIS, Version=1.10.0.0">
     <behaviors>
