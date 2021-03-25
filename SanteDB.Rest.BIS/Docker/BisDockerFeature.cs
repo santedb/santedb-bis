@@ -1,4 +1,5 @@
-﻿using SanteDB.Core.Configuration;
+﻿using SanteDB.BI.Services.Impl;
+using SanteDB.Core.Configuration;
 using SanteDB.Core.Exceptions;
 using SanteDB.Docker.Core;
 using SanteDB.Rest.Common.Behavior;
@@ -15,7 +16,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// A docker feature for the AMI
     /// </summary>
-    public class BisFeature : IDockerFeature
+    public class BisDockerFeature : IDockerFeature
     {
 
         /// <summary>
@@ -152,12 +153,16 @@ namespace SanteDB.Rest.BIS
                 }
             }
 
-            // Add services
-            var serviceConfiguration = configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders;
-            if (!serviceConfiguration.Any(s => s.Type == typeof(BisMessageHandler)))
+            var serviceTypes = new Type[]
             {
-                serviceConfiguration.Add(new TypeReferenceConfiguration(typeof(BisMessageHandler)));
-            }
+                typeof(BisMessageHandler),
+                typeof(AppletBiRepository),
+                typeof(InMemoryPivotProvider),
+                typeof(LocalBiRenderService)
+            };
+            var serviceConfiguration = configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders;
+            serviceConfiguration.AddRange(serviceTypes.Where(t => !serviceConfiguration.Any(c => c.Type == t)).Select(t => new TypeReferenceConfiguration(t)));
+
         }
     }
 }
