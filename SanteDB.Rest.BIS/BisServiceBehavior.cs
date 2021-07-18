@@ -42,7 +42,7 @@ using SanteDB.BI.Util;
 using SanteDB.Core.Services;
 using System.Globalization;
 using SanteDB.Core.Security.Audit;
-using SanteDB.Core.Auditing;
+using SanteDB.Core.Model.Audit;
 using System.Text.RegularExpressions;
 using SanteDB.BI;
 using SanteDB.Core.Security.Services;
@@ -191,7 +191,7 @@ namespace SanteDB.Rest.BIS
         /// <returns></returns>
         private BisResultContext HydrateQuery(String queryId)
         {
-            AuditData audit = new AuditData(DateTime.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.SecondaryUseQuery));
+            AuditEventData audit = new AuditEventData(DateTime.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.SecondaryUseQuery));
             try
             {
                 // First we want to grab the appropriate source for this ID
