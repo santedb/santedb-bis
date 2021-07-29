@@ -163,27 +163,28 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void LoadAllDefinitions()
         {
-            AuthenticationContext.Current = new AuthenticationContext(AuthenticationContext.SystemPrincipal);
-            this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
-            // We only want to clear those assets which can be defined in applets
-            this.m_definitionCache.Remove(typeof(BiReportDefinition));
-            this.m_definitionCache.Remove(typeof(BiQueryDefinition));
-            this.m_definitionCache.Remove(typeof(BiParameterDefinition));
-            var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
-
-            // Doesn't have a solution manager
-            if (solutions == null)
-                this.ProcessApplet(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets);
-            else
+            using (AuthenticationContext.EnterSystemContext())
             {
-                solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
-                foreach (var s in solutions)
+                this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
+                // We only want to clear those assets which can be defined in applets
+                this.m_definitionCache.Remove(typeof(BiReportDefinition));
+                this.m_definitionCache.Remove(typeof(BiQueryDefinition));
+                this.m_definitionCache.Remove(typeof(BiParameterDefinition));
+                var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
+
+                // Doesn't have a solution manager
+                if (solutions == null)
+                    this.ProcessApplet(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets);
+                else
                 {
-                    var appletCollection = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>().GetApplets(s.Meta.Id);
-                    this.ProcessApplet(appletCollection);
+                    solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
+                    foreach (var s in solutions)
+                    {
+                        var appletCollection = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>().GetApplets(s.Meta.Id);
+                        this.ProcessApplet(appletCollection);
+                    }
                 }
             }
-
         }
 
         /// <summary>
