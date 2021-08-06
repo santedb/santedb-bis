@@ -24,6 +24,7 @@ using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Interfaces;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Claims;
+using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -50,6 +51,9 @@ namespace SanteDB.BI.Components
         // Component cache
         private static Dictionary<XName, IBiViewComponent> m_componentCache;
 
+        // Localization service ref
+        private static ILocalizationService m_localeService = ApplicationServiceContext.Current.GetService<ILocalizationService>();
+
         /// <summary>
         /// Static CTOR
         /// </summary>
@@ -65,35 +69,7 @@ namespace SanteDB.BI.Components
         /// <summary>
         /// Get localized string
         /// </summary>
-        public static string GetString(string key)
-        {
-            // TODO: Replace with ILocalizationService call
-            var slnMgr = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>();
-            if(slnMgr?.Solutions?.Any() == true)
-            {
-                String retVal = null;
-                foreach(var solution in slnMgr.Solutions)
-                {
-                    
-                    retVal = slnMgr.GetApplets(solution.Meta.Id).SelectMany(o => o.Strings)
-                        .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
-                        .SelectMany(o => o.String)
-                        .Where(o => o.Key == key)
-                        .OrderByDescending(o => o.Priority)
-                        .FirstOrDefault()?.Value;
-                    if (retVal != null) break;
-                }
-                return retVal ?? key;
-            }
-            else 
-                return ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets
-                    .SelectMany(o => o.Strings)
-                    .Where(o => o.Language == (AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName))
-                    .SelectMany(o => o.String)
-                    .Where(o => o.Key == key)
-                    .OrderByDescending(o=>o.Priority)
-                    .FirstOrDefault()?.Value ?? key;
-        }
+        public static string GetString(string key) => m_localeService.GetString(key);
 
         /// <summary>
         /// Gets the value of the specified context
