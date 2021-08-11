@@ -19,6 +19,7 @@
 using RestSrvr.Attributes;
 using SanteDB.BI.Model;
 using SanteDB.Core.Interop;
+using SanteDB.Rest.Common;
 using SanteDB.Rest.Common.Attributes;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace SanteDB.Rest.BIS
     [ServiceKnownResource(typeof(BiRenderFormatDefinition))]
     [ServiceProduces("application/json")]
     [ServiceProduces("application/xml")]
-    public interface IBisServiceContract
+    public interface IBisServiceContract : IRestApiContractImplementation
     {
 
 

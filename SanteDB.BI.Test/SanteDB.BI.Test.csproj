@@ -46,11 +46,8 @@
     <Compile Include="TestExpressionParsing.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSTest.TestAdapter">
-      <Version>1.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestFramework">
-      <Version>1.3.2</Version>
+    <PackageReference Include="NUnit">
+      <Version>3.13.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
