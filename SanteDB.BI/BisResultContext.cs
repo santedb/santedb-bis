@@ -32,7 +32,9 @@ namespace SanteDB.BI
     public class BisResultContext
     {
 
-        
+        /// <summary>
+        /// Creates a new result context
+        /// </summary>
         public BisResultContext(BiQueryDefinition definition, 
             IDictionary<String, Object> arguments,
             IBiDataSource source,

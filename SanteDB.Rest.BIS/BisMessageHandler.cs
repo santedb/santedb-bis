@@ -24,6 +24,7 @@ using SanteDB.Core.Services;
 using SanteDB.Rest.BIS.Configuration;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -34,7 +35,8 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// Represents a message handler for the BIS
     /// </summary>
-    [ApiServiceProvider("BIS REST Daemon", typeof(IBisServiceContract), configurationType: typeof(BisServiceConfigurationSection))]
+    [Description("Exposes the SanteDB Business Intelligence functions (reports, queries, etc.) over HTTP REST")]
+    [ApiServiceProvider("BIS REST Daemon", typeof(BisServiceBehavior), configurationType: typeof(BisServiceConfigurationSection))]
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer

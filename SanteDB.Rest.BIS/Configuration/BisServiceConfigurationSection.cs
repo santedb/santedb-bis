@@ -22,12 +22,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace SanteDB.Rest.BIS.Configuration
 {
     /// <summary>
     /// BIS Service configuration section
     /// </summary>
+    [XmlType(nameof(BisServiceConfigurationSection), Namespace = "http://santedb.org/configuration")]
     public class BisServiceConfigurationSection : IConfigurationSection
     {
     }
