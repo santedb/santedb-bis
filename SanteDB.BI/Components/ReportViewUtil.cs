@@ -28,6 +28,7 @@ using SanteDB.Core.Security;
 using SanteDB.Core.Security.Claims;
 using SanteDB.Core.Services;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
@@ -44,8 +45,11 @@ namespace SanteDB.BI.Components
     /// <summary>
     /// Report view utility
     /// </summary>
-    internal static class ReportViewUtil
+    internal static partial class ReportViewUtil
     {
+
+        // Helpers
+        private static BiExpressionHelpers m_helpers = new BiExpressionHelpers();
 
         // Expression regex
         private static Regex m_exprRegex = new Regex(@"^[\w_\s]+$");
@@ -86,7 +90,11 @@ namespace SanteDB.BI.Components
             object value = null;
 
             // Is there an expression?
-            if (m_exprRegex.IsMatch(field))
+            if(field.Equals("."))
+            {
+                return context.ScopedObject.ToString();
+            }
+            else if (m_exprRegex.IsMatch(field))
             {
                 var scopedExpando = (context.ScopedObject as IDictionary<String, Object>);
                 var currentContext = context;
@@ -124,9 +132,8 @@ namespace SanteDB.BI.Components
                 expression.TypeRegistry.RegisterType<Guid>();
                 expression.TypeRegistry.RegisterType<DateTimeOffset>();
                 expression.TypeRegistry.RegisterType<TimeSpan>();
-
+                expression.TypeRegistry.RegisterSymbol("BiUtil", m_helpers);
                 evaluator = expression.ScopeCompile<ExpandoObject>();
-
                 exprs?.Add(fieldOrExpression, evaluator);
 
             }

@@ -83,6 +83,9 @@ namespace SanteDB.BI.Components.Base
                         case "eq":
                             opSuccess = fieldValue?.Equals(value) == true || fieldValue == value;
                             break;
+                        case "ne":
+                            opSuccess = fieldValue?.Equals(value) == false || fieldValue != value;
+                            break;
                     }
 
                     if (isNot) opSuccess = !opSuccess;

@@ -54,11 +54,11 @@ namespace SanteDB.BI.Components.Base
             // Render children
             foreach (var node in element.Nodes())
             {
-                if (node is XElement)
-                    ReportViewUtil.Write(writer, node as XElement, context);
-                else if (node is XText)
+                if (node is XElement ele)
+                    ReportViewUtil.Write(writer, ele, context);
+                else if (node is XText xtext)
                 {
-                    var text = (node as XText).Value;
+                    var text = xtext.Value;
                     if(!String.IsNullOrWhiteSpace(text))
                         writer.WriteString(text);
                 }

@@ -59,7 +59,7 @@ namespace SanteDB.BI.Services.Impl
 
                 // Render the report
                 var renderer = Activator.CreateInstance(formatDefinition.Type) as IBiReportFormatProvider;
-
+                
                 mimeType = formatDefinition.ContentType;
                 return renderer.Render(reportDefinition, viewName, parameters);
             }
