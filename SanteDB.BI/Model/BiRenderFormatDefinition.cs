@@ -21,10 +21,6 @@
 using Newtonsoft.Json;
 using SanteDB.Core.Model.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -54,7 +50,8 @@ namespace SanteDB.BI.Model
         /// Gets or sets the rendere xml format
         /// </summary>
         [XmlAttribute("renderer"), JsonProperty("renderer")]
-        public String TypeXml {
+        public String TypeXml
+        {
             get => this.Type?.AssemblyQualifiedName;
             set
             {

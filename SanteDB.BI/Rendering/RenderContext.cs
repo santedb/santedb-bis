@@ -20,21 +20,16 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using SanteDB.BI.Model;
 
 namespace SanteDB.BI.Rendering
 {
     /// <summary>
     /// Represents a report rendering context implementation linked to a report
     /// </summary>
-    public class RenderContext  : IRenderContext
+    public class RenderContext : IRenderContext
     {
 
-       
+
         /// <summary>
         /// Creates a new child rendering context
         /// </summary>

@@ -18,23 +18,19 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using SanteDB.BI.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Exceptions;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
-using SanteDB.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -97,7 +93,7 @@ namespace SanteDB.BI.Services.Impl
                 ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             // Locate type definitions
-            if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object>  typeDefinitions))
+            if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object> typeDefinitions))
             {
                 typeDefinitions = new Dictionary<string, Object>();
                 this.m_definitionCache.Add(metadata.GetType(), typeDefinitions);
@@ -107,7 +103,7 @@ namespace SanteDB.BI.Services.Impl
             if (typeDefinitions.TryGetValue(metadata.Id, out object existing))
             {
                 // Can't replace sys object
-                if(existing is BiDefinition && !(existing as BiDefinition).IsSystemObject)
+                if (existing is BiDefinition && !(existing as BiDefinition).IsSystemObject)
                     typeDefinitions[metadata.Id] = metadata;
                 else if (existing is AppletAsset && metadata is BiDefinition) // cant downgrade but can upgrade
                     typeDefinitions[metadata.Id] = metadata;
@@ -143,14 +139,14 @@ namespace SanteDB.BI.Services.Impl
                     .Take(count ?? 100);
             return new TBisDefinition[0];
         }
-               
+
         /// <summary>
         /// Remove the specified object from the repository
         /// </summary>
         public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
             // Demand unrestricted metadata
-            if(AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+            if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
                 ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, object> definitions) &&
@@ -202,7 +198,7 @@ namespace SanteDB.BI.Services.Impl
                     try
                     {
                         this.m_tracer.TraceVerbose("Attempting to load {0}", o.Name);
-                        
+
                         using (var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
                             return new { Definition = BiDefinition.Load(ms), Asset = o };
                     }
@@ -217,12 +213,12 @@ namespace SanteDB.BI.Services.Impl
 
 
             // Process contents
-           foreach (var itm in bisDefinitions)
+            foreach (var itm in bisDefinitions)
             {
                 this.ProcessBisDefinition(itm.Definition);
 #if DEBUG
-                if(itm.Definition is BiReportDefinition || itm.Definition is BiViewDefinition || itm.Definition is BiQueryDefinition)
-                    this.m_definitionCache[itm.Definition.GetType()][itm.Definition.Id] = itm.Asset;    
+                if (itm.Definition is BiReportDefinition || itm.Definition is BiViewDefinition || itm.Definition is BiQueryDefinition)
+                    this.m_definitionCache[itm.Definition.GetType()][itm.Definition.Id] = itm.Asset;
 #endif
             }
         }

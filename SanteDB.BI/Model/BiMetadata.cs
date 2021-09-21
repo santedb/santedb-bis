@@ -85,7 +85,7 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("version"), JsonProperty("version")]
         public String Version { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the authors
         /// </summary>

@@ -19,9 +19,7 @@
  * Date: 2021-8-5
  */
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -44,8 +42,8 @@ namespace SanteDB.BI.Model
         /// Gets or sets the schema definitions for the specified transform definition
         /// </summary>
         [XmlArray("schema"),
-            XmlArrayItem("table", typeof(BiSchemaTableDefinition)), 
-            XmlArrayItem("view", typeof(BiSchemaViewDefinition)), 
+            XmlArrayItem("table", typeof(BiSchemaTableDefinition)),
+            XmlArrayItem("view", typeof(BiSchemaViewDefinition)),
             JsonProperty("schemas")]
         public List<BiSchemaObjectDefinition> Schemas { get; set; }
 

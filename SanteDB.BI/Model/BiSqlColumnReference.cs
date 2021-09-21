@@ -23,7 +23,7 @@ using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
-    
+
     /// <summary>
     /// Represents Aggregate functions
     /// </summary>

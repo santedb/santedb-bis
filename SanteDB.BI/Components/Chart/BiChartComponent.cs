@@ -18,19 +18,14 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using Newtonsoft.Json;
+using SanteDB.BI.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Newtonsoft.Json;
-using SanteDB.BI.Rendering;
-using System.Reflection;
-using SanteDB.Core.Model;
 
 namespace SanteDB.BI.Components.Chart
 {

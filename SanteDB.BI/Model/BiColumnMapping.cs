@@ -64,7 +64,7 @@ namespace SanteDB.BI.Model
     /// Indicates the source transform from another column
     /// </summary>
     [XmlType(nameof(BiColumnMappingTransformJoin), Namespace = BiConstants.XmlNamespace)]
-    public class BiColumnMappingTransformJoin 
+    public class BiColumnMappingTransformJoin
     {
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the join expression for the join operation
         /// </summary>
-        [XmlElement("join") ,JsonProperty("join")]
+        [XmlElement("join"), JsonProperty("join")]
         public String Join { get; set; }
     }
 }

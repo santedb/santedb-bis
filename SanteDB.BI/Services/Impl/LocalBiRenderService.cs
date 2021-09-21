@@ -24,8 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -59,7 +57,7 @@ namespace SanteDB.BI.Services.Impl
 
                 // Render the report
                 var renderer = Activator.CreateInstance(formatDefinition.Type) as IBiReportFormatProvider;
-                
+
                 mimeType = formatDefinition.ContentType;
                 return renderer.Render(reportDefinition, viewName, parameters);
             }

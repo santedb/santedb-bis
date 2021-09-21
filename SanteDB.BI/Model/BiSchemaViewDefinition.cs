@@ -19,9 +19,6 @@
  * Date: 2021-8-5
  */
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -47,5 +44,5 @@ namespace SanteDB.BI.Model
         [XmlElement("query"), JsonProperty("query")]
         public BiQueryDefinition Query { get; set; }
     }
-   
+
 }

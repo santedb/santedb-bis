@@ -22,21 +22,13 @@ using ExpressionEvaluator;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
-using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Interfaces;
-using SanteDB.Core.Security;
-using SanteDB.Core.Security.Claims;
 using SanteDB.Core.Services;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Globalization;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -90,7 +82,7 @@ namespace SanteDB.BI.Components
             object value = null;
 
             // Is there an expression?
-            if(field.Equals("."))
+            if (field.Equals("."))
             {
                 return context.ScopedObject.ToString();
             }

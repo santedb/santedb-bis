@@ -18,19 +18,6 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using SanteDB.BI.Components;
-using SanteDB.BI.Exceptions;
-using SanteDB.BI.Model;
-using SanteDB.BI.Services;
-using SanteDB.Core;
-using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Security.Services;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
 
 namespace SanteDB.BI.Rendering
 {

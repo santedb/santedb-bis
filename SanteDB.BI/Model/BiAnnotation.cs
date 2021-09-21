@@ -30,7 +30,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiAnnotation), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    public class BiAnnotation 
+    public class BiAnnotation
     {
         /// <summary>
         /// Represents the body of the annotation
@@ -45,7 +45,8 @@ namespace SanteDB.BI.Model
         public string JsonBody
         {
             get => this.Body?.ToString();
-            set {
+            set
+            {
                 if (value != null)
                 {
                     using (var sr = new StringReader(value))

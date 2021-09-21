@@ -18,15 +18,6 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using SanteDB.BI.Services;
-using SanteDB.BI.Services.Impl;
-using SanteDB.Core;
-using SanteDB.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.BI
 {

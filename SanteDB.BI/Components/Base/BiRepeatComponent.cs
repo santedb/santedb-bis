@@ -18,18 +18,12 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Rendering;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using SanteDB.BI.Exceptions;
-using SanteDB.BI.Rendering;
-using SanteDB.BI.Services;
-using SanteDB.Core;
 
 namespace SanteDB.BI.Components.Base
 {
@@ -69,9 +63,9 @@ namespace SanteDB.BI.Components.Base
             else // Execute expression
             {
                 var value = ReportViewUtil.GetValue(context, element.Attribute("expression").Value);
-                if(value is IEnumerable enumerable)
+                if (value is IEnumerable enumerable)
                 {
-                    foreach(var itm in enumerable)
+                    foreach (var itm in enumerable)
                         foreach (var el in element.Elements())
                             ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
                 }

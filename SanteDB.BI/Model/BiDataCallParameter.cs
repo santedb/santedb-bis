@@ -47,7 +47,7 @@ namespace SanteDB.BI.Model
     public class BiDataCallParameter<T> : BiDataCallParameter
     {
 
-       
+
         /// <summary>
         /// Gets or sets the value of the parameter
         /// </summary>

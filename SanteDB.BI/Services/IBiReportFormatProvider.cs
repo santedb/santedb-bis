@@ -22,9 +22,6 @@ using SanteDB.BI.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.BI.Services
 {
@@ -43,6 +40,6 @@ namespace SanteDB.BI.Services
         /// <returns>The rendered output stream</returns>
         Stream Render(BiReportDefinition reportDefinition, String viewName, IDictionary<String, Object> parameters);
 
-        
+
     }
 }
