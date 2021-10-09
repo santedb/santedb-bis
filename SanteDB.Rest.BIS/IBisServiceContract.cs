@@ -22,13 +22,9 @@ using RestSrvr.Attributes;
 using SanteDB.BI.Model;
 using SanteDB.Core.Interop;
 using SanteDB.Rest.Common;
-using SanteDB.Rest.Common.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.Rest.BIS
 {
@@ -75,7 +71,7 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         [RestInvoke("PING", "/")]
         void Ping();
-        
+
         /// <summary>
         /// Searches the specified resource at endpoint
         /// </summary>

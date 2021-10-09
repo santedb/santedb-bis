@@ -18,15 +18,11 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
 using SanteDB.BI.Rendering;
 using SanteDB.Core.Model.Map;
+using System;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace SanteDB.BI.Components.Base
 {
@@ -48,13 +44,13 @@ namespace SanteDB.BI.Components.Base
             var fieldOrExpression = element.Attribute("value").Value;
             var fieldValue = ReportViewUtil.GetValue(context, fieldOrExpression);
 
-            foreach(var whenClauseElement in element.Elements((XNamespace)BiConstants.ComponentNamespace + "when"))
+            foreach (var whenClauseElement in element.Elements((XNamespace)BiConstants.ComponentNamespace + "when"))
             {
                 var op = whenClauseElement.Attribute("op").Value;
                 var isNot = whenClauseElement.Attribute("not")?.Value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
                 var xmlValue = whenClauseElement.Attribute("value").Value;
                 object value = null;
-                
+
                 // Convert for comparison
                 if (xmlValue == "null") // Null 
                     value = null;
@@ -83,11 +79,14 @@ namespace SanteDB.BI.Components.Base
                         case "eq":
                             opSuccess = fieldValue?.Equals(value) == true || fieldValue == value;
                             break;
+                        case "ne":
+                            opSuccess = fieldValue?.Equals(value) == false || fieldValue != value;
+                            break;
                     }
 
                     if (isNot) opSuccess = !opSuccess;
                 }
-                catch(InvalidCastException)
+                catch (InvalidCastException)
                 {
                     throw new InvalidOperationException($"Field value type {fieldValue.GetType().Name} is not IComparible and cannot be used in a switch");
                 }
@@ -102,10 +101,10 @@ namespace SanteDB.BI.Components.Base
 
             // Default condition?
             var defaultOption = element.Element((XNamespace)BiConstants.ComponentNamespace + "default");
-            if(defaultOption != null)
+            if (defaultOption != null)
                 foreach (var itm in defaultOption.Elements())
                     ReportViewUtil.Write(writer, itm, context);
-            
+
         }
 
         /// <summary>

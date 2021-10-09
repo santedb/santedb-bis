@@ -18,23 +18,24 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using SanteDB.BI.Model;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 
-namespace SanteDB.BI.Services
+namespace SanteDB.BI.Components
 {
+
     /// <summary>
-    /// Represents a PIVOT provider which can take a dataset and pivot it
+    /// Utility classes to be used by expressions
     /// </summary>
-    public interface IBiPivotProvider
+    public class BiExpressionHelpers
     {
 
-        /// <summary>
-        /// Pivots <paramref name="context"/> in place returning it for chaining
-        /// </summary>
-        /// <param name="context">The result context to be pivoted</param>
-        /// <param name="pivot">The pivot definition to apply</param>
-        /// <returns>The pivoted context</returns>
-        BisResultContext Pivot(BisResultContext context, BiViewPivotDefinition pivot);
+        private static readonly Regex csvRegex = new Regex(@"(?!\s*$)\s*(?:'([^'\\]*(?:\\[\S\s][^'\\]*)*)'|""([^""\\]*(?:\\[\S\s][^""\\] *) *)""|([^,'""\s\\]*(?:\s+[^,'""\s\\]+)*))\s*(?:,|$)", RegexOptions.Multiline);
 
+        /// <summary>
+        /// Split a CSV string into a collection of values
+        /// </summary>
+        public String[] CsvSplit(object csvString) => csvRegex.Matches($"{csvString},").OfType<Match>().Select(o => o.Value.EndsWith(",") ? o.Value.Substring(0, o.Value.Length - 1) : o.Value).ToArray();
     }
 }

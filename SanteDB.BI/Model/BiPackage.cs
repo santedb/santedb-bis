@@ -20,13 +20,8 @@
  */
 using Newtonsoft.Json;
 using SanteDB.BI.Util;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -109,7 +104,8 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// True if the definitions should be serialized
         /// </summary>
-        internal override bool ShouldSerializeDefinitions {
+        internal override bool ShouldSerializeDefinitions
+        {
             get => base.ShouldSerializeDefinitions;
             set
             {

@@ -19,7 +19,6 @@
  * Date: 2021-8-5
  */
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model

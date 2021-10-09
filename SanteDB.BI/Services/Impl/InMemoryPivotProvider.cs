@@ -18,15 +18,13 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Model;
+using SanteDB.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using SanteDB.BI.Model;
-using SanteDB.Core.Model;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -46,7 +44,7 @@ namespace SanteDB.BI.Services.Impl
         {
 
             String aggFn = String.Empty;
-            switch(aggregateFunction)
+            switch (aggregateFunction)
             {
                 case BiAggregateFunction.Average:
                     aggFn = nameof(Enumerable.Average);

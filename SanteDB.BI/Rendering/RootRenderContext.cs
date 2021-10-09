@@ -79,7 +79,7 @@ namespace SanteDB.BI.Rendering
         {
 
             BisResultContext retVal = null;
-            if(!this.m_dataSources.TryGetValue(name, out retVal))
+            if (!this.m_dataSources.TryGetValue(name, out retVal))
             {
 
                 var viewDef = this.m_report.DataSource.FirstOrDefault(o => o.Name == name);
@@ -134,7 +134,7 @@ namespace SanteDB.BI.Rendering
         {
             get
             {
-                if(this.m_scopedObject == null)
+                if (this.m_scopedObject == null)
                 {
                     this.m_scopedObject = new ExpandoObject();
                     (this.m_scopedObject as IDictionary<String, Object>).Add("Report", this.m_report);

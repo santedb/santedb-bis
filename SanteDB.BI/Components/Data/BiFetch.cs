@@ -25,8 +25,6 @@ using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 

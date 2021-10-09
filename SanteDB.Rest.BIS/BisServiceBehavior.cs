@@ -18,20 +18,32 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using RestSrvr;
 using RestSrvr.Attributes;
 using RestSrvr.Exceptions;
+using SanteDB.BI;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
+using SanteDB.BI.Util;
 using SanteDB.Core;
+using SanteDB.Core.Auditing;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Interop;
+using SanteDB.Core.Model;
+using SanteDB.Core.Model.Query;
+using SanteDB.Core.Security;
+using SanteDB.Core.Security.Audit;
+using SanteDB.Core.Security.Claims;
+using SanteDB.Core.Services;
+using SanteDB.Rest.Common.Attributes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using SanteDB.Core.Model;
 using SanteDB.Rest.Common.Attributes;
@@ -305,7 +317,7 @@ namespace SanteDB.Rest.BIS
         private IDictionary<String, Object> CreateParameterDictionary()
         {
             // Parameters
-            Dictionary<String, object> parameters = NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query).ToDictionary(o=>o.Key, o=>o.Value.Count == 1 ? o.Value.First() : (object)o.Value.ToArray());
+            Dictionary<String, object> parameters = NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query).ToDictionary(o => o.Key, o => o.Value.Count == 1 ? o.Value.First() : (object)o.Value.ToArray());
 
             // Context parameters
             foreach (var kv in this.m_contextParams)
@@ -390,10 +402,10 @@ namespace SanteDB.Rest.BIS
                 var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"];
 
                 var retVal = ApplicationServiceContext.Current.GetService<IBiRenderService>().Render(id, view, format, this.CreateParameterDictionary(), out string mimeType);
-                
+
                 // Set output headers
                 RestOperationContext.Current.OutgoingResponse.ContentType = mimeType;
-                if(RestOperationContext.Current.IncomingRequest.QueryString["_download"] == "true")
+                if (RestOperationContext.Current.IncomingRequest.QueryString["_download"] == "true")
                     RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment; filename=\"{id}-{view}-{DateTime.Now.ToString("yyyy-MM-ddTHH_mm_ss")}.{format}\"");
                 return retVal;
             }

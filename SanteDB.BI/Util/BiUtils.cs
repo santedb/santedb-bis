@@ -21,14 +21,11 @@
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SanteDB.Core.Model;
-using System.Reflection;
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace SanteDB.BI.Util
 {

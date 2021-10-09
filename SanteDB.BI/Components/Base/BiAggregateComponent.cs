@@ -18,15 +18,11 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Rendering;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using SanteDB.BI.Rendering;
-using SanteDB.Core.Model.Map;
 
 namespace SanteDB.BI.Components.Base
 {
@@ -66,7 +62,7 @@ namespace SanteDB.BI.Components.Base
                     value = dataSource.Dataset.Sum(o => (decimal)expression.DynamicInvoke(o));
                     break;
                 case "count":
-                    if(expression.Method.ReturnType == typeof(bool))
+                    if (expression.Method.ReturnType == typeof(bool))
                         value = dataSource.Dataset.Count(o => expression.DynamicInvoke(o));
                     else
                     {

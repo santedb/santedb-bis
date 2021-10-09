@@ -22,9 +22,6 @@ using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.BI
 {
@@ -37,7 +34,7 @@ namespace SanteDB.BI
         /// <summary>
         /// Creates a new result context
         /// </summary>
-        public BisResultContext(BiQueryDefinition definition, 
+        public BisResultContext(BiQueryDefinition definition,
             IDictionary<String, Object> arguments,
             IBiDataSource source,
             IEnumerable<dynamic> results,

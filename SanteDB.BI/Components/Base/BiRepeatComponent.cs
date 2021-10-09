@@ -18,17 +18,12 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Rendering;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using SanteDB.BI.Exceptions;
-using SanteDB.BI.Rendering;
-using SanteDB.BI.Services;
-using SanteDB.Core;
 
 namespace SanteDB.BI.Components.Base
 {
@@ -48,20 +43,33 @@ namespace SanteDB.BI.Components.Base
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
             // Run dataset and start context
-            var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
-            var thisContext = new RenderContext(context, dataSource.Dataset);
+            if (element.Attribute("source") != null)
+            {
+                var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
+                var thisContext = new RenderContext(context, dataSource.Dataset);
 
-            // Add watches and expressions
-            thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-            thisContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
+                // Add watches and expressions
+                thisContext.Tags.Add("watches", new Dictionary<String, Object>());
+                thisContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
 
-            writer.WriteComment($"start repeat : {dataSource.QueryDefinition.Id}");
+                writer.WriteComment($"start repeat : {dataSource.QueryDefinition.Id}");
 
-            foreach (var itm in dataSource.Dataset)
-                foreach (var el in element.Elements())
-                    ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
+                foreach (var itm in dataSource.Dataset)
+                    foreach (var el in element.Elements())
+                        ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
 
-            writer.WriteComment($"end repeat : {dataSource.QueryDefinition.Id}");
+                writer.WriteComment($"end repeat : {dataSource.QueryDefinition.Id}");
+            }
+            else // Execute expression
+            {
+                var value = ReportViewUtil.GetValue(context, element.Attribute("expression").Value);
+                if (value is IEnumerable enumerable)
+                {
+                    foreach (var itm in enumerable)
+                        foreach (var el in element.Elements())
+                            ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                }
+            }
         }
 
         /// <summary>
@@ -69,8 +77,9 @@ namespace SanteDB.BI.Components.Base
         /// </summary>
         public bool Validate(XElement element, IRenderContext context)
         {
-            return element.HasAttributes && element.Attribute("source") != null &&
-                (context.Root as RootRenderContext).HasDataSource(element.Attribute("source").Value);
+            return element.HasAttributes && (element.Attribute("source") != null &&
+                (context.Root as RootRenderContext).HasDataSource(element.Attribute("source").Value) ||
+                element.Attribute("expression") != null);
         }
     }
 }

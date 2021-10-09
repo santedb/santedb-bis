@@ -19,11 +19,7 @@
  * Date: 2021-8-5
  */
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -41,7 +37,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiPackage))]
-    public class BiDefinitionCollection 
+    public class BiDefinitionCollection
     {
 
         /// <summary>
@@ -55,7 +51,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Collection ctor with objects 
         /// </summary>
-        public BiDefinitionCollection(IEnumerable<BiDefinition> items) 
+        public BiDefinitionCollection(IEnumerable<BiDefinition> items)
         {
             this.Items = new List<BiDefinition>(items);
         }

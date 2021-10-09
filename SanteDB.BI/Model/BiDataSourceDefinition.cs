@@ -37,7 +37,8 @@ namespace SanteDB.BI.Model
         /// Gets or sets the instance of the provider
         /// </summary>
         [XmlAttribute("provider"), JsonProperty("provider")]
-        public String ProviderTypeXml {
+        public String ProviderTypeXml
+        {
             get => this.ProviderType?.AssemblyQualifiedName;
             set
             {

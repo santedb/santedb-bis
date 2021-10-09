@@ -18,14 +18,10 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Rendering;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using SanteDB.BI.Rendering;
 
 namespace SanteDB.BI.Components.Base
 {
@@ -54,12 +50,12 @@ namespace SanteDB.BI.Components.Base
             // Render children
             foreach (var node in element.Nodes())
             {
-                if (node is XElement)
-                    ReportViewUtil.Write(writer, node as XElement, context);
-                else if (node is XText)
+                if (node is XElement ele)
+                    ReportViewUtil.Write(writer, ele, context);
+                else if (node is XText xtext)
                 {
-                    var text = (node as XText).Value;
-                    if(!String.IsNullOrWhiteSpace(text))
+                    var text = xtext.Value;
+                    if (!String.IsNullOrWhiteSpace(text))
                         writer.WriteString(text);
                 }
             }

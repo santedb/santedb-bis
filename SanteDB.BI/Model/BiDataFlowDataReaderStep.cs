@@ -41,7 +41,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the definitions for the data source
         /// </summary>
-        [XmlArray("definitions"), XmlArrayItem("add") , JsonProperty("definitions")]
+        [XmlArray("definitions"), XmlArrayItem("add"), JsonProperty("definitions")]
         public List<BiSqlDefinition> Definition { get; set; }
     }
 }

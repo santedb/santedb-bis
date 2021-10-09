@@ -19,10 +19,6 @@
  * Date: 2021-8-5
  */
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace SanteDB.BI.Exceptions
@@ -49,7 +45,7 @@ namespace SanteDB.BI.Exceptions
         /// <summary>
         /// Creates a new exception with specified message
         /// </summary>
-        public ViewValidationException(XElement element, String message) : this(element, message,  null)
+        public ViewValidationException(XElement element, String message) : this(element, message, null)
         {
         }
 

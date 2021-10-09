@@ -79,7 +79,8 @@ namespace SanteDB.BI.Rendering
             var context = new RootRenderContext(reportDefinition, viewName, parameters);
             try
             {
-                using (var tempMs = new MemoryStream()) {
+                using (var tempMs = new MemoryStream())
+                {
                     using (var xw = XmlWriter.Create(tempMs, new XmlWriterSettings()
                     {
                         CloseOutput = false,
