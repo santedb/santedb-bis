@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using RestSrvr;
 using RestSrvr.Attributes;
 using RestSrvr.Exceptions;
@@ -26,7 +27,6 @@ using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
 using SanteDB.Core;
-using SanteDB.Core.Auditing;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Interop;
 using SanteDB.Core.Model;
@@ -45,10 +45,13 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
+
 using SanteDB.Core.Model;
 using SanteDB.Rest.Common.Attributes;
 using SanteDB.Core.Security;
+
 using System.Linq.Expressions;
+
 using SanteDB.Core.Model.Query;
 using RestSrvr;
 using System.Collections;
@@ -56,10 +59,14 @@ using SanteDB.BI.Util;
 using SanteDB.Core.Services;
 using System.Globalization;
 using SanteDB.Core.Security.Audit;
+
 using SanteDB.Core.Model.Audit;
+
 using System.Text.RegularExpressions;
 using SanteDB.BI;
+
 using SanteDB.Core.Security.Services;
+
 using SanteDB.Core.Security.Claims;
 
 namespace SanteDB.Rest.BIS
@@ -70,7 +77,6 @@ namespace SanteDB.Rest.BIS
     [ServiceBehavior(Name = "BIS", InstanceMode = ServiceInstanceMode.Singleton)]
     public class BisServiceBehavior : IBisServiceContract
     {
-
         // Context parameters
         protected Dictionary<String, Func<Object>> m_contextParams = new Dictionary<string, Func<object>>()
         {
@@ -195,7 +201,6 @@ namespace SanteDB.Rest.BIS
         public void Ping()
         {
             RestOperationContext.Current.OutgoingResponse.StatusCode = (int)System.Net.HttpStatusCode.NoContent;
-
         }
 
         /// <summary>
@@ -239,7 +244,6 @@ namespace SanteDB.Rest.BIS
                     providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
                 else
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
-
 
                 // Populate data about the query
                 audit.AuditableObjects.Add(new AuditableObject()
@@ -287,7 +291,6 @@ namespace SanteDB.Rest.BIS
                     throw new FormatException("_offset is not in the correct format");
                 if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100", out count))
                     throw new FormatException("_count is not in the correct format");
-
 
                 var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
                 return queryData;
@@ -394,7 +397,6 @@ namespace SanteDB.Rest.BIS
         {
             try
             {
-
                 // Render the report
                 var parameters = this.CreateParameterDictionary();
 
