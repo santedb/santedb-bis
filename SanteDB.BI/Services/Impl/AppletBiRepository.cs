@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using SanteDB.BI.Model;
 using SanteDB.Core;
 using SanteDB.Core.Applets;
@@ -28,6 +29,7 @@ using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -39,12 +41,11 @@ namespace SanteDB.BI.Services.Impl
     /// </summary>
     public class AppletBiRepository : IBiMetadataRepository
     {
-
         // Tracer for this repository
         private Tracer m_tracer = Tracer.GetTracer(typeof(AppletBiRepository));
 
         /// <summary>
-        /// Definition cache 
+        /// Definition cache
         /// </summary>
         private Dictionary<Type, Dictionary<String, Object>> m_definitionCache = new Dictionary<Type, Dictionary<string, Object>>();
 
@@ -61,23 +62,55 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public bool IsLocal => true;
 
+        // Applet Manager
+        private IAppletManagerService m_appletManager;
+
+        // Policy enforcement
+        private IPolicyEnforcementService m_policyEnforcementService;
+
+        // Solution manager
+        private IAppletSolutionManagerService m_solutionManagerService;
+
         /// <summary>
-        /// Gets the specified object from the specified type repository 
+        /// DI applet BI repository
+        /// </summary>
+        public AppletBiRepository(IAppletManagerService appletManager, IPolicyEnforcementService policyEnforcementService, IAppletSolutionManagerService solutionManagerService = null)
+        {
+            this.m_appletManager = appletManager;
+            this.m_policyEnforcementService = policyEnforcementService;
+            this.m_solutionManagerService = solutionManagerService;
+
+            // Re-scans the loaded applets for definitions when the collection has changed
+            this.m_appletManager.Applets.CollectionChanged += (oa, ea) =>
+            {
+                this.LoadAllDefinitions();
+            };
+
+            if (this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
+            {
+                notify.CollectionChanged += (oa, eo) =>
+                {
+                    this.LoadAllDefinitions();
+                };
+            }
+            //this.LoadAllDefinitions();
+        }
+
+        /// <summary>
+        /// Gets the specified object from the specified type repository
         /// </summary>
         public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
-            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions) &&
                 definitions.TryGetValue(id, out Object asset))
             {
                 if (asset is AppletAsset)
-                    using (var ms = new MemoryStream(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.RenderAssetContent(asset as AppletAsset)))
+                    using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(asset as AppletAsset)))
                         asset = BiDefinition.Load(ms);
 
                 var definition = asset as BiDefinition;
                 if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
-                definition?.MetaData?.Demands.All(o => pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, o) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
                     return (TBisDefinition)definition;
             }
             return null;
@@ -90,7 +123,7 @@ namespace SanteDB.BI.Services.Impl
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
-                ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+                this.m_policyEnforcementService.Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             // Locate type definitions
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object> typeDefinitions))
@@ -119,22 +152,20 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition
         {
-            var pdp = ApplicationServiceContext.Current.GetService<IPolicyDecisionService>();
-
             // TODO: If the definition is an applet asset then load it
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
                 return definitions.Values
                     .Select(o =>
                     {
                         if (o is AppletAsset)
-                            using (var ms = new MemoryStream(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.RenderAssetContent(o as AppletAsset)))
+                            using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(o as AppletAsset)))
                                 return BiDefinition.Load(ms);
                         else
                             return o;
                     })
                     .OfType<TBisDefinition>()
                     .Where(filter.Compile())
-                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => pdp.GetPolicyOutcome(AuthenticationContext.Current.Principal, d) == Core.Model.Security.PolicyGrantType.Grant) == true)
+                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true)
                     .Skip(offset)
                     .Take(count ?? 100);
             return new TBisDefinition[0];
@@ -147,13 +178,12 @@ namespace SanteDB.BI.Services.Impl
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
-                ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+                this.m_policyEnforcementService.Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
 
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, object> definitions) &&
                 definitions.TryGetValue(id, out object existing) &&
                 (existing is AppletAsset || (existing as BiDefinition).IsSystemObject))
                 definitions.Remove(id);
-
         }
 
         /// <summary>
@@ -168,17 +198,17 @@ namespace SanteDB.BI.Services.Impl
                 this.m_definitionCache.Remove(typeof(BiReportDefinition));
                 this.m_definitionCache.Remove(typeof(BiQueryDefinition));
                 this.m_definitionCache.Remove(typeof(BiParameterDefinition));
-                var solutions = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>()?.Solutions.ToList();
+                var solutions = this.m_solutionManagerService?.Solutions.ToList();
 
                 // Doesn't have a solution manager
                 if (solutions == null)
-                    this.ProcessApplet(ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets);
+                    this.ProcessApplet(this.m_appletManager.Applets);
                 else
                 {
                     solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
                     foreach (var s in solutions)
                     {
-                        var appletCollection = ApplicationServiceContext.Current.GetService<IAppletSolutionManagerService>().GetApplets(s.Meta.Id);
+                        var appletCollection = this.m_solutionManagerService.GetApplets(s.Meta.Id);
                         this.ProcessApplet(appletCollection);
                     }
                 }
@@ -190,7 +220,6 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void ProcessApplet(ReadonlyAppletCollection appletCollection)
         {
-
             var bisDefinitions = appletCollection.SelectMany(o => o.Assets)
                 .Where(o => o.Name.StartsWith("bi/") && o.Name.EndsWith(".xml"))
                 .Select(o =>
@@ -210,7 +239,6 @@ namespace SanteDB.BI.Services.Impl
                 })
                 .OfType<dynamic>()
                 .ToArray();
-
 
             // Process contents
             foreach (var itm in bisDefinitions)
@@ -252,23 +280,6 @@ namespace SanteDB.BI.Services.Impl
 
                 this.Insert(definition);
             }
-        }
-
-        /// <summary>
-        /// Applet metadata repository
-        /// </summary>
-        public AppletBiRepository()
-        {
-            ApplicationServiceContext.Current.Started += (o, e) =>
-            {
-                // Re-scans the loaded applets for definitions when the collection has changed
-                ApplicationServiceContext.Current.GetService<IAppletManagerService>().Applets.CollectionChanged += (oa, ea) =>
-                {
-                    this.LoadAllDefinitions();
-                };
-
-                this.LoadAllDefinitions();
-            };
         }
     }
 }
