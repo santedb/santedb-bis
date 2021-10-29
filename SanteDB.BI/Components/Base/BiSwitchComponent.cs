@@ -99,7 +99,7 @@ namespace SanteDB.BI.Components.Base
 
                 if (opSuccess)
                 {
-                    foreach (var itm in whenClauseElement.Elements())
+                    foreach (var itm in whenClauseElement.Nodes())
                         ReportViewUtil.Write(writer, itm, context);
                     return;
                 }
@@ -108,7 +108,7 @@ namespace SanteDB.BI.Components.Base
             // Default condition?
             var defaultOption = element.Element((XNamespace)BiConstants.ComponentNamespace + "default");
             if (defaultOption != null)
-                foreach (var itm in defaultOption.Elements())
+                foreach (var itm in defaultOption.Nodes())
                     ReportViewUtil.Write(writer, itm, context);
         }
 
