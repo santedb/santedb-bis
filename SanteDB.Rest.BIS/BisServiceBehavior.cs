@@ -88,7 +88,7 @@ namespace SanteDB.Rest.BIS
         };
 
         // Default tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
 
         // Metadata repository
         private IBiMetadataRepository m_metadataRepository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();

@@ -42,7 +42,7 @@ namespace SanteDB.BI.Services.Impl
     public class AppletBiRepository : IBiMetadataRepository
     {
         // Tracer for this repository
-        private Tracer m_tracer = Tracer.GetTracer(typeof(AppletBiRepository));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletBiRepository));
 
         /// <summary>
         /// Definition cache

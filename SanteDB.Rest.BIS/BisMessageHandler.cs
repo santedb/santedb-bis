@@ -40,7 +40,7 @@ namespace SanteDB.Rest.BIS
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(BisMessageHandler));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BisMessageHandler));
 
         // The REST host
         private RestService m_webHost;
