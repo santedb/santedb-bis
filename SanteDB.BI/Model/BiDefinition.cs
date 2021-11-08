@@ -2,22 +2,23 @@
  * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you 
- * may not use this file except in compliance with the License. You may 
- * obtain a copy of the License at 
- * 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you
+ * may not use this file except in compliance with the License. You may
+ * obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations under 
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
  * the License.
- * 
+ *
  * User: fyfej
  * Date: 2021-8-5
  */
+
 using Newtonsoft.Json;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Serialization;
@@ -52,9 +53,8 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiDataFlowDefinition))]
     public abstract class BiDefinition
     {
-
         // Serializers
-        private static List<XmlSerializer> m_serializer = new List<XmlSerializer>();
+        private static XmlSerializer s_serializer;
 
         /// <summary>
         /// BI Definition
@@ -77,8 +77,7 @@ namespace SanteDB.BI.Model
                 typeof(BiDataFlowDefinition)
             };
             foreach (var t in types)
-                m_serializer.Add(XmlModelSerializerFactory.Current.CreateSerializer(t, types));
-
+                s_serializer = new XmlSerializer(t, types);
         }
 
         /// <summary>
@@ -144,21 +143,17 @@ namespace SanteDB.BI.Model
         /// </summary>
         public static BiDefinition Load(Stream s)
         {
-
             // Attempt to load the appropriate serializer
             using (var xr = XmlReader.Create(s))
-                foreach (var ser in m_serializer)
-                    if (ser.CanDeserialize(xr))
-                        return ser.Deserialize(xr) as BiDefinition;
+                if (s_serializer.CanDeserialize(xr))
+                    return s_serializer.Deserialize(xr) as BiDefinition;
             throw new InvalidDataException("Stream does not contain a valid BIS definition");
         }
-
 
         /// <summary>
         /// Gets or sets the serialization definitions
         /// </summary>
         [XmlIgnore, JsonIgnore]
         internal virtual bool ShouldSerializeDefinitions { get; set; }
-
     }
 }
