@@ -146,21 +146,23 @@ namespace SanteDB.BI.Components
         /// <summary>
         /// Write the specified object to the screen
         /// </summary>
-        internal static void Write(XmlWriter writer, XElement el, IRenderContext context)
+        internal static void Write(XmlWriter writer, XNode nd, IRenderContext context)
         {
-            // TODO get helper here
-            IBiViewComponent component = ReportViewUtil.GetViewComponent(el.Name);
+            if (nd is XElement el)
+            {
+                // TODO get helper here
+                IBiViewComponent component = ReportViewUtil.GetViewComponent(el.Name);
 
-            if (component == null)
-            {
-                writer.WriteComment($"WARNING: No component for {el.Name} is registered");
-            }
-            else if (component.Validate(el, context))
-                component.Render(el, writer, context);
-            else
-            {
+                if (component == null)
+                {
+                    writer.WriteComment($"WARNING: No component for {el.Name} is registered");
+                }
+                else if (component.Validate(el, context))
+                    component.Render(el, writer, context);
+                else
+                {
 #if DEBUG
-                throw new ViewValidationException(el, $"Component {component?.ComponentName} failed validation");
+                    throw new ViewValidationException(el, $"Component {component?.ComponentName} failed validation");
 #else
                 writer.WriteStartElement("em", BiConstants.HtmlNamespace);
                 writer.WriteAttributeString("style", "color: #f00");
@@ -174,6 +176,11 @@ namespace SanteDB.BI.Components
                 writer.WriteString($"Component {component.ComponentName} failed validation at {path}");
                 writer.WriteEndElement(); // em
 #endif
+                }
+            }
+            else if (nd is XText xt)
+            {
+                writer.WriteString(xt.Value.Trim());
             }
         }
     }
