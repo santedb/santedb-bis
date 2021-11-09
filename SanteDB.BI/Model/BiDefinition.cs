@@ -54,7 +54,7 @@ namespace SanteDB.BI.Model
     public abstract class BiDefinition
     {
         // Serializers
-        private static XmlSerializer s_serializer;
+        private static List<XmlSerializer> s_serializers = new List<XmlSerializer>(10);
 
         /// <summary>
         /// BI Definition
@@ -77,7 +77,7 @@ namespace SanteDB.BI.Model
                 typeof(BiDataFlowDefinition)
             };
             foreach (var t in types)
-                s_serializer = new XmlSerializer(t, types);
+                s_serializers.Add(new XmlSerializer(t, types));
         }
 
         /// <summary>
@@ -145,8 +145,13 @@ namespace SanteDB.BI.Model
         {
             // Attempt to load the appropriate serializer
             using (var xr = XmlReader.Create(s))
-                if (s_serializer.CanDeserialize(xr))
-                    return s_serializer.Deserialize(xr) as BiDefinition;
+            {
+                foreach (var sz in s_serializers)
+                {
+                    if (sz.CanDeserialize(xr))
+                        return sz.Deserialize(xr) as BiDefinition;
+                }
+            }
             throw new InvalidDataException("Stream does not contain a valid BIS definition");
         }
 
