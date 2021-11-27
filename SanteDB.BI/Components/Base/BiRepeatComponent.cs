@@ -19,6 +19,7 @@
  * Date: 2021-8-5
  */
 
+using DynamicExpresso;
 using SanteDB.BI.Rendering;
 using System;
 using System.Collections;
@@ -51,7 +52,7 @@ namespace SanteDB.BI.Components.Base
 
                 // Add watches and expressions
                 thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-                thisContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
+                thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
 
                 writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
 
