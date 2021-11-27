@@ -1,4 +1,5 @@
-﻿using SanteDB.BI.Rendering;
+﻿using DynamicExpresso;
+using SanteDB.BI.Rendering;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -148,7 +149,7 @@ namespace SanteDB.BI.Components.Data
 
                 // Add watches and expressions
                 thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-                thisContext.Tags.Add("expressions", new Dictionary<String, Delegate>());
+                thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
 
                 writer.WriteComment($"start dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
 
