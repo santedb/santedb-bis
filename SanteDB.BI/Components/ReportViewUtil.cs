@@ -102,7 +102,7 @@ namespace SanteDB.BI.Components
                 while ((scopedExpando == null || !scopedExpando.TryGetValue(field, out value)) && currentContext != null)
                 {
                     currentContext = currentContext.Parent;
-                    scopedExpando = currentContext?.ScopedObject;
+                    scopedExpando = currentContext?.ScopedObject as IDictionary<String, Object>;
                 }
                 return value;
             }
