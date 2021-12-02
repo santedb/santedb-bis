@@ -18,12 +18,8 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Dynamic;
 using NUnit.Framework;
-using SanteDB.BI.Rendering;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SanteDB.BI.Test
 {
