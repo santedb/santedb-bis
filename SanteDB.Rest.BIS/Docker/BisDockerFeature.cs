@@ -27,6 +27,7 @@ using SanteDB.Rest.Common.Configuration;
 using SanteDB.Rest.Common.Security;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace SanteDB.Rest.BIS
@@ -34,6 +35,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// A docker feature for the AMI
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class BisDockerFeature : IDockerFeature
     {
 
