@@ -19,7 +19,7 @@
  * Date: 2021-8-5
  */
 
-using ExpressionEvaluator;
+using DynamicExpresso;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
@@ -52,6 +52,14 @@ namespace SanteDB.BI.Components
 
         // Localization service ref
         private static ILocalizationService m_localeService = ApplicationServiceContext.Current.GetService<ILocalizationService>();
+
+        /// <summary>
+        /// Convert to parameter array
+        /// </summary>
+        public static object[] ToParameterArray(dynamic context)
+        {
+            return (context as IDictionary<String, Object>).Select(o => o.Value).ToArray();
+        }
 
         /// <summary>
         /// Static CTOR
@@ -89,7 +97,7 @@ namespace SanteDB.BI.Components
             }
             else if (m_exprRegex.IsMatch(field))
             {
-                var scopedExpando = (context.ScopedObject as IDictionary<String, Object>);
+                var scopedExpando = context.ScopedObject as IDictionary<String, Object>;
                 var currentContext = context;
                 while ((scopedExpando == null || !scopedExpando.TryGetValue(field, out value)) && currentContext != null)
                 {
@@ -100,8 +108,7 @@ namespace SanteDB.BI.Components
             }
             else // complex expression
             {
-                Delegate evaluator = context.CompileExpression(field);
-                return evaluator.DynamicInvoke(context.ScopedObject);
+                return context.CompileExpression(field).Invoke(ToParameterArray(context.ScopedObject));
             }
         }
 
@@ -111,22 +118,22 @@ namespace SanteDB.BI.Components
         /// <param name="me"></param>
         /// <param name="fieldOrExpression"></param>
         /// <returns></returns>
-        public static Delegate CompileExpression(this IRenderContext me, String fieldOrExpression)
+        public static Lambda CompileExpression(this IRenderContext me, String fieldOrExpression)
         {
-            IDictionary<String, Delegate> exprs = me.Parent?.Tags["expressions"] as IDictionary<String, Delegate>;
+            IDictionary<String, Lambda> exprs = me.Parent?.Tags["expressions"] as IDictionary<String, Lambda>;
 
-            Delegate evaluator = null;
+            Lambda evaluator = null;
             if (exprs?.TryGetValue(fieldOrExpression, out evaluator) != true)
             {
-                var expression = new CompiledExpression(fieldOrExpression);
-                expression.TypeRegistry = new TypeRegistry();
-                expression.TypeRegistry.RegisterDefaultTypes();
-                expression.TypeRegistry.RegisterType<Guid>();
-                expression.TypeRegistry.RegisterType<DateTimeOffset>();
-                expression.TypeRegistry.RegisterType<TimeSpan>();
-                expression.TypeRegistry.RegisterSymbol("BiUtil", m_helpers);
-                evaluator = expression.ScopeCompile<ExpandoObject>();
-                exprs?.Add(fieldOrExpression, evaluator);
+                var interpretor = new Interpreter(InterpreterOptions.Default)
+                    .Reference(typeof(Guid))
+                    .Reference(typeof(DateTimeOffset))
+                    .Reference(typeof(TimeSpan))
+                    .SetVariable("BiUtil", m_helpers)
+                    .SetFunction("now", (Func<DateTime>)(() => DateTime.Now));
+
+                evaluator = interpretor.Parse(fieldOrExpression,
+                    (me.ScopedObject as IDictionary<String, Object>).Select(o => new Parameter(o.Key, o.Value?.GetType() ?? typeof(Object))).ToArray());
             }
 
             return evaluator;
