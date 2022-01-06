@@ -18,8 +18,13 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Jobs;
 using SanteDB.BI.Model;
+using SanteDB.BI.Util;
 using SanteDB.Core;
+using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Jobs;
+using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,6 +37,54 @@ namespace SanteDB.BI.Services.Impl
     /// </summary>
     public class LocalBiRenderService : IBiRenderService
     {
+
+        // Service manager
+        private readonly IServiceManager m_serviceManager;
+
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(LocalBiRenderService));
+
+        /// <summary>
+        /// DI constructor
+        /// </summary>
+        public LocalBiRenderService(IServiceManager serviceManager, IJobManagerService jobManager, IBiMetadataRepository metadataRepository, IBiDataSource defaultDataSource = null)
+        {
+            this.m_serviceManager = serviceManager;
+            var job = new BiMaterializeJob();
+            jobManager.AddJob(job, TimeSpan.MinValue, JobStartType.TimerOnly);
+            jobManager.SetJobSchedule(job, new DayOfWeek[]
+            {
+                DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
+            }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1, 0, 0, 0)); // First run for tomorrow
+
+            // Scan and initialize all BI materialized views
+            ApplicationServiceContext.Current.Started += (o, e) =>
+            {
+                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.MetaData.Status == BiDefinitionStatus.Active, 0, 100))
+                {
+                    try
+                    {
+                        IBiDataSource dataSource = null;
+                        var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
+                        var providerType = queryDefinition.DataSources.FirstOrDefault()?.ProviderType;
+                        if (providerType != null)
+                        {
+                            dataSource = this.m_serviceManager.CreateInjected(providerType) as IBiDataSource;
+                        }
+                        else
+                        {
+                            dataSource = defaultDataSource;
+                        }
+
+                        this.m_tracer.TraceVerbose("Materializing views for {0}", queryDefinition.Id);
+                        dataSource.CreateMaterializedView(queryDefinition);
+                    }
+                    catch(Exception ex)
+                    {
+                        this.m_tracer.TraceWarning("Could not initialize matieralized views for {0}", itm.Id);
+                    }
+                }
+            };
+        }
 
         /// <summary>
         /// Service name
@@ -56,7 +109,7 @@ namespace SanteDB.BI.Services.Impl
                     throw new KeyNotFoundException($"Report {reportId} is not registered");
 
                 // Render the report
-                var renderer = Activator.CreateInstance(formatDefinition.Type) as IBiReportFormatProvider;
+                var renderer = this.m_serviceManager.CreateInjected(formatDefinition.Type) as IBiReportFormatProvider;
 
                 mimeType = formatDefinition.ContentType;
                 return renderer.Render(reportDefinition, viewName, parameters);

@@ -94,7 +94,7 @@ namespace SanteDB.BI.Rendering
 
                 IBiDataSource providerImplementation = null;
                 if (dsource.ProviderType != null)
-                    providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
+                    providerImplementation = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(dsource.ProviderType) as IBiDataSource;
                 else
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
 
