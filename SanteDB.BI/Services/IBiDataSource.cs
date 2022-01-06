@@ -39,6 +39,16 @@ namespace SanteDB.BI.Services
         BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int offset, int? count);
 
         /// <summary>
+        /// Materializes the specified materialized view definition
+        /// </summary>
+        void CreateMaterializedView(BiQueryDefinition materializeDefinition);
+
+        /// <summary>
+        /// Refresh the materialized view 
+        /// </summary>
+        void RefreshMaterializedView(BiQueryDefinition materializeDefinition);
+
+        /// <summary>
         /// Executes the specified <paramref name="queryDefinition"/> using the specified <paramref name="parameters"/>
         /// </summary>
         /// <param name="queryId">The ID of the query definition to execute</param>

@@ -20,6 +20,7 @@
  */
 
 using SanteDB.BI.Model;
+using SanteDB.BI.Util;
 using SanteDB.Core;
 using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
@@ -27,6 +28,7 @@ using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
+using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -63,22 +65,30 @@ namespace SanteDB.BI.Services.Impl
         public bool IsLocal => true;
 
         // Applet Manager
-        private IAppletManagerService m_appletManager;
+        private readonly IAppletManagerService m_appletManager;
 
         // Policy enforcement
-        private IPolicyEnforcementService m_policyEnforcementService;
+        private readonly IPolicyEnforcementService m_policyEnforcementService;
 
         // Solution manager
-        private IAppletSolutionManagerService m_solutionManagerService;
+        private readonly IAppletSolutionManagerService m_solutionManagerService;
+
+        // Service manager
+        private readonly IServiceManager m_serviceManager;
+
+        // Default data source
+        private readonly IBiDataSource m_defaultDataSource;
 
         /// <summary>
         /// DI applet BI repository
         /// </summary>
-        public AppletBiRepository(IAppletManagerService appletManager, IPolicyEnforcementService policyEnforcementService, IAppletSolutionManagerService solutionManagerService = null)
+        public AppletBiRepository(IAppletManagerService appletManager, IServiceManager serviceManager, IPolicyEnforcementService policyEnforcementService, IAppletSolutionManagerService solutionManagerService = null, IBiDataSource defaultDataSource = null)
         {
             this.m_appletManager = appletManager;
             this.m_policyEnforcementService = policyEnforcementService;
             this.m_solutionManagerService = solutionManagerService;
+            this.m_serviceManager = serviceManager;
+            this.m_defaultDataSource = defaultDataSource;
 
             // Re-scans the loaded applets for definitions when the collection has changed
             this.m_appletManager.Applets.CollectionChanged += (oa, ea) =>
@@ -142,8 +152,10 @@ namespace SanteDB.BI.Services.Impl
                     typeDefinitions[metadata.Id] = metadata;
             }
             else
+            {
                 typeDefinitions.Add(metadata.Id, metadata);
 
+            }
             return metadata;
         }
 
@@ -248,6 +260,7 @@ namespace SanteDB.BI.Services.Impl
                 if (itm.Definition is BiReportDefinition || itm.Definition is BiViewDefinition || itm.Definition is BiQueryDefinition)
                     this.m_definitionCache[itm.Definition.GetType()][itm.Definition.Id] = itm.Asset;
 #endif
+
             }
         }
 
@@ -277,7 +290,6 @@ namespace SanteDB.BI.Services.Impl
             else
             {
                 this.m_tracer.TraceInfo("Processing BIS Definition: {0}", definition.Id);
-
                 this.Insert(definition);
             }
         }

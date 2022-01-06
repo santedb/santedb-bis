@@ -69,7 +69,28 @@ namespace SanteDB.Rest.BIS
         private Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
 
         // Metadata repository
-        private IBiMetadataRepository m_metadataRepository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
+        private readonly IBiMetadataRepository m_metadataRepository;
+
+        // Service manager
+        private readonly IServiceManager m_serviceManager;
+
+
+        /// <summary>
+        /// BI Service behavior
+        /// </summary>
+        public BisServiceBehavior() : 
+            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), ApplicationServiceContext.Current.GetService<IBiMetadataRepository>())
+        {
+
+        }
+        /// <summary>
+        /// DI constructor
+        /// </summary>
+        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository)
+        {
+            this.m_serviceManager = serviceManager;
+            this.m_metadataRepository = metadataRepository;
+        }
 
         /// <summary>
         /// Get resource type
@@ -220,7 +241,7 @@ namespace SanteDB.Rest.BIS
 
                 IBiDataSource providerImplementation = null;
                 if (dsource.ProviderType != null && this.m_metadataRepository.IsLocal)
-                    providerImplementation = Activator.CreateInstance(dsource.ProviderType) as IBiDataSource;
+                    providerImplementation = this.m_serviceManager.CreateInjected(dsource.ProviderType) as IBiDataSource;
                 else
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
 

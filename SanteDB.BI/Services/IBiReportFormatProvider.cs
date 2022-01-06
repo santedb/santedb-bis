@@ -32,7 +32,7 @@ namespace SanteDB.BI.Services
     public interface IBiReportFormatProvider
     {
         /// <summary>
-        /// Render the specified report accoring to the format
+        /// Render the specified report according to the format
         /// </summary>
         /// <param name="parameters">The parameters used to populate the report</param>
         /// <param name="reportDefinition">The report that should be rendered</param>

@@ -18,6 +18,7 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Configuration;
 using SanteDB.BI.Services.Impl;
 using SanteDB.Core.Configuration;
 using SanteDB.Core.Exceptions;
@@ -53,6 +54,11 @@ namespace SanteDB.Rest.BIS
         public const string AuthenticationSetting = "AUTH";
 
         /// <summary>
+        /// Max results setting
+        /// </summary>
+        public const string MaxResultsSetting = "MAX_RESULTS";
+
+        /// <summary>
         /// Map the settings to the authentication behavior
         /// </summary>
         private readonly IDictionary<String, Type> authSettings = new Dictionary<String, Type>()
@@ -70,7 +76,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Get the settings
         /// </summary>
-        public IEnumerable<string> Settings => new String[] { AuthenticationSetting, ListenUriSetting, CorsSetting };
+        public IEnumerable<string> Settings => new String[] { AuthenticationSetting, ListenUriSetting, CorsSetting, MaxResultsSetting };
 
         /// <summary>
         /// Create an endpoint config
@@ -171,6 +177,17 @@ namespace SanteDB.Rest.BIS
                         Type = typeof(CorsEndpointBehavior)
                     }));
                 }
+            }
+
+            if(settings.TryGetValue(MaxResultsSetting, out var maxResults))
+            {
+                var biConfig = configuration.GetSection<BiConfigurationSection>();
+                if(biConfig == null)
+                {
+                    biConfig = new BiConfigurationSection();
+                    configuration.AddSection(biConfig);
+                }
+                biConfig.MaxBiResultSetSize = Int32.Parse(maxResults);
             }
 
             var serviceTypes = new Type[]
