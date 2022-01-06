@@ -75,12 +75,12 @@ namespace SanteDB.BI.Services.Impl
                             dataSource = defaultDataSource;
                         }
 
-                        this.m_tracer.TraceVerbose("Materializing views for {0}", queryDefinition.Id);
+                        this.m_tracer.TraceInfo("Materializing views for {0}", queryDefinition.Id);
                         dataSource.CreateMaterializedView(queryDefinition);
                     }
                     catch(Exception ex)
                     {
-                        this.m_tracer.TraceWarning("Could not initialize matieralized views for {0}", itm.Id);
+                        this.m_tracer.TraceWarning("Could not initialize materialized views for {0} - {1}", itm.Id, ex);
                     }
                 }
             };

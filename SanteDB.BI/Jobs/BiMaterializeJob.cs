@@ -77,6 +77,7 @@ namespace SanteDB.BI.Jobs
         /// </summary>
         public void Cancel()
         {
+            this.StatusText += "(Cancel Requested)";
             this.m_cancel = true;
         }
 

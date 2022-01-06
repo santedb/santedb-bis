@@ -18,6 +18,7 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+using SanteDB.BI.Configuration;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
@@ -39,6 +40,9 @@ namespace SanteDB.BI.Rendering
         // The report which is being executed / rendered
         private BiReportDefinition m_report;
 
+        // Maximum size of the render context
+        private int? m_maxResultSetSize;
+
         // The data sources
         private Dictionary<String, BisResultContext> m_dataSources = new Dictionary<string, BisResultContext>();
 
@@ -54,12 +58,13 @@ namespace SanteDB.BI.Rendering
         /// <param name="report">The report being rendered</param>
         /// <param name="viewName">The view being rendered</param>
         /// <param name="parameters">The parameters to the renderer</param>
-        public RootRenderContext(BiReportDefinition report, String viewName, IDictionary<String, object> parameters)
+        public RootRenderContext(BiReportDefinition report, String viewName, IDictionary<String, object> parameters, int? maxResultSetSize)
         {
             this.Parameters = parameters;
             this.m_viewName = viewName;
             this.m_report = report;
             this.Tags = new Dictionary<String, Object>();
+            this.m_maxResultSetSize = maxResultSetSize;
         }
 
         /// <summary>
@@ -102,12 +107,19 @@ namespace SanteDB.BI.Rendering
                 var cacheService = ApplicationServiceContext.Current.GetService<IAdhocCacheService>();
                 var key = $"{name}?{String.Join("&", this.Parameters.Select(o => $"{o.Key}={o.Value}"))}";
                 var cacheResult = cacheService?.Get<IEnumerable<dynamic>>(key);
+
+                int count = 10000;
+                if (this.m_maxResultSetSize.HasValue)
+                    count = this.m_maxResultSetSize.Value;
+                else if (this.Parameters.TryGetValue("_count", out var parameterCount) && Int32.TryParse(parameterCount.ToString(), out var tCount))
+                    count = tCount;
+
                 if (cacheResult != null)
                     return new BisResultContext(null, this.Parameters, providerImplementation, cacheResult, DateTime.Now);
                 else if (viewDef is BiViewDefinition)
-                    retVal = providerImplementation.ExecuteView(viewDef as BiViewDefinition, this.Parameters, 0, null);
+                    retVal = providerImplementation.ExecuteView(viewDef as BiViewDefinition, this.Parameters, 0, count);
                 else if (viewDef is BiQueryDefinition)
-                    retVal = providerImplementation.ExecuteQuery(viewDef as BiQueryDefinition, this.Parameters, null, 0, null);
+                    retVal = providerImplementation.ExecuteQuery(viewDef as BiQueryDefinition, this.Parameters, null, 0, count);
                 else
                     throw new InvalidOperationException($"Cannot determine data source type of {name}");
 
