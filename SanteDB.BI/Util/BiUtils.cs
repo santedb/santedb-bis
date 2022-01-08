@@ -39,8 +39,17 @@ namespace SanteDB.BI.Util
         /// <summary>
         /// Resolves all references to their proper objects
         /// </summary>
-        public static BiDefinition ResolveRefs(BiDefinition definition)
+        public static TBiDefinition ResolveRefs<TBiDefinition>(TBiDefinition definition)
+            where TBiDefinition : BiDefinition
         {
+            return (TBiDefinition)ResolveRefs((BiDefinition)definition);
+        }
+
+        /// <summary>
+        /// Resolves all references and their proper objects from the metadata repository
+        /// </summary>
+        public static BiDefinition ResolveRefs(BiDefinition definition) 
+        { 
             // Create new instance
             if (definition == null)
                 return null;

@@ -18,36 +18,28 @@
  * User: fyfej
  * Date: 2021-8-5
  */
-using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// Represents a basic SQL definition
+    /// Materialized view definition
     /// </summary>
-    [XmlType(nameof(BiSqlDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlRoot(nameof(BiSqlDefinition), Namespace = BiConstants.XmlNamespace)]
-    public class BiSqlDefinition : BiDefinition
+    [XmlType(nameof(BiMaterializeDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiMaterializeDefinition), Namespace = BiConstants.XmlNamespace)]
+    public class BiMaterializeDefinition
     {
 
         /// <summary>
-        /// Gets or sets the invariant of SQL dialect
+        /// Gets the name of the view
         /// </summary>
-        [XmlArray("providers"), XmlArrayItem("invariant")]
-        public List<string> Invariants { get; set; }
-
-        /// <summary>
-        /// When specified, the materialized view information
-        /// </summary>
-        [XmlElement("materialize")]
-        public BiMaterializeDefinition Materialize { get; set; }
+        [XmlAttribute("name")]
+        public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the SQL
         /// </summary>
         [XmlText]
         public string Sql { get; set; }
-
     }
 }
