@@ -31,18 +31,39 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiDataType), Namespace = BiConstants.XmlNamespace)]
     public enum BiDataType
     {
+        /// <summary>
+        /// The data type is a reference to another object
+        /// </summary>
         [XmlEnum("ref")]
         Ref,
+        /// <summary>
+        /// The type of data is a universally unique identifier
+        /// </summary>
         [XmlEnum("uuid")]
         Uuid,
+        /// <summary>
+        /// The type of data is a string
+        /// </summary>
         [XmlEnum("string")]
         String,
+        /// <summary>
+        /// The type of data is a signed integer
+        /// </summary>
         [XmlEnum("int")]
         Integer,
+        /// <summary>
+        /// The type of data is a boolean
+        /// </summary>
         [XmlEnum("bool")]
         Boolean,
+        /// <summary>
+        /// The type of data is a simple date
+        /// </summary>
         [XmlEnum("date")]
         Date,
+        /// <summary>
+        /// The type of data is a date with a time
+        /// </summary>
         [XmlEnum("date-time")]
         DateTime
     }
