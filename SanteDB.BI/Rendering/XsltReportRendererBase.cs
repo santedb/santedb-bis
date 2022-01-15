@@ -20,12 +20,14 @@
  */
 
 using SanteDB.BI.Components;
+using SanteDB.BI.Configuration;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Security.Services;
+using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,6 +43,16 @@ namespace SanteDB.BI.Rendering
     /// </summary>
     public abstract class XsltReportRendererBase : IBiReportFormatProvider
     {
+        private readonly BiConfigurationSection m_configuration;
+
+        /// <summary>
+        /// DI constructor
+        /// </summary>
+        public XsltReportRendererBase(IConfigurationManager configurationManager)
+        {
+            this.m_configuration = configurationManager.GetSection<BiConfigurationSection>();
+        }
+
         // XSL
         private XslCompiledTransform m_xsl;
 
@@ -76,7 +88,7 @@ namespace SanteDB.BI.Rendering
 
             // Demand permission to render
             // Start a new root context
-            var context = new RootRenderContext(reportDefinition, viewName, parameters);
+            var context = new RootRenderContext(reportDefinition, viewName, parameters, this.m_configuration?.MaxBiResultSetSize);
             try
             {
                 using (var tempMs = new MemoryStream())

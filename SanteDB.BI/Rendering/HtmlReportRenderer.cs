@@ -19,10 +19,12 @@
  * Date: 2021-8-5
  */
 using SanteDB.BI.Components;
+using SanteDB.BI.Configuration;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
 using SanteDB.Core.Security.Services;
+using SanteDB.Core.Services;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,6 +37,15 @@ namespace SanteDB.BI.Rendering
     /// </summary>
     public class HtmlReportRenderer : IBiReportFormatProvider
     {
+        private readonly BiConfigurationSection m_configuration;
+
+        /// <summary>
+        /// DI constructor
+        /// </summary>
+        public HtmlReportRenderer(IConfigurationManager configurationManager)
+        {
+            this.m_configuration = configurationManager.GetSection<BiConfigurationSection>();
+        }
 
         /// <summary>
         /// Render this report as HTML
@@ -56,7 +67,7 @@ namespace SanteDB.BI.Rendering
 
             // Demand permission to render
             // Start a new root context
-            var context = new RootRenderContext(reportDefinition, viewName, parameters);
+            var context = new RootRenderContext(reportDefinition, viewName, parameters, this.m_configuration?.MaxBiResultSetSize);
             var retVal = new MemoryStream();
             using (var xw = XmlWriter.Create(retVal, new XmlWriterSettings()
             {
