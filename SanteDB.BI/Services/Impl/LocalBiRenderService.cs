@@ -50,7 +50,7 @@ namespace SanteDB.BI.Services.Impl
         {
             this.m_serviceManager = serviceManager;
             var job = new BiMaterializeJob();
-            jobManager.AddJob(job, TimeSpan.MinValue, JobStartType.TimerOnly);
+            jobManager.AddJob(job, JobStartType.TimerOnly);
             jobManager.SetJobSchedule(job, new DayOfWeek[]
             {
                 DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
