@@ -62,7 +62,7 @@ namespace SanteDB.BI.Services.Impl
             // Scan and initialize all BI materialized views
             ApplicationServiceContext.Current.Started += (o, e) =>
             {
-                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.MetaData.Status == BiDefinitionStatus.Active, 0, 100))
+                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.MetaData.Status == BiDefinitionStatus.Active))
                 {
                     try
                     {
@@ -103,7 +103,7 @@ namespace SanteDB.BI.Services.Impl
             {
 
                 // Get the report format 
-                var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == formatName, 0, 1).FirstOrDefault();
+                var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == formatName).FirstOrDefault();
                 if (formatDefinition == null)
                     throw new KeyNotFoundException($"Report format {formatName} is not registered");
 

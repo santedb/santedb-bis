@@ -19,6 +19,7 @@
  * Date: 2021-8-5
  */
 using SanteDB.BI.Model;
+using SanteDB.Core.Model.Query;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,17 @@ namespace SanteDB.BI.Services
         /// <typeparam name="TBisDefinition">The type of definition to query for</typeparam>
         /// <param name="filter">The filter for query</param>
         /// <returns>Matching bis definitions </returns>
+        [Obsolete("Use Query(Expression<Func<TBidDefinition, bool>>)", true)]
         IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition;
+
+        /// <summary>
+        /// Query the underlying BI definition repository for the specified <typeparamref name="TBisDefinition"/>
+        /// </summary>
+        /// <typeparam name="TBisDefinition">The type of BI definition being queried</typeparam>
+        /// <param name="filter">The filter to apply</param>
+        /// <returns>A <see cref="IQueryResultSet"/> representing the results of the query</returns>
+        IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter)
+            where TBisDefinition : BiDefinition;
 
         /// <summary>
         /// Get the specified BI definition by identifier

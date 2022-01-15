@@ -26,6 +26,7 @@ using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
@@ -164,23 +165,7 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition
         {
-            // TODO: If the definition is an applet asset then load it
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
-                return definitions.Values
-                    .Select(o =>
-                    {
-                        if (o is AppletAsset)
-                            using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(o as AppletAsset)))
-                                return BiDefinition.Load(ms);
-                        else
-                            return o;
-                    })
-                    .OfType<TBisDefinition>()
-                    .Where(filter.Compile())
-                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true)
-                    .Skip(offset)
-                    .Take(count ?? 100);
-            return new TBisDefinition[0];
+            return this.Query<TBisDefinition>(filter).Skip(offset).Take(count ?? 100);
         }
 
         /// <summary>
@@ -292,6 +277,27 @@ namespace SanteDB.BI.Services.Impl
                 this.m_tracer.TraceInfo("Processing BIS Definition: {0}", definition.Id);
                 this.Insert(definition);
             }
+        }
+
+        /// <inheritdoc/>
+        public IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter)
+            where TBisDefinition : BiDefinition
+        {
+            // TODO: If the definition is an applet asset then load it
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
+                return new MemoryQueryResultSet<TBisDefinition>(definitions.Values
+                    .Select(o =>
+                    {
+                        if (o is AppletAsset)
+                            using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(o as AppletAsset)))
+                                return BiDefinition.Load(ms);
+                        else
+                            return o;
+                    })
+                    .OfType<TBisDefinition>()
+                    .Where(filter.Compile())
+                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
+            return new MemoryQueryResultSet<TBisDefinition>();
         }
     }
 }

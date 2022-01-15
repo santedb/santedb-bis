@@ -101,8 +101,9 @@ namespace SanteDB.BI.Jobs
                 // TODO: Refactor on new enhanced persistence layer definition
                 using (AuthenticationContext.EnterSystemContext())
                 {
-                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status == BiDefinitionStatus.Active, 0, 100).ToArray();
-                    int i = 0;
+                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status == BiDefinitionStatus.Active);
+                    
+                    int i = 0, count = definitions.Count();
                     foreach (var itm in definitions)
                     {
 
@@ -112,7 +113,7 @@ namespace SanteDB.BI.Jobs
                         }
 
                         this.StatusText = $"Refreshing {itm.Name ?? itm.Id}";
-                        this.Progress = ((float)i++ / (float)definitions.Length);
+                        this.Progress = ((float)i++ / (float)count);
 
                         var dataSource = biProvider;
                         var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
