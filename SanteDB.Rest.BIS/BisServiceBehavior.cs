@@ -77,7 +77,10 @@ namespace SanteDB.Rest.BIS
     [ServiceBehavior(Name = "BIS", InstanceMode = ServiceInstanceMode.Singleton)]
     public class BisServiceBehavior : IBisServiceContract
     {
-        // Context parameters
+
+        /// <summary>
+        /// Default context parameters to be sent to all reports
+        /// </summary>
         protected Dictionary<String, Func<Object>> m_contextParams = new Dictionary<string, Func<object>>()
         {
             { "Context.UserName", () => AuthenticationContext.Current.Principal.Identity.Name },

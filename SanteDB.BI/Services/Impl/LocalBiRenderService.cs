@@ -50,11 +50,14 @@ namespace SanteDB.BI.Services.Impl
         {
             this.m_serviceManager = serviceManager;
             var job = new BiMaterializeJob();
-            jobManager.AddJob(job, JobStartType.TimerOnly);
-            jobManager.SetJobSchedule(job, new DayOfWeek[]
+            jobManager.AddJob(job, JobStartType.TimerOnly);  // Set default job
+            if (jobManager.GetJobSchedules(job)?.Any() != true)
             {
+                jobManager.SetJobSchedule(job, new DayOfWeek[]
+                {
                 DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
-            }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1, 0, 0, 0)); // First run for tomorrow
+                }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1, 0, 0, 0)); // First run for tomorrow
+            }
 
             // Scan and initialize all BI materialized views
             ApplicationServiceContext.Current.Started += (o, e) =>
