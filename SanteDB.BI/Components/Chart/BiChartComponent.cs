@@ -46,6 +46,26 @@ namespace SanteDB.BI.Components.Chart
         /// </summary>
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
+            if(element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+            else if(element.Attribute("source") == null)
+            {
+                throw new InvalidOperationException("Cannot find root source");
+            }
+            else if(writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+            else if(context == null)
+            {
+                throw new ArgumentException(nameof(context));
+            }
+            else if(!(context.Root is RootRenderContext rootContext))
+            {
+                throw new InvalidOperationException("Invalid root context");
+            }
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
             if (dataSource.Dataset.Count() == 0)
                 writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition.Name} - 0 REC");
