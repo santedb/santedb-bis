@@ -101,17 +101,18 @@ namespace SanteDB.BI.Jobs
                 // TODO: Refactor on new enhanced persistence layer definition
                 using (AuthenticationContext.EnterSystemContext())
                 {
-                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status == BiDefinitionStatus.Active, 0, 100).ToArray();
+                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status != BiDefinitionStatus.Deprecated && o.MetaData.Status != BiDefinitionStatus.Obsolete, 0, 100).ToArray();
                     int i = 0;
                     foreach (var itm in definitions)
                     {
 
-                        if (parameters.Length > 0 && parameters[0]?.Equals(itm.Id) != true)
+                        if (parameters.Length > 0 && !String.IsNullOrEmpty(parameters[0]?.ToString()) && parameters[0]?.Equals(itm.Id) != true)
                         {
                             continue;
                         }
 
                         this.StatusText = $"Refreshing {itm.Name ?? itm.Id}";
+                        this.m_tracer.TraceInfo(this.StatusText);
                         this.Progress = ((float)i++ / (float)definitions.Length);
 
                         var dataSource = biProvider;
