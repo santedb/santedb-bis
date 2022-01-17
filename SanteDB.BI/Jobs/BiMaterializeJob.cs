@@ -106,7 +106,7 @@ namespace SanteDB.BI.Jobs
                     foreach (var itm in definitions)
                     {
 
-                        if (parameters.Length > 0 && parameters[0]?.Equals(itm.Id) != true)
+                        if (parameters.Length > 0 && !String.IsNullOrEmpty(parameters[0]?.ToString()) && parameters[0]?.Equals(itm.Id) != true)
                         {
                             continue;
                         }
