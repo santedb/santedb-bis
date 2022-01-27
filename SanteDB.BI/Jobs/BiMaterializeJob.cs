@@ -32,7 +32,10 @@ namespace SanteDB.BI.Jobs
         /// <summary>
         /// Gets the name of the job
         /// </summary>
-        public string Name => $"Refresh BI Materialized Views";
+        public string Name => "Refresh BI Materialized Views";
+
+        /// <inheritdoc/>
+        public string Description => "Refreshes the materialized views in data sources for BI reports (run if you suspect your reports are out of date)";
 
         /// <summary>
         /// Can cancel

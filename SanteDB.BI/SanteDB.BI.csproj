@@ -55,7 +55,7 @@
   </ItemGroup>  
   <ItemGroup>
     <PackageReference Include="Antlr3.Runtime" Version="3.5.1" />
-    <PackageReference Include="DynamicExpresso.Core" Version="2.9.5" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.10.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
