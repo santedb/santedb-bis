@@ -56,7 +56,7 @@ namespace SanteDB.BI.Services.Impl
                 jobManager.SetJobSchedule(job, new DayOfWeek[]
                 {
                 DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
-                }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1, 0, 0, 0)); // First run for tomorrow
+                }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0)); // First run for tomorrow
             }
 
             // Scan and initialize all BI materialized views
