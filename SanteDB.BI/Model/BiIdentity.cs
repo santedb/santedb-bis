@@ -27,6 +27,7 @@ namespace SanteDB.BI.Model
     /// Represents a simple BI identity
     /// </summary>
     [XmlType(nameof(BiIdentity), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiIdentity
     {
 

@@ -31,6 +31,7 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiRenderFormatDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiRenderFormatDefinition : BiDefinition
     {
 

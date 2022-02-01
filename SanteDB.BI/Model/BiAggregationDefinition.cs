@@ -28,6 +28,7 @@ namespace SanteDB.BI.Model
     /// Represents a BI Aggregation definition
     /// </summary>
     [XmlType(nameof(BiAggregationDefinition), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiAggregationDefinition : BiSqlDefinition
     {
         /// <summary>

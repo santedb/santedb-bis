@@ -57,6 +57,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDataFlowDataWriterStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiDataFlowDataWriterStep : BiDataFlowStreamStep
     {
 

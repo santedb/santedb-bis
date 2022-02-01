@@ -68,6 +68,7 @@ namespace SanteDB.BI.Model
     /// BI metadata
     /// </summary>
     [XmlType(nameof(BiMetadata), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiMetadata
     {
 

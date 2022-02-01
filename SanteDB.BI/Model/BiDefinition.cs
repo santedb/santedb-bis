@@ -50,6 +50,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [XmlInclude(typeof(BiSchemaViewDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public abstract class BiDefinition
     {
         // Serializers

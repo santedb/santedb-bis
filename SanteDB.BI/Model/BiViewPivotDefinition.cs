@@ -27,6 +27,7 @@ namespace SanteDB.BI.Model
     /// Represents an instructed definition for pivoting data
     /// </summary>
     [XmlType(nameof(BiViewPivotDefinition), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiViewPivotDefinition
     {
         /// <summary>

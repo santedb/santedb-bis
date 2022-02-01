@@ -74,6 +74,7 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiParameterDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiParameterDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiParameterDefinition : BiDefinition
     {
 

@@ -36,6 +36,7 @@ namespace SanteDB.BI.Jobs
     /// <summary>
     /// Materialized view job
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiMaterializeJob : IReportProgressJob
     {
 

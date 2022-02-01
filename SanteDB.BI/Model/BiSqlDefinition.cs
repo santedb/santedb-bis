@@ -28,6 +28,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiSqlDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiSqlDefinition), Namespace = BiConstants.XmlNamespace)]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiSqlDefinition : BiDefinition
     {
 

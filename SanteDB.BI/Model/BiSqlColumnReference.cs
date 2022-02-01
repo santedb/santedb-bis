@@ -86,6 +86,7 @@ namespace SanteDB.BI.Model
     /// Represents the BI SQL Column Reference
     /// </summary>
     [XmlType(nameof(BiSqlColumnReference), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiSqlColumnReference
     {
         /// <summary>
@@ -106,6 +107,7 @@ namespace SanteDB.BI.Model
     /// Represents a BI SQL Column reference which provides an aggregation function
     /// </summary>
     [XmlType(nameof(BiAggregateSqlColumnReference), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiAggregateSqlColumnReference : BiSqlColumnReference
     {
 

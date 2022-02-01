@@ -35,6 +35,7 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiTransformDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiTransformDefinition : BiDefinition
     {
 

@@ -28,6 +28,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDataCallParameter), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public abstract class BiDataCallParameter
     {
 
@@ -44,6 +45,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiDataCallParameter<T> : BiDataCallParameter
     {
 
