@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
 using Newtonsoft.Json;
 using System;
@@ -29,6 +29,7 @@ namespace SanteDB.BI.Model
     /// A column mapping between a souce and destination column
     /// </summary>
     [XmlType(nameof(BiColumnMapping), Namespace = BiConstants.XmlNamespace)]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiColumnMapping
     {
         /// <summary>
@@ -48,6 +49,7 @@ namespace SanteDB.BI.Model
     /// Schema definition for an input column with an optional transform
     /// </summary>
     [XmlType(nameof(BiColumnMappingSource), Namespace = BiConstants.XmlNamespace)]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiColumnMappingSource : BiSchemaColumnDefinition
     {
 
@@ -64,6 +66,7 @@ namespace SanteDB.BI.Model
     /// Indicates the source transform from another column
     /// </summary>
     [XmlType(nameof(BiColumnMappingTransformJoin), Namespace = BiConstants.XmlNamespace)]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiColumnMappingTransformJoin
     {
 
