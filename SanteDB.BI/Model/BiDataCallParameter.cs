@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,10 +16,8 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
-
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Xml.Serialization;
 
@@ -30,7 +28,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDataCallParameter), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    [ExcludeFromCodeCoverage] // Serialization class
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public abstract class BiDataCallParameter
     {
 
@@ -47,7 +45,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    [ExcludeFromCodeCoverage] // Serialization class
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiDataCallParameter<T> : BiDataCallParameter
     {
 

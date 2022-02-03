@@ -1,24 +1,23 @@
 ﻿/*
- * Copyright (C) 2021 - 2021, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you
- * may not use this file except in compliance with the License. You may
- * obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
  * the License.
- *
+ * 
  * User: fyfej
- * Date: 2021-8-5
+ * Date: 2021-8-27
  */
-
 using DynamicExpresso;
 using Newtonsoft.Json;
 using SanteDB.BI.Rendering;
@@ -46,6 +45,26 @@ namespace SanteDB.BI.Components.Chart
         /// </summary>
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
+            if(element == null)
+            {
+                throw new ArgumentNullException(nameof(element));
+            }
+            else if(element.Attribute("source") == null)
+            {
+                throw new InvalidOperationException("Cannot find root source");
+            }
+            else if(writer == null)
+            {
+                throw new ArgumentNullException(nameof(writer));
+            }
+            else if(context == null)
+            {
+                throw new ArgumentException(nameof(context));
+            }
+            else if(!(context.Root is RootRenderContext rootContext))
+            {
+                throw new InvalidOperationException("Invalid root context");
+            }
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
             if (dataSource.Dataset.Count() == 0)
                 writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition.Name} - 0 REC");

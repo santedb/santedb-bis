@@ -1,4 +1,24 @@
-﻿using SanteDB.BI.Model;
+﻿/*
+ * Copyright (C) 2021 - 2022, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
+ * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you 
+ * may not use this file except in compliance with the License. You may 
+ * obtain a copy of the License at 
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0 
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
+ * License for the specific language governing permissions and limitations under 
+ * the License.
+ * 
+ * User: fyfej
+ * Date: 2022-1-6
+ */
+using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
 using SanteDB.Core;
@@ -16,6 +36,7 @@ namespace SanteDB.BI.Jobs
     /// <summary>
     /// Materialized view job
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiMaterializeJob : IReportProgressJob
     {
 
@@ -32,7 +53,10 @@ namespace SanteDB.BI.Jobs
         /// <summary>
         /// Gets the name of the job
         /// </summary>
-        public string Name => $"Refresh BI Materialized Views";
+        public string Name => "Refresh BI Materialized Views";
+
+        /// <inheritdoc/>
+        public string Description => "Refreshes the materialized views in data sources for BI reports (run if you suspect your reports are out of date)";
 
         /// <summary>
         /// Can cancel
@@ -101,13 +125,12 @@ namespace SanteDB.BI.Jobs
                 // TODO: Refactor on new enhanced persistence layer definition
                 using (AuthenticationContext.EnterSystemContext())
                 {
-                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status == BiDefinitionStatus.Active);
-                    
+                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status != BiDefinitionStatus.Deprecated && o.MetaData.Status != BiDefinitionStatus.Obsolete);
                     int i = 0, count = definitions.Count();
                     foreach (var itm in definitions)
                     {
 
-                        if (parameters.Length > 0 && parameters[0]?.Equals(itm.Id) != true)
+                        if (parameters.Length > 0 && !String.IsNullOrEmpty(parameters[0]?.ToString()) && parameters[0]?.Equals(itm.Id) != true)
                         {
                             continue;
                         }
