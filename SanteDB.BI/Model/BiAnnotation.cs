@@ -18,6 +18,8 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using System.IO;
 using System.Xml.Linq;
@@ -30,6 +32,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiAnnotation), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiAnnotation
     {
         /// <summary>

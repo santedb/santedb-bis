@@ -18,6 +18,8 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -27,6 +29,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiMaterializeDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiMaterializeDefinition), Namespace = BiConstants.XmlNamespace)]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiMaterializeDefinition
     {
 

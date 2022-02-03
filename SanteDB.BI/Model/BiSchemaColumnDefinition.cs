@@ -28,6 +28,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiSchemaColumnDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
     public class BiSchemaColumnDefinition : BiDefinition
     {
 

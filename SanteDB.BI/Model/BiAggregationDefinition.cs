@@ -20,6 +20,7 @@
  */
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -28,6 +29,7 @@ namespace SanteDB.BI.Model
     /// Represents a BI Aggregation definition
     /// </summary>
     [XmlType(nameof(BiAggregationDefinition), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiAggregationDefinition : BiSqlDefinition
     {
         /// <summary>

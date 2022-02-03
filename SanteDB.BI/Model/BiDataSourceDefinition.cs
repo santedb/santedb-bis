@@ -20,6 +20,7 @@
  */
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -30,6 +31,7 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiDataSourceDefinition : BiDefinition
     {
 

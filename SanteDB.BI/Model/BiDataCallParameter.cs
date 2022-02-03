@@ -18,6 +18,8 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Xml.Serialization;
 
@@ -28,6 +30,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDataCallParameter), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public abstract class BiDataCallParameter
     {
 
@@ -44,6 +47,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiDataCallParameter<T> : BiDataCallParameter
     {
 

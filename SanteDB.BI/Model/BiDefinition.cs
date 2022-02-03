@@ -24,6 +24,7 @@ using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -51,6 +52,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [XmlInclude(typeof(BiSchemaViewDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
+    [ExcludeFromCodeCoverage] // Serialization class
     public abstract class BiDefinition
     {
         // Serializers

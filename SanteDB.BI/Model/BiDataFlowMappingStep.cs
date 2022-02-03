@@ -20,6 +20,7 @@
  */
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -29,6 +30,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDataFlowMappingStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiDataFlowMappingStep : BiDataFlowStreamStep
     {
 

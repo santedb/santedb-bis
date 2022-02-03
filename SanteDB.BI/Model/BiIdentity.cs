@@ -18,6 +18,8 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Xml.Serialization;
 
@@ -27,6 +29,7 @@ namespace SanteDB.BI.Model
     /// Represents a simple BI identity
     /// </summary>
     [XmlType(nameof(BiIdentity), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiIdentity
     {
 

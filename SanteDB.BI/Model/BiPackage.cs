@@ -21,6 +21,7 @@
 using Newtonsoft.Json;
 using SanteDB.BI.Util;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -33,6 +34,7 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [XmlType(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiPackage : BiDefinition
     {
 

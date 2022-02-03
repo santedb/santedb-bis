@@ -18,6 +18,8 @@
  * User: fyfej
  * Date: 2021-8-5
  */
+
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using System.Xml.Serialization;
 
@@ -86,6 +88,7 @@ namespace SanteDB.BI.Model
     /// Represents the BI SQL Column Reference
     /// </summary>
     [XmlType(nameof(BiSqlColumnReference), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiSqlColumnReference
     {
         /// <summary>
@@ -106,6 +109,7 @@ namespace SanteDB.BI.Model
     /// Represents a BI SQL Column reference which provides an aggregation function
     /// </summary>
     [XmlType(nameof(BiAggregateSqlColumnReference), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiAggregateSqlColumnReference : BiSqlColumnReference
     {
 

@@ -21,6 +21,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -68,6 +69,7 @@ namespace SanteDB.BI.Model
     /// BI metadata
     /// </summary>
     [XmlType(nameof(BiMetadata), Namespace = BiConstants.XmlNamespace), JsonObject]
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiMetadata
     {
 

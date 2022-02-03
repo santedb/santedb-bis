@@ -35,6 +35,7 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiTransformDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
     public class BiTransformDefinition : BiDefinition
     {
 
