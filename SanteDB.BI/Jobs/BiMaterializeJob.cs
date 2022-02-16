@@ -37,13 +37,25 @@ namespace SanteDB.BI.Jobs
     /// Materialized view job
     /// </summary>
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
-    public class BiMaterializeJob : IReportProgressJob
+    public class BiMaterializeJob  : IJob
     {
 
         // Tracer 
         private Tracer m_tracer = Tracer.GetTracer(typeof(BiMaterializeJob));
 
-        private bool m_cancel = false;
+        // Cancel request
+        private volatile bool m_cancel = false;
+
+        // State manager
+        private readonly IJobStateManagerService m_stateManager;
+
+        /// <summary>
+        /// DI constructor for state manager
+        /// </summary>
+        public BiMaterializeJob(IJobStateManagerService stateManager)
+        {
+            this.m_stateManager = stateManager;
+        }
 
         /// <summary>
         /// Gets the ID of the specified job
@@ -64,11 +76,6 @@ namespace SanteDB.BI.Jobs
         public bool CanCancel => true;
 
         /// <summary>
-        /// Gets or sets the current state
-        /// </summary>
-        public JobStateType CurrentState { get; private set; }
-
-        /// <summary>
         /// Gets the parameters for this job
         /// </summary>
         public IDictionary<string, Type> Parameters => new Dictionary<String, Type>()
@@ -77,31 +84,11 @@ namespace SanteDB.BI.Jobs
         };
 
         /// <summary>
-        /// Gets or sets the last time this job was started
-        /// </summary>
-        public DateTime? LastStarted { get; private set; }
-
-        /// <summary>
-        /// Gets the time that this job was last finished
-        /// </summary>
-        public DateTime? LastFinished { get; private set; }
-
-        /// <summary>
-        /// Current progress
-        /// </summary>
-        public float Progress { get; private set; }
-
-        /// <summary>
-        /// Gets the status text
-        /// </summary>
-        public string StatusText { get; private set; }
-
-        /// <summary>
         /// Cancel this job
         /// </summary>
         public void Cancel()
         {
-            this.StatusText += "(Cancel Requested)";
+            this.m_stateManager.SetProgress(this, "Cancel Requested", 0.0f);
             this.m_cancel = true;
         }
 
@@ -120,8 +107,7 @@ namespace SanteDB.BI.Jobs
                 this.m_tracer.TraceInfo("Starting refresh of defined BI materialized views");
 
                 this.m_cancel = false;
-                this.CurrentState = JobStateType.Running;
-                this.LastStarted = DateTime.Now;
+                this.m_stateManager.SetState(this, JobStateType.Running);
                 // TODO: Refactor on new enhanced persistence layer definition
                 using (AuthenticationContext.EnterSystemContext())
                 {
@@ -135,9 +121,8 @@ namespace SanteDB.BI.Jobs
                             continue;
                         }
 
-                        this.StatusText = $"Refreshing {itm.Name ?? itm.Id}";
-                        this.m_tracer.TraceInfo(this.StatusText);
-                        this.Progress = ((float)i++ / (float)definitions.Length);
+
+                        this.m_stateManager.SetProgress(this, $"Refreshing {itm.Name ?? itm.Id}", ((float)i++ / (float)definitions.Length));
 
                         var dataSource = biProvider;
                         var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
@@ -150,18 +135,18 @@ namespace SanteDB.BI.Jobs
 
                         if (this.m_cancel)
                         {
-                            this.CurrentState = JobStateType.Cancelled;
+                            this.m_stateManager.SetState(this, JobStateType.Cancelled);
                             return;
                         }
                     }
                 }
 
-                this.CurrentState = JobStateType.Completed;
-                this.LastFinished = DateTime.Now;
+                this.m_stateManager.SetState(this, JobStateType.Completed);
             }
             catch (Exception ex)
             {
-                this.CurrentState = JobStateType.Aborted;
+                this.m_stateManager.SetState(this, JobStateType.Aborted);
+                this.m_stateManager.SetProgress(this, ex.Message, 0.0f);
                 this.m_cancel = false;
                 this.m_tracer.TraceError("Error processing BI materialized views: {0}", ex.Message);
                 throw new Exception("Error running BI refresh job", ex);
