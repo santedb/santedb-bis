@@ -122,7 +122,7 @@ namespace SanteDB.BI.Jobs
                         }
 
 
-                        this.m_stateManager.SetProgress(this, $"Refreshing {itm.Name ?? itm.Id}", ((float)i++ / (float)definitions.Length));
+                        this.m_stateManager.SetProgress(this, $"Refreshing {itm.Name ?? itm.Id}", ((float)i++ / (float)count));
 
                         var dataSource = biProvider;
                         var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
