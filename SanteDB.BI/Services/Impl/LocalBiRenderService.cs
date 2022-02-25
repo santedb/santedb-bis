@@ -49,7 +49,7 @@ namespace SanteDB.BI.Services.Impl
         public LocalBiRenderService(IServiceManager serviceManager, IJobManagerService jobManager, IBiMetadataRepository metadataRepository, IBiDataSource defaultDataSource = null)
         {
             this.m_serviceManager = serviceManager;
-            var job = new BiMaterializeJob();
+            var job = serviceManager.CreateInjected<BiMaterializeJob>();
             jobManager.AddJob(job, JobStartType.TimerOnly);  // Set default job
             if (jobManager.GetJobSchedules(job)?.Any() != true)
             {
