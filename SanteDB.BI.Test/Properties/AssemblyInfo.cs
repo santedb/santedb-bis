@@ -19,7 +19,6 @@
  * Date: 2021-8-5
  */
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("SanteDB.BI.Test")]
