@@ -17,7 +17,7 @@
  - the License.
  - 
  - User: fyfej
- - Date: 2021-8-27
+ - Date: 2022-5-30
  -->
 <xs:schema xmlns:tns="http://santedb.org/bi" elementFormDefault="qualified" targetNamespace="http://santedb.org/bi" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="xhtml.xsd" namespace="http://www.w3.org/1999/xhtml" />
