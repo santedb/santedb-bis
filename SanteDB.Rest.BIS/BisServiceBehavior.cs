@@ -65,8 +65,7 @@ using System.Text.RegularExpressions;
 using SanteDB.BI;
 
 using SanteDB.Core.Security.Services;
-
-using SanteDB.Core.Security.Claims;
+using SanteDB.Rest.Common.Security;
 
 namespace SanteDB.Rest.BIS
 {
