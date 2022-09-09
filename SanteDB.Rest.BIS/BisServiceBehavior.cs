@@ -341,7 +341,7 @@ namespace SanteDB.Rest.BIS
         private IDictionary<String, Object> CreateParameterDictionary()
         {
             // Parameters
-            Dictionary<String, object> parameters = NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query).ToDictionary(o => o.Key, o => o.Value.Count == 1 ? o.Value.First() : (object)o.Value.ToArray());
+            Dictionary<String, object> parameters = RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString().ToDictionary().ToDictionary(o=>o.Key, o=>o.Value.Length == 1 ? o.Value[0] : (object)o.Value);
 
             // Context parameters
             foreach (var kv in this.m_contextParams)
@@ -378,11 +378,8 @@ namespace SanteDB.Rest.BIS
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                var expression = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression),
-                    new Type[] { rt },
-                    new Type[] { typeof(NameValueCollection) }
-                ).Invoke(null, new Object[] { NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query) });
-
+                var expression = QueryExpressionParser.BuildLinqExpression(rt, RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
+               
                 int offset = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0"),
                     count = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100");
                 // Execute the query
@@ -418,9 +415,7 @@ namespace SanteDB.Rest.BIS
         {
             try
             {
-                // Render the report
-                var parameters = this.CreateParameterDictionary();
-
+               
                 // Get the view name
                 var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"];
 
