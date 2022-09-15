@@ -114,7 +114,7 @@ namespace SanteDB.Rest.BIS
                     {
                         new Rest.Common.Configuration.RestServiceBehaviorConfiguration(typeof(TokenAuthorizationAccessBehavior))
                     },
-                    Name = "BIS",
+                    ConfigurationName = BisMessageHandler.ConfigurationName,
                     Endpoints = new List<Rest.Common.Configuration.RestEndpointConfiguration>()
                     {
                         this.CreateEndpoint("http://0.0.0.0:8080/bis")

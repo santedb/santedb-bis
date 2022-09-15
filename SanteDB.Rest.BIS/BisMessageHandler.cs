@@ -50,6 +50,11 @@ namespace SanteDB.Rest.BIS
         public bool IsRunning => this.m_webHost?.IsRunning == true;
 
         /// <summary>
+        /// Name of the service in the configuration file
+        /// </summary>
+        internal const string ConfigurationName = "BIS";
+
+        /// <summary>
         /// Gets the service name
         /// </summary>
         public string ServiceName => "BIS REST Daemon";
@@ -106,7 +111,7 @@ namespace SanteDB.Rest.BIS
             try
             {
                 this.Starting?.Invoke(this, EventArgs.Empty);
-                this.m_webHost = ApplicationServiceContext.Current.GetService<IRestServiceFactory>().CreateService(typeof(BisServiceBehavior));
+                this.m_webHost = ApplicationServiceContext.Current.GetService<IRestServiceFactory>().CreateService(ConfigurationName);
 
                 // Add service behaviors
                 foreach (ServiceEndpoint endpoint in this.m_webHost.Endpoints)
