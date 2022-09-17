@@ -26,6 +26,7 @@
   <endpoint address="http://0.0.0.0:8080/bis" contract="SanteDB.Rest.BIS.IBisServiceContract, SanteDB.Rest.BIS">
     <behaviors>
       <add type="SanteDB.Rest.Common.Behavior.MessageLoggingEndpointBehavior, SanteDB.Rest.Common"/>
+      <add type="SanteDB.Rest.Common.Behavior.AcceptLanguageEndpointBehavior, SanteDB.Rest.Common"/>
       <add type="SanteDB.Rest.Common.Behavior.MessageCompressionEndpointBehavior, SanteDB.Rest.Common"/>
     </behaviors>
   </endpoint>

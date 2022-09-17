@@ -133,7 +133,7 @@ namespace SanteDB.Rest.BIS
                 // Ensure that endpoint agrees with the body definition
                 var rt = this.GetResourceType(resourceType);
                 if (body.GetType() != rt)
-                    throw new FaultException(400, "Invalid resource type");
+                    throw new FaultException(System.Net.HttpStatusCode.BadRequest, "Invalid resource type");
                 return this.m_metadataRepository.Insert(body);
             }
             catch (Exception e)
@@ -325,7 +325,7 @@ namespace SanteDB.Rest.BIS
             {
                 audit.Outcome = OutcomeIndicator.MinorFail;
                 this.m_tracer.TraceError("Error rendering query: {0}", e);
-                throw new FaultException(500, $"Error rendering query {queryId}", e);
+                throw new FaultException(System.Net.HttpStatusCode.InternalServerError, $"Error rendering query {queryId}", e);
             }
             finally
             {
