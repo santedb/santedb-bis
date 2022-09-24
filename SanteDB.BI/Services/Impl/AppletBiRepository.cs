@@ -253,10 +253,9 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void ProcessBisDefinition(BiDefinition definition)
         {
-            if (definition is BiPackage)
+            if (definition is BiPackage pkg)
             {
-                this.m_tracer.TraceInfo("Processing BIS Package: {0}", definition.Id);
-                var pkg = definition as BiPackage;
+                this.m_tracer.TraceInfo("Processing BI Package: {0}", definition.Id);
                 var objs = pkg.DataSources.OfType<BiDefinition>()
                     .Union(pkg.Formats.OfType<BiDefinition>())
                     .Union(pkg.Parameters.OfType<BiDefinition>())
@@ -273,7 +272,7 @@ namespace SanteDB.BI.Services.Impl
             }
             else
             {
-                this.m_tracer.TraceInfo("Processing BIS Definition: {0}", definition.Id);
+                this.m_tracer.TraceVerbose("Processing BI Definition: {0}", definition.Id);
                 this.Insert(definition);
             }
         }

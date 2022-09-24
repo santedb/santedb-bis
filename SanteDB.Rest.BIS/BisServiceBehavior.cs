@@ -66,6 +66,7 @@ using SanteDB.BI;
 
 using SanteDB.Core.Security.Services;
 using SanteDB.Rest.Common.Security;
+using SanteDB.Rest.Common;
 
 namespace SanteDB.Rest.BIS
 {
@@ -308,9 +309,9 @@ namespace SanteDB.Rest.BIS
                 }
 
                 int offset = 0, count = 100;
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0", out offset))
+                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpOffsetParameterName] , out offset))
                     throw new FormatException("_offset is not in the correct format");
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100", out count))
+                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName] , out count))
                     throw new FormatException("_count is not in the correct format");
 
                 var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
