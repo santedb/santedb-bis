@@ -29,7 +29,6 @@ using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Jobs
 {
@@ -37,7 +36,7 @@ namespace SanteDB.BI.Jobs
     /// Materialized view job
     /// </summary>
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
-    public class BiMaterializeJob  : IJob
+    public class BiMaterializeJob : IJob
     {
 
         // Tracer 

@@ -81,7 +81,7 @@ namespace SanteDB.BI.Services.Impl
                         this.m_tracer.TraceInfo("Materializing views for {0}", queryDefinition.Id);
                         dataSource.CreateMaterializedView(queryDefinition);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         this.m_tracer.TraceWarning("Could not initialize materialized views for {0} - {1}", itm.Id, ex.Message);
                     }
@@ -105,11 +105,15 @@ namespace SanteDB.BI.Services.Impl
                 // Get the report format 
                 var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == formatName).FirstOrDefault();
                 if (formatDefinition == null)
+                {
                     throw new KeyNotFoundException($"Report format {formatName} is not registered");
+                }
 
                 var reportDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Get<BiReportDefinition>(reportId);
                 if (reportDefinition == null)
+                {
                     throw new KeyNotFoundException($"Report {reportId} is not registered");
+                }
 
                 // Render the report
                 var renderer = this.m_serviceManager.CreateInjected(formatDefinition.Type) as IBiReportFormatProvider;

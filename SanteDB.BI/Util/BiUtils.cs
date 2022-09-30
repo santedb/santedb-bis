@@ -21,7 +21,6 @@
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
-using SanteDB.Core.Model;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -48,13 +47,17 @@ namespace SanteDB.BI.Util
         /// <summary>
         /// Resolves all references and their proper objects from the metadata repository
         /// </summary>
-        public static BiDefinition ResolveRefs(BiDefinition definition) 
-        { 
+        public static BiDefinition ResolveRefs(BiDefinition definition)
+        {
             // Create new instance
             if (definition == null)
+            {
                 return null;
+            }
             else if (definition is BiReportViewDefinition) // Report views cannot be resolved
+            {
                 return definition;
+            }
 
             var localName = definition.Name;
             var localLabel = definition.Label;
@@ -68,7 +71,10 @@ namespace SanteDB.BI.Util
             {
                 var refId = definition.Ref;
                 definition.Ref = null;
-                if (refId.StartsWith("#")) refId = refId.Substring(1);
+                if (refId.StartsWith("#"))
+                {
+                    refId = refId.Substring(1);
+                }
 
                 var repository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
                 // Attempt to lookup
@@ -76,17 +82,29 @@ namespace SanteDB.BI.Util
                     new Type[] { definition.GetType() },
                     new Type[] { typeof(String) }).Invoke(repository, new object[] { refId }) as BiDefinition);
                 if (retVal == null)
+                {
                     throw new KeyNotFoundException($"{newDef.GetType().Name} #{refId} does not exist or you do not have permission");
+                }
 
                 if (!String.IsNullOrEmpty(localName))
+                {
                     retVal.Name = localName;
+                }
+
                 if (!String.IsNullOrEmpty(localLabel))
+                {
                     retVal.Label = localLabel;
+                }
+
                 if (localRequired.HasValue)
+                {
                     (retVal as BiParameterDefinition).Required = localRequired.Value;
+                }
+
                 return retVal;
             }
             else  // Cascade
+            {
                 foreach (var pi in definition.GetType().GetRuntimeProperties())
                 {
                     var val = pi.GetValue(definition);
@@ -94,18 +112,31 @@ namespace SanteDB.BI.Util
                     {
                         var nvList = Activator.CreateInstance(val.GetType()) as IList;
                         foreach (var itm in val as IList)
+                        {
                             if (itm is BiDefinition)
+                            {
                                 nvList.Add(ResolveRefs(itm as BiDefinition));
+                            }
                             else
+                            {
                                 nvList.Add(itm);
+                            }
+                        }
+
                         pi.SetValue(definition, nvList);
                     }
                     else if (val is BiDefinition)
+                    {
                         pi.SetValue(definition, ResolveRefs(val as BiDefinition));
+                    }
                 }
+            }
 
             if (!String.IsNullOrEmpty(localName))
+            {
                 definition.Name = localName;
+            }
+
             return definition;
         }
     }

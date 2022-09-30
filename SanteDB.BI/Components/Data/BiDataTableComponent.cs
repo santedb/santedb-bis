@@ -24,7 +24,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -70,9 +69,13 @@ namespace SanteDB.BI.Components.Data
                         {
                             writer.WriteAttributeString("colspan", subFields.Count().ToString());
                             if (subFieldStack.Any())
+                            {
                                 subFieldStack.Peek().AddRange(subFields);
+                            }
                             else
+                            {
                                 subFieldStack.Enqueue(subFields.ToList());
+                            }
                         }
                         else
                         {
@@ -81,7 +84,10 @@ namespace SanteDB.BI.Components.Data
 
                         // Write out header elements
                         foreach (var el in header.Nodes())
+                        {
                             ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                        }
+
                         writer.WriteEndElement();
                     }
 
@@ -148,7 +154,10 @@ namespace SanteDB.BI.Components.Data
                 }
                 writer.WriteStartElement("td", BiConstants.HtmlNamespace);
                 foreach (var el in cell.Elements())
+                {
                     ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                }
+
                 writer.WriteEndElement();
             }
         }

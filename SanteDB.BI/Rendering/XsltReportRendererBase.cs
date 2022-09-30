@@ -68,7 +68,10 @@ namespace SanteDB.BI.Rendering
         {
             this.m_xsl = new XslCompiledTransform(false);
             using (var xr = XmlReader.Create(xslStream))
+            {
                 this.m_xsl.Load(xr);
+            }
+
             this.m_isText = emitPlainText;
         }
 
@@ -78,12 +81,16 @@ namespace SanteDB.BI.Rendering
         public virtual Stream Render(BiReportDefinition reportDefinition, string viewName, IDictionary<string, object> parameters)
         {
             foreach (var pol in reportDefinition.MetaData.Demands ?? new List<string>())
+            {
                 ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(pol);
+            }
 
             // Get the view
             var view = string.IsNullOrEmpty(viewName) ? reportDefinition.Views.First() : reportDefinition.Views.FirstOrDefault(o => o.Name == viewName);
             if (view == null)
+            {
                 throw new KeyNotFoundException($"Report view {viewName} does not exist in {reportDefinition.Id}");
+            }
 
             // Demand permission to render
             // Start a new root context
@@ -103,7 +110,9 @@ namespace SanteDB.BI.Rendering
                 OmitXmlDeclaration = true
 #endif
                     }))
+                    {
                         ReportViewUtil.Write(xw, view.Body, context);
+                    }
 
                     tempMs.Seek(0, SeekOrigin.Begin);
                     var retVal = new MemoryStream();
@@ -113,15 +122,23 @@ namespace SanteDB.BI.Rendering
                     using (var xr = XmlReader.Create(tempMs))
                     {
                         if (this.m_isText)
+                        {
                             using (var xw = new StreamWriter(retVal, Encoding.UTF8, 1024, true))
+                            {
                                 this.m_xsl.Transform(xr, null, xw);
+                            }
+                        }
                         else
+                        {
                             using (var xw = XmlWriter.Create(retVal, new XmlWriterSettings()
                             {
                                 Indent = true,
                                 OmitXmlDeclaration = false
                             }))
+                            {
                                 this.m_xsl.Transform(xr, xw);
+                            }
+                        }
                     }
                     retVal.Seek(0, SeekOrigin.Begin);
 

@@ -45,18 +45,24 @@ namespace SanteDB.BI.Components.Base
 
             // Render attributes
             foreach (var itm in element.Attributes())
+            {
                 writer.WriteAttributeString(itm.Name.LocalName, itm.Value);
+            }
 
             // Render children
             foreach (var node in element.Nodes())
             {
                 if (node is XElement ele)
+                {
                     ReportViewUtil.Write(writer, ele, context);
+                }
                 else if (node is XText xtext)
                 {
                     var text = xtext.Value;
                     if (!String.IsNullOrWhiteSpace(text))
+                    {
                         writer.WriteString(text);
+                    }
                 }
             }
             writer.WriteEndElement();

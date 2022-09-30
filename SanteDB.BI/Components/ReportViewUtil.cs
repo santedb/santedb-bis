@@ -22,13 +22,10 @@ using DynamicExpresso;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
-using SanteDB.Core.Interfaces;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -145,7 +142,10 @@ namespace SanteDB.BI.Components
         {
             IBiViewComponent retVal = null;
             if (!m_componentCache.TryGetValue(elementName, out retVal) && !m_componentCache.TryGetValue(elementName.Namespace + "any", out retVal))
+            {
                 return null;
+            }
+
             return retVal;
         }
 
@@ -164,7 +164,9 @@ namespace SanteDB.BI.Components
                     writer.WriteComment($"WARNING: No component for {el.Name} is registered");
                 }
                 else if (component.Validate(el, context))
+                {
                     component.Render(el, writer, context);
+                }
                 else
                 {
 #if DEBUG

@@ -45,9 +45,13 @@ namespace SanteDB.BI.Model
             set
             {
                 if (value != null)
+                {
                     this.ProviderType = Type.GetType(value);
+                }
                 else
+                {
                     this.ProviderType = null;
+                }
             }
         }
 

@@ -73,7 +73,9 @@ namespace SanteDB.BI.Components.Data
                     var instance = dpService.Get(key);
 
                     if (instance == null)
+                    {
                         writer.WriteComment($"{resourceType.Name}/{key} not found");
+                    }
                     else if (!String.IsNullOrEmpty(render))
                     {
                         var selKey = $"{resourceType.Name}.{render}";
@@ -85,7 +87,9 @@ namespace SanteDB.BI.Components.Data
                         writer.WriteString(selDelegate.DynamicInvoke(instance)?.ToString());
                     }
                     else
+                    {
                         writer.WriteString(instance?.ToString());
+                    }
                 }
             }
         }

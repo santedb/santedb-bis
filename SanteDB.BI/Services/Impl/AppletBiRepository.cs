@@ -19,8 +19,6 @@
  * Date: 2022-5-30
  */
 using SanteDB.BI.Model;
-using SanteDB.BI.Util;
-using SanteDB.Core;
 using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
@@ -115,13 +113,19 @@ namespace SanteDB.BI.Services.Impl
                 definitions.TryGetValue(id, out Object asset))
             {
                 if (asset is AppletAsset)
+                {
                     using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(asset as AppletAsset)))
+                    {
                         asset = BiDefinition.Load(ms);
+                    }
+                }
 
                 var definition = asset as BiDefinition;
                 if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
                 definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
+                {
                     return (TBisDefinition)definition;
+                }
             }
             return null;
         }
@@ -133,7 +137,9 @@ namespace SanteDB.BI.Services.Impl
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+            {
                 this.m_policyEnforcementService.Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            }
 
             // Locate type definitions
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object> typeDefinitions))
@@ -147,9 +153,13 @@ namespace SanteDB.BI.Services.Impl
             {
                 // Can't replace sys object
                 if (existing is BiDefinition && !(existing as BiDefinition).IsSystemObject)
+                {
                     typeDefinitions[metadata.Id] = metadata;
+                }
                 else if (existing is AppletAsset && metadata is BiDefinition) // cant downgrade but can upgrade
+                {
                     typeDefinitions[metadata.Id] = metadata;
+                }
             }
             else
             {
@@ -174,12 +184,16 @@ namespace SanteDB.BI.Services.Impl
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+            {
                 this.m_policyEnforcementService.Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            }
 
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, object> definitions) &&
                 definitions.TryGetValue(id, out object existing) &&
                 (existing is AppletAsset || (existing as BiDefinition).IsSystemObject))
+            {
                 definitions.Remove(id);
+            }
         }
 
         /// <summary>
@@ -198,7 +212,9 @@ namespace SanteDB.BI.Services.Impl
 
                 // Doesn't have a solution manager
                 if (solutions == null)
+                {
                     this.ProcessApplet(this.m_appletManager.Applets);
+                }
                 else
                 {
                     solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
@@ -225,7 +241,9 @@ namespace SanteDB.BI.Services.Impl
                         this.m_tracer.TraceVerbose("Attempting to load {0}", o.Name);
 
                         using (var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
+                        {
                             return new { Definition = BiDefinition.Load(ms), Asset = o };
+                        }
                     }
                     catch (Exception e)
                     {
@@ -242,7 +260,9 @@ namespace SanteDB.BI.Services.Impl
                 this.ProcessBisDefinition(itm.Definition);
 #if DEBUG
                 if (itm.Definition is BiReportDefinition || itm.Definition is BiViewDefinition || itm.Definition is BiQueryDefinition)
+                {
                     this.m_definitionCache[itm.Definition.GetType()][itm.Definition.Id] = itm.Asset;
+                }
 #endif
 
             }
@@ -283,18 +303,27 @@ namespace SanteDB.BI.Services.Impl
         {
             // TODO: If the definition is an applet asset then load it
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
+            {
                 return new MemoryQueryResultSet<TBisDefinition>(definitions.Values
                     .Select(o =>
                     {
                         if (o is AppletAsset)
+                        {
                             using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(o as AppletAsset)))
+                            {
                                 return BiDefinition.Load(ms);
+                            }
+                        }
                         else
+                        {
                             return o;
+                        }
                     })
                     .OfType<TBisDefinition>()
                     .Where(filter.Compile())
                     .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
+            }
+
             return new MemoryQueryResultSet<TBisDefinition>();
         }
     }

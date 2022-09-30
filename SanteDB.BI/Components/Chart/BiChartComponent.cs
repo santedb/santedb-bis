@@ -45,39 +45,43 @@ namespace SanteDB.BI.Components.Chart
         /// </summary>
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
-            if(element == null)
+            if (element == null)
             {
                 throw new ArgumentNullException(nameof(element));
             }
-            else if(element.Attribute("source") == null)
+            else if (element.Attribute("source") == null)
             {
                 throw new InvalidOperationException("Cannot find root source");
             }
-            else if(writer == null)
+            else if (writer == null)
             {
                 throw new ArgumentNullException(nameof(writer));
             }
-            else if(context == null)
+            else if (context == null)
             {
                 throw new ArgumentException(nameof(context));
             }
-            else if(!(context.Root is RootRenderContext rootContext))
+            else if (!(context.Root is RootRenderContext rootContext))
             {
                 throw new InvalidOperationException("Invalid root context");
             }
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
             if (dataSource.Dataset.Count() == 0)
+            {
                 writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition.Name} - 0 REC");
+            }
             else
             {
                 // Render the object
                 writer.WriteStartElement("chart", BiConstants.HtmlNamespace);
                 writer.WriteAttributeString("type", $"'{element.Attribute("type").Value}'");
-                writer.WriteAttributeString("legend", $"{element.Attribute("legend")?.Value ?? "false" }");
+                writer.WriteAttributeString("legend", $"{element.Attribute("legend")?.Value ?? "false"}");
 
                 var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
                 if (title != null)
+                {
                     writer.WriteAttributeString("title", $"'{title.Value}'");
+                }
 
                 var chartContext = new RenderContext(context, dataSource.Dataset);
                 chartContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
@@ -105,12 +109,19 @@ namespace SanteDB.BI.Components.Chart
 
                     // First determine type
                     if (typeof(DateTime).IsAssignableFrom(axisSelector.Invoke(ReportViewUtil.ToParameterArray(chartData.First())).GetType()))
+                    {
                         writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{(axis.Attribute("time-unit")?.Value ?? "day")}' }}");
+                    }
                     else
+                    {
                         writer.WriteString("linear'");
+                    }
 
                     if (axis.Attribute("label") != null)
+                    {
                         writer.WriteString($", scaleLabel: '{ReportViewUtil.GetString(axis.Attribute("label").Value)}'");
+                    }
+
                     writer.WriteString("}");
                     writer.WriteEndAttribute(); // axis
                 }
@@ -129,13 +140,24 @@ namespace SanteDB.BI.Components.Chart
                         data.Add("label", ReportViewUtil.GetString(ds.Attribute("label")?.Value ?? "unknown"));
 
                         if (ds.Attribute("backgroundColor") != null)
+                        {
                             data.Add("backgroundColor", ds.Attribute("backgroundColor").Value);
+                        }
+
                         if (ds.Attribute("borderColor") != null)
+                        {
                             data.Add("borderColor", ds.Attribute("borderColor").Value);
+                        }
+
                         if (ds.Attribute("type") != null)
+                        {
                             data.Add("type", ds.Attribute("type").Value);
+                        }
+
                         if (ds.Attribute("fill") != null)
+                        {
                             data.Add("fill", Boolean.Parse(ds.Attribute("fill").Value));
+                        }
 
                         if (axis != null) // this is an X/Y plot
                         {

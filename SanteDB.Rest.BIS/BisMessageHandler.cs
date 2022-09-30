@@ -106,7 +106,9 @@ namespace SanteDB.Rest.BIS
         {
             // Don't startup unless in SanteDB
             if (!Assembly.GetEntryAssembly().GetName().Name.StartsWith("SanteDB"))
+            {
                 return true;
+            }
 
             try
             {

@@ -58,12 +58,16 @@ namespace SanteDB.BI.Rendering
         {
 
             foreach (var pol in reportDefinition.MetaData.Demands ?? new List<string>())
+            {
                 ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(pol);
+            }
 
             // Get the view 
             var view = string.IsNullOrEmpty(viewName) ? reportDefinition.Views.First() : reportDefinition.Views.FirstOrDefault(o => o.Name == viewName);
             if (view == null)
+            {
                 throw new KeyNotFoundException($"Report view {viewName} does not exist in {reportDefinition.Id}");
+            }
 
             // Demand permission to render
             // Start a new root context
