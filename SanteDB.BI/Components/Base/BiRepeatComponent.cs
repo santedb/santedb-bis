@@ -56,8 +56,12 @@ namespace SanteDB.BI.Components.Base
                 writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
 
                 foreach (var itm in dataSource.Dataset)
+                {
                     foreach (var el in element.Nodes())
+                    {
                         ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
+                    }
+                }
 
                 writer.WriteComment($"end repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
             }
@@ -67,8 +71,12 @@ namespace SanteDB.BI.Components.Base
                 if (value is IEnumerable enumerable)
                 {
                     foreach (var itm in enumerable)
+                    {
                         foreach (var el in element.Elements())
+                        {
                             ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                        }
+                    }
                 }
             }
         }

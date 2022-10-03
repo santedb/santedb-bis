@@ -43,7 +43,9 @@ namespace SanteDB.BI.Components.Base
             var fieldOrExpression = element.Value;
             var value = ReportViewUtil.GetValue(context, fieldOrExpression);
             if (value == null && !String.IsNullOrEmpty(element.Attribute("default")?.Value))
+            {
                 value = ReportViewUtil.GetValue(context, element.Attribute("default")?.Value);
+            }
 
             var attributeName = element.Attribute("name")?.Value;
 
@@ -54,12 +56,18 @@ namespace SanteDB.BI.Components.Base
                 if (!String.IsNullOrEmpty(format))
                 {
                     if (format.Contains("{0}"))
+                    {
                         writer.WriteAttributeString(attributeName, String.Format(format, value));
+                    }
                     else
+                    {
                         writer.WriteAttributeString(attributeName, String.Format($"{{0:{format}}}", value));
+                    }
                 }
                 else
+                {
                     writer.WriteAttributeString(attributeName, value.ToString());
+                }
             }
 
         }

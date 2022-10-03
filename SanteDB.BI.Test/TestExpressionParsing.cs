@@ -32,6 +32,6 @@ namespace SanteDB.BI.Test
     public class TestExpressionParsing
     {
 
-  
+
     }
 }

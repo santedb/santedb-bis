@@ -113,7 +113,9 @@ namespace SanteDB.BI.Model
             {
                 base.ShouldSerializeDefinitions = value;
                 foreach (var itm in new BiPackageEnumerator(this))
+                {
                     itm.ShouldSerializeDefinitions = value;
+                }
             }
         }
 

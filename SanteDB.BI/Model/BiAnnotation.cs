@@ -18,8 +18,8 @@
  * User: fyfej
  * Date: 2022-5-30
  */
-using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -52,10 +52,14 @@ namespace SanteDB.BI.Model
                 if (value != null)
                 {
                     using (var sr = new StringReader(value))
+                    {
                         this.Body = XElement.Load(sr);
+                    }
                 }
                 else
+                {
                     this.Body = null;
+                }
             }
         }
 

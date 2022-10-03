@@ -51,7 +51,9 @@ namespace SanteDB.BI.Components.Base
 
             // Now we want to select the values for this object
             if (String.IsNullOrEmpty(fieldOrExpression))
+            {
                 fieldOrExpression = "!null";
+            }
 
             var expression = context.CompileExpression(fieldOrExpression);
             object value = null;
@@ -63,7 +65,9 @@ namespace SanteDB.BI.Components.Base
 
                 case "count":
                     if (expression.ReturnType == typeof(bool))
+                    {
                         value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                    }
                     else
                     {
                         value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)) != null);
@@ -92,9 +96,13 @@ namespace SanteDB.BI.Components.Base
 
             // Is there a format?
             if (!String.IsNullOrEmpty(element.Attribute("format")?.Value))
+            {
                 writer.WriteString(String.Format($"{{0:{element.Attribute("format").Value}}}", value));
+            }
             else
+            {
                 writer.WriteString(value.ToString());
+            }
         }
 
         /// <summary>

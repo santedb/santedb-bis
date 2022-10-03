@@ -179,10 +179,10 @@ namespace SanteDB.Rest.BIS
                 }
             }
 
-            if(settings.TryGetValue(MaxResultsSetting, out var maxResults))
+            if (settings.TryGetValue(MaxResultsSetting, out var maxResults))
             {
                 var biConfig = configuration.GetSection<BiConfigurationSection>();
-                if(biConfig == null)
+                if (biConfig == null)
                 {
                     biConfig = new BiConfigurationSection();
                     configuration.AddSection(biConfig);
