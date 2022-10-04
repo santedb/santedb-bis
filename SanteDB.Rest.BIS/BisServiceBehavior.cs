@@ -75,22 +75,25 @@ namespace SanteDB.Rest.BIS
         // Service manager
         private readonly IServiceManager m_serviceManager;
 
+        readonly IAuditService _AuditService;
+
 
         /// <summary>
         /// BI Service behavior
         /// </summary>
-        public BisServiceBehavior() :
-            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), ApplicationServiceContext.Current.GetService<IBiMetadataRepository>())
+        public BisServiceBehavior() : 
+            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(), ApplicationServiceContext.Current.GetAuditService())
         {
 
         }
         /// <summary>
         /// DI constructor
         /// </summary>
-        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository)
+        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService)
         {
             this.m_serviceManager = serviceManager;
             this.m_metadataRepository = metadataRepository;
+            _AuditService = auditService;
         }
 
         /// <summary>
@@ -215,7 +218,8 @@ namespace SanteDB.Rest.BIS
         /// <returns></returns>
         private BisResultContext HydrateQuery(String queryId)
         {
-            AuditEventData audit = new AuditEventData(DateTimeOffset.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.SecondaryUseQuery));
+            var audit = _AuditService.Audit(DateTimeOffset.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, EventTypeCodes.SecondaryUseQuery);
+
             try
             {
                 // First we want to grab the appropriate source for this ID
@@ -260,7 +264,7 @@ namespace SanteDB.Rest.BIS
                 }
 
                 // Populate data about the query
-                audit.AuditableObjects.Add(new AuditableObject()
+                audit = audit.WithAuditableObjects(new AuditableObject()
                 {
                     IDTypeCode = AuditableObjectIdType.ReportNumber,
                     LifecycleType = AuditableObjectLifecycle.Report,
@@ -314,20 +318,18 @@ namespace SanteDB.Rest.BIS
             }
             catch (KeyNotFoundException)
             {
-                audit.Outcome = OutcomeIndicator.MinorFail;
+                audit = audit.WithOutcome(OutcomeIndicator.MinorFail);
                 throw;
             }
             catch (Exception e)
             {
-                audit.Outcome = OutcomeIndicator.MinorFail;
+                audit = audit.WithOutcome(OutcomeIndicator.MinorFail);
                 this.m_tracer.TraceError("Error rendering query: {0}", e);
                 throw new FaultException(System.Net.HttpStatusCode.InternalServerError, $"Error rendering query {queryId}", e);
             }
             finally
             {
-                AuditUtil.AddLocalDeviceActor(audit);
-                AuditUtil.AddUserActor(audit);
-                AuditUtil.SendAudit(audit);
+                audit.WithLocalDevice().WithUser().Send();
             }
         }
 
