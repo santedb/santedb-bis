@@ -94,7 +94,7 @@ namespace SanteDB.BI.Services.Impl
                 this.LoadAllDefinitions();
             };
 
-            if (this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
+            if (this.m_solutionManagerService != null && this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
             {
                 notify.CollectionChanged += (oa, eo) =>
                 {
