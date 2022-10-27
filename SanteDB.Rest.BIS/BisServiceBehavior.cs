@@ -329,7 +329,7 @@ namespace SanteDB.Rest.BIS
             }
             finally
             {
-                audit.WithLocalDevice().WithUser().Send();
+                audit.WithLocalDevice().WithPrincipal().Send();
             }
         }
 
