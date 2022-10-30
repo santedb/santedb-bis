@@ -35,7 +35,7 @@ namespace SanteDB.Rest.BIS
     /// Represents a message handler for the BIS
     /// </summary>
     [Description("Exposes the SanteDB Business Intelligence functions (reports, queries, etc.) over HTTP REST")]
-    [ApiServiceProvider("Business Intelligence Service", typeof(BisServiceBehavior), configurationType: typeof(BisServiceConfigurationSection))]
+    [ApiServiceProvider("Business Intelligence Service", typeof(BisServiceBehavior), ServiceEndpointType.BusinessIntelligenceService, configurationType: typeof(BisServiceConfigurationSection))]
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer
@@ -52,7 +52,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Name of the service in the configuration file
         /// </summary>
-        internal const string ConfigurationName = "BIS";
+        public const string ConfigurationName = "BIS";
 
         /// <summary>
         /// Gets the service name

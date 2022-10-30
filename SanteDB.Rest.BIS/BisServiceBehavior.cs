@@ -33,6 +33,7 @@ using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Audit;
 using SanteDB.Core.Security.Claims;
+using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using SanteDB.Rest.Common;
 using SanteDB.Rest.Common.Attributes;
@@ -51,7 +52,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// Default implementation of the BIS service contract
     /// </summary>
-    [ServiceBehavior(Name = "BIS", InstanceMode = ServiceInstanceMode.Singleton)]
+    [ServiceBehavior(Name = BisMessageHandler.ConfigurationName, InstanceMode = ServiceInstanceMode.Singleton)]
     public class BisServiceBehavior : IBisServiceContract
     {
 
