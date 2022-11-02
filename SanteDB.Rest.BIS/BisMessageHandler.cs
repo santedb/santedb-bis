@@ -105,7 +105,7 @@ namespace SanteDB.Rest.BIS
         public bool Start()
         {
             // Don't startup unless in SanteDB
-            if (!Assembly.GetEntryAssembly().GetName().Name.StartsWith("SanteDB"))
+            if (ApplicationServiceContext.Current.HostType == SanteDBHostType.Test)
             {
                 return true;
             }

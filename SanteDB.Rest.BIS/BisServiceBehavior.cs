@@ -189,6 +189,7 @@ namespace SanteDB.Rest.BIS
             return new ServiceOptions()
             {
                 InterfaceVersion = typeof(BisServiceBehavior).Assembly.GetName().Version.ToString(),
+                ServerVersion = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyProductAttribute>()?.Product} v{Assembly.GetEntryAssembly().GetName().Version} ({Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion})",
                 Resources = typeof(IBisServiceContract).GetCustomAttributes<ServiceKnownResourceAttribute>().Select(o => new ServiceResourceOptions(
                     o.Type.GetCustomAttribute<XmlRootAttribute>().ElementName,
                     o.Type,
