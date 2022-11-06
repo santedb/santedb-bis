@@ -79,8 +79,15 @@ namespace SanteDB.BI.Model
         public BiMetadata()
         {
             this.Demands = new List<string>();
+            this.Tags = new List<BiMetadataTag>();
             this.Status = BiDefinitionStatus.New;
         }
+
+        /// <summary>
+        /// Gets the list of tags
+        /// </summary>
+        [XmlElement("tag"), JsonProperty("tag")]
+        public List<BiMetadataTag> Tags { get; set; }
 
         /// <summary>
         /// Gets or sets the version of this object
@@ -111,7 +118,6 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlArray("policies"), XmlArrayItem("demand"), JsonProperty("policies")]
         public List<string> Demands { get; set; }
-
 
     }
 }

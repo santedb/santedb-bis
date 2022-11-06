@@ -83,7 +83,9 @@ namespace SanteDB.Rest.BIS
         /// BI Service behavior
         /// </summary>
         public BisServiceBehavior() : 
-            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(), ApplicationServiceContext.Current.GetAuditService())
+            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), 
+                ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(), 
+                ApplicationServiceContext.Current.GetAuditService())
         {
 
         }
@@ -109,7 +111,7 @@ namespace SanteDB.Rest.BIS
         /// Create the specified BIS metadata object
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
-        public BiDefinition Create(string resourceType, BiDefinition body)
+        public virtual BiDefinition Create(string resourceType, BiDefinition body)
         {
             try
             {
@@ -133,7 +135,7 @@ namespace SanteDB.Rest.BIS
         /// Delete the specified resource type
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
-        public BiDefinition Delete(string resourceType, string id)
+        public virtual BiDefinition Delete(string resourceType, string id)
         {
             try
             {
@@ -153,7 +155,7 @@ namespace SanteDB.Rest.BIS
         /// Get the specified resource type
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public BiDefinition Get(string resourceType, string id)
+        public virtual BiDefinition Get(string resourceType, string id)
         {
             try
             {
@@ -184,7 +186,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Get service options
         /// </summary>
-        public ServiceOptions Options()
+        public virtual ServiceOptions Options()
         {
             return new ServiceOptions()
             {
@@ -208,7 +210,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Execute a ping
         /// </summary>
-        public void Ping()
+        public virtual void Ping()
         {
             RestOperationContext.Current.OutgoingResponse.StatusCode = (int)System.Net.HttpStatusCode.NoContent;
         }
@@ -331,7 +333,7 @@ namespace SanteDB.Rest.BIS
             }
             finally
             {
-                audit.WithLocalDevice().WithPrincipal().Send();
+                audit.WithRemoteSource(RemoteEndpointUtil.Current.GetRemoteClient()).WithLocalDestination().WithPrincipal().Send();
             }
         }
 
@@ -367,7 +369,7 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         /// Policies controlled by query implementation
         [Demand(PermissionPolicyIdentifiers.Login)]
-        public IEnumerable<dynamic> RenderQuery(string id)
+        public virtual IEnumerable<dynamic> RenderQuery(string id)
         {
             var retVal = this.HydrateQuery(id);
             return retVal.Dataset;
@@ -377,7 +379,7 @@ namespace SanteDB.Rest.BIS
         /// Search for BIS definitions
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public BiDefinitionCollection Search(string resourceType)
+        public virtual BiDefinitionCollection Search(string resourceType)
         {
             try
             {
@@ -402,7 +404,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Update the specfied resource (delete/create)
         /// </summary>
-        public BiDefinition Update(string resourceType, string id, BiDefinition body)
+        public virtual BiDefinition Update(string resourceType, string id, BiDefinition body)
         {
             this.Delete(resourceType, id);
             return this.Create(resourceType, body);
@@ -415,7 +417,7 @@ namespace SanteDB.Rest.BIS
         /// <param name="format"></param>
         /// <returns></returns>
         [Demand(PermissionPolicyIdentifiers.Login)]
-        public Stream RenderReport(string id, string format)
+        public virtual Stream RenderReport(string id, string format)
         {
             try
             {
