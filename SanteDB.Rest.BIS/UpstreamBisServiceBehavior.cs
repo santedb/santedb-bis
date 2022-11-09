@@ -9,6 +9,7 @@ using SanteDB.Core.Http;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
+using SanteDB.Rest.BIS.Configuration;
 using SanteDB.Rest.Common;
 using System;
 using System.Collections.Generic;
@@ -27,12 +28,14 @@ namespace SanteDB.Rest.BIS
         private readonly IRestClientFactory m_restClientFactory;
         private readonly IBiMetadataRepository m_biRepository;
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(UpstreamBisServiceBehavior));
+        private readonly BisServiceConfigurationSection m_configuration;
 
         /// <summary>
         /// Constructor rest service
         /// </summary>
         public UpstreamBisServiceBehavior()
             : this(
+                  ApplicationServiceContext.Current.GetService<IConfigurationManager>(),
                   ApplicationServiceContext.Current.GetService<IServiceManager>(),
                   ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(),
                   ApplicationServiceContext.Current.GetService<IAuditService>(),
@@ -71,21 +74,28 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// DI constructor
         /// </summary>
-        public UpstreamBisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService, IUpstreamIntegrationService upstreamIntegrationService, IUpstreamAvailabilityProvider upstreamAvailabilityProvider, IRestClientFactory restClientFactory, IBiMetadataRepository biMetadataRepository) : base(serviceManager, metadataRepository, auditService)
+        public UpstreamBisServiceBehavior(IConfigurationManager configurationManager, IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService, IUpstreamIntegrationService upstreamIntegrationService, IUpstreamAvailabilityProvider upstreamAvailabilityProvider, IRestClientFactory restClientFactory, IBiMetadataRepository biMetadataRepository) : base(serviceManager, metadataRepository, auditService)
         {
             this.m_upstreamIntegrationService = upstreamIntegrationService;
             this.m_upstreamAvailabilityProvider = upstreamAvailabilityProvider;
             this.m_restClientFactory = restClientFactory;
             this.m_biRepository = biMetadataRepository;
+            this.m_configuration = configurationManager.GetSection<BisServiceConfigurationSection>();
         }
+        /// <summary>
+        /// Returns true if the request should be forwarded
+        /// </summary>
+        private bool ShouldForwardRequest() =>
+            Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
+                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr ||
+            this.m_configuration.AutomaticallyForwardRequests;
 
         /// <inheritdoc/>
         [UrlParameter(QueryControlParameterNames.HttpUpstreamParameterName, typeof(bool), "When true, forces this API to relay the caller's query to the configured upstream server")]
         public override BiDefinition Create(string resourceType, BiDefinition body)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if(this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
@@ -119,8 +129,7 @@ namespace SanteDB.Rest.BIS
         public override BiDefinition Delete(string resourceType, string id)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
@@ -154,8 +163,7 @@ namespace SanteDB.Rest.BIS
         public override BiDefinition Get(string resourceType, string id)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
@@ -192,8 +200,7 @@ namespace SanteDB.Rest.BIS
         public override IEnumerable<dynamic> RenderQuery(string id)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
@@ -229,8 +236,7 @@ namespace SanteDB.Rest.BIS
         public override Stream RenderReport(string id, string format)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
@@ -266,8 +272,7 @@ namespace SanteDB.Rest.BIS
         public override BiDefinitionCollection Search(string resourceType)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
@@ -303,8 +308,7 @@ namespace SanteDB.Rest.BIS
         public override BiDefinition Update(string resourceType, string id, BiDefinition body)
         {
             // Perform only on the external server
-            if (Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr)
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
