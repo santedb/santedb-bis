@@ -89,7 +89,7 @@ namespace SanteDB.BI.Services.Impl
             this.m_defaultDataSource = defaultDataSource;
 
             // Re-scans the loaded applets for definitions when the collection has changed
-            this.m_appletManager.Applets.CollectionChanged += (oa, ea) =>
+            this.m_appletManager.Changed += (oa, ea) =>
             {
                 this.LoadAllDefinitions();
             };
@@ -101,7 +101,7 @@ namespace SanteDB.BI.Services.Impl
                     this.LoadAllDefinitions();
                 };
             }
-            //this.LoadAllDefinitions();
+            this.LoadAllDefinitions();
         }
 
         /// <summary>
