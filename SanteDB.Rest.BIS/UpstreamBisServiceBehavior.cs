@@ -85,17 +85,19 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Returns true if the request should be forwarded
         /// </summary>
-        private bool ShouldForwardRequest() =>
-            Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry) && upstreamQry ||
-                Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr) && upstreamHdr ||
-            this.m_configuration.AutomaticallyForwardRequests;
+        private bool ShouldForwardRequest()
+        {
+            var hasUpstreamParam = Boolean.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpUpstreamParameterName], out var upstreamQry);
+            var hasUpstreamHeader = Boolean.TryParse(RestOperationContext.Current.IncomingRequest.Headers[ExtendedHttpHeaderNames.UpstreamHeaderName], out var upstreamHdr);
+            return upstreamHdr || upstreamQry || this.m_configuration?.AutomaticallyForwardRequests == true && !hasUpstreamHeader && !hasUpstreamParam;
+        }
 
         /// <inheritdoc/>
         [UrlParameter(QueryControlParameterNames.HttpUpstreamParameterName, typeof(bool), "When true, forces this API to relay the caller's query to the configured upstream server")]
         public override BiDefinition Create(string resourceType, BiDefinition body)
         {
             // Perform only on the external server
-            if(this.ShouldForwardRequest())
+            if (this.ShouldForwardRequest())
             {
                 if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                 {
