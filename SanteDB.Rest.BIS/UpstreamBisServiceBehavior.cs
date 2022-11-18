@@ -211,7 +211,7 @@ namespace SanteDB.Rest.BIS
                         using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
-                            var retVal = restClient.Get<IEnumerable<dynamic>>($"Query/{id}");
+                            var retVal = restClient.Get<IEnumerable<dynamic>>($"Query/{id}", RestOperationContext.Current.IncomingRequest.QueryString);
                             return retVal;
                         }
                     }
@@ -247,7 +247,7 @@ namespace SanteDB.Rest.BIS
                         using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
-                            var retVal = restClient.Get($"Report/{format}/{id}");
+                            var retVal = restClient.Get($"Report/{format}/{id}", RestOperationContext.Current.IncomingRequest.QueryString);
                             return new MemoryStream(retVal);
                         }
                     }
