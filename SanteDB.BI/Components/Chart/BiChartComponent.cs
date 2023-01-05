@@ -68,7 +68,7 @@ namespace SanteDB.BI.Components.Chart
             var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
             if (dataSource.Dataset.Count() == 0)
             {
-                writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition.Name} - 0 REC");
+                writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");
             }
             else
             {
