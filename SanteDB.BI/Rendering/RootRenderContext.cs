@@ -56,6 +56,7 @@ namespace SanteDB.BI.Rendering
         /// </summary>
         /// <param name="report">The report being rendered</param>
         /// <param name="viewName">The view being rendered</param>
+        /// <param name="maxResultSetSize">The maximum number of results which can be present in the BI result set</param>
         /// <param name="parameters">The parameters to the renderer</param>
         public RootRenderContext(BiReportDefinition report, String viewName, IDictionary<String, object> parameters, int? maxResultSetSize)
         {
