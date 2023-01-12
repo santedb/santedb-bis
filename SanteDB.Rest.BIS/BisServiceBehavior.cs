@@ -322,12 +322,12 @@ namespace SanteDB.Rest.BIS
             }
             catch (KeyNotFoundException)
             {
-                audit = audit.WithOutcome(OutcomeIndicator.MinorFail);
+                audit = audit.WithOutcome(OutcomeIndicator.SeriousFail);
                 throw;
             }
             catch (Exception e)
             {
-                audit = audit.WithOutcome(OutcomeIndicator.MinorFail);
+                audit = audit.WithOutcome(OutcomeIndicator.SeriousFail);
                 this.m_tracer.TraceError("Error rendering query: {0}", e);
                 throw new FaultException(System.Net.HttpStatusCode.InternalServerError, $"Error rendering query {queryId}", e);
             }
