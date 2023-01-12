@@ -83,7 +83,7 @@ namespace SanteDB.BI.Services.Impl
                     }
                     catch (Exception ex)
                     {
-                        this.m_tracer.TraceWarning("Could not initialize materialized views for {0} - {1}", itm.Id, ex);
+                        this.m_tracer.TraceWarning("Could not initialize materialized views for {0} - {1}", itm.Id, ex.Message);
                     }
                 }
             };
