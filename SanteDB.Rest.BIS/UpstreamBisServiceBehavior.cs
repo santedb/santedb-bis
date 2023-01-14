@@ -246,7 +246,14 @@ namespace SanteDB.Rest.BIS
                     {
                         using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
                         {
-                            restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
+                            restClient.Responded += (o, e) =>
+                            {
+                                RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
+                                if (e.Headers?.ContainsKey("Content-Disposition") == true)
+                                {
+                                    RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", e.Headers["Content-Disposition"]);
+                                }
+                            };
                             var retVal = restClient.Get($"Report/{format}/{id}", RestOperationContext.Current.IncomingRequest.QueryString);
                             return new MemoryStream(retVal);
                         }

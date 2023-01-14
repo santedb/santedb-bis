@@ -183,16 +183,27 @@ namespace SanteDB.BI.Components.Data
                 writer.WriteComment($"start dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
 
                 var sn = 0;
-                foreach (var itm in dataSource.Dataset)
+                if (dataSource.Dataset.Any())
                 {
-                    if (sn++ == 0)
+                    foreach (var itm in dataSource.Dataset)
                     {
-                        this.WriteHeaderRow(writer, itm, thisContext, columnList);
-                        writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                        if (sn++ == 0)
+                        {
+                            this.WriteHeaderRow(writer, itm, thisContext, columnList);
+                            writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                        }
+                        this.WriteDataRow(writer, itm, thisContext, columnList);
                     }
-                    this.WriteDataRow(writer, itm, thisContext, columnList);
+                    writer.WriteEndElement();
                 }
-                writer.WriteEndElement();
+                else
+                {
+                    writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                    writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
+                    writer.WriteElementString("td", BiConstants.HtmlNamespace, "0 REC");
+                    writer.WriteEndElement();
+                    writer.WriteEndElement();
+                }
 
                 writer.WriteComment($"end dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
             }
