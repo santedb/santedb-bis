@@ -104,7 +104,7 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         private Type GetResourceType(String resourceTypeName)
         {
-            return typeof(BiDefinition).Assembly.ExportedTypes.FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
+            return typeof(BiDefinition).Assembly.GetExportedTypesSafe().FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
         }
 
         /// <summary>
