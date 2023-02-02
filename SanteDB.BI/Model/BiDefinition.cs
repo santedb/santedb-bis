@@ -108,11 +108,11 @@ namespace SanteDB.BI.Model
         [XmlAttribute("id"), JsonProperty("id"), QueryParameter("id")]
         public String Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the UUID
-        /// </summary>
-        [XmlAttribute("uuid"), JsonProperty("uuid"), QueryParameter("uuid")]
-        public Guid Uuid { get; set; }
+        ///// <summary>
+        ///// Gets or sets the UUID
+        ///// </summary>
+        //[XmlAttribute("uuid"), JsonProperty("uuid"), QueryParameter("uuid")]
+        //public Guid Uuid { get; set; }
 
         /// <summary>
         /// Gets or sets the label

@@ -25,6 +25,7 @@ using SanteDB.Core.Model.Serialization;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -41,7 +42,7 @@ namespace SanteDB.BI.Components.Data
         /// <summary>
         /// Selectors
         /// </summary>
-        private ConcurrentDictionary<String, Delegate> m_selectors = new ConcurrentDictionary<string, Delegate>();
+        private ConcurrentDictionary<String, Func<Object, Object>> m_selectors = new ConcurrentDictionary<string, Func<Object, Object>>();
 
         /// <summary>
         /// Gets the component name
@@ -79,12 +80,14 @@ namespace SanteDB.BI.Components.Data
                     else if (!String.IsNullOrEmpty(render))
                     {
                         var selKey = $"{resourceType.Name}.{render}";
-                        if (!this.m_selectors.TryGetValue(selKey, out Delegate selDelegate))
+                        if (!this.m_selectors.TryGetValue(selKey, out var selDelegate))
                         {
-                            selDelegate = QueryExpressionParser.BuildPropertySelector(resourceType, render).Compile();
+                            var selExpression = QueryExpressionParser.BuildPropertySelector(resourceType, render);
+                            var parm = Expression.Parameter(typeof(Object));
+                            selDelegate = Expression.Lambda<Func<Object, Object>>(Expression.Invoke(selExpression, Expression.Convert(parm, resourceType)), parm).Compile();
                             this.m_selectors.TryAdd(selKey, selDelegate);
                         }
-                        writer.WriteString(selDelegate.DynamicInvoke(instance)?.ToString());
+                        writer.WriteString(selDelegate(instance)?.ToString());
                     }
                     else
                     {

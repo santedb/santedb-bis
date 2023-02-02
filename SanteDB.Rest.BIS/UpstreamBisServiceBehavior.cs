@@ -103,7 +103,7 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
                             return restClient.Post<BiDefinition, BiDefinition>($"{resourceType}", body);
@@ -137,7 +137,7 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
                             return restClient.Delete<BiDefinition>($"{resourceType}/{id}");
@@ -171,7 +171,7 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
                             var retVal = restClient.Get<BiDefinition>($"{resourceType}/{id}");
@@ -196,6 +196,16 @@ namespace SanteDB.Rest.BIS
             }
         }
 
+        /// <summary>
+        /// Create upstream rest client
+        /// </summary>
+        private IRestClient CreateUpstreamRestClient()
+        {
+            var retVal = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService);
+            retVal.Accept = "application/xml";
+            return retVal;
+        }
+
 
         /// <inheritdoc/>
         [UrlParameter(QueryControlParameterNames.HttpUpstreamParameterName, typeof(bool), "When true, forces this API to relay the caller's get to the configured upstream server")]
@@ -208,8 +218,9 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
+                            restClient.Accept = "application/json";
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
                             var retVal = restClient.Get<IEnumerable<dynamic>>($"Query/{id}", RestOperationContext.Current.IncomingRequest.QueryString);
                             return retVal;
@@ -244,7 +255,7 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
                             restClient.Responded += (o, e) =>
                             {
@@ -287,7 +298,7 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
                             var retVal = restClient.Get<BiDefinitionCollection>($"{resourceType}", RestOperationContext.Current.IncomingRequest.QueryString);
@@ -323,7 +334,7 @@ namespace SanteDB.Rest.BIS
                 {
                     try
                     {
-                        using (var restClient = this.m_restClientFactory.GetRestClientFor(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                        using (var restClient = this.CreateUpstreamRestClient())
                         {
                             restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
                             return restClient.Put<BiDefinition, BiDefinition>($"{resourceType}/{id}", body);

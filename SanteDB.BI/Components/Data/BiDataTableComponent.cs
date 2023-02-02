@@ -198,6 +198,10 @@ namespace SanteDB.BI.Components.Data
                 }
                 else
                 {
+                    writer.WriteStartElement("thead", BiConstants.HtmlNamespace);
+                    writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
+                    writer.WriteElementString("th", BiConstants.HtmlNamespace, "REC");
+                    writer.WriteEndElement();
                     writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
                     writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
                     writer.WriteElementString("td", BiConstants.HtmlNamespace, "0 REC");

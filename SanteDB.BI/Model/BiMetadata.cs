@@ -119,5 +119,10 @@ namespace SanteDB.BI.Model
         [XmlArray("policies"), XmlArrayItem("demand"), JsonProperty("policies")]
         public List<string> Demands { get; set; }
 
+        /// <summary>
+        /// True if the report is public
+        /// </summary>
+        [XmlElement("public"), JsonProperty("public")]
+        public bool IsPublic { get; set; }
     }
 }

@@ -307,15 +307,8 @@ namespace SanteDB.Rest.BIS
                 }
 
                 int offset = 0, count = 100;
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpOffsetParameterName], out offset))
-                {
-                    throw new FormatException("_offset is not in the correct format");
-                }
-
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName], out count))
-                {
-                    throw new FormatException("_count is not in the correct format");
-                }
+                _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpOffsetParameterName], out offset);
+                _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName], out count);
 
                 var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
                 return queryData;
@@ -345,6 +338,11 @@ namespace SanteDB.Rest.BIS
             // Parameters
             Dictionary<String, object> parameters = RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString().ToDictionary().ToDictionary(o => o.Key, o => o.Value.Length == 1 ? o.Value[0] : (object)o.Value);
 
+            if (parameters.TryGetValue("_download", out _))
+            {
+                parameters.Remove("_count");
+                parameters.Add("_count", "50000");
+            }
             // Context parameters
             foreach (var kv in this.m_contextParams)
             {
