@@ -173,43 +173,45 @@ namespace SanteDB.BI.Components.Data
             if (element.Attribute("source") != null)
             {
                 // Render from source
-                var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
-                var thisContext = new RenderContext(context, dataSource.Dataset);
-
-                // Add watches and expressions
-                thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-                thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
-
-                writer.WriteComment($"start dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
-
-                var sn = 0;
-                if (dataSource.Dataset.Any())
+                using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
                 {
-                    foreach (var itm in dataSource.Dataset)
+                    var thisContext = new RenderContext(context, dataSource.Dataset);
+
+                    // Add watches and expressions
+                    thisContext.Tags.Add("watches", new Dictionary<String, Object>());
+                    thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
+
+                    writer.WriteComment($"start dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
+
+                    var sn = 0;
+                    if (dataSource.Dataset.Any())
                     {
-                        if (sn++ == 0)
+                        foreach (var itm in dataSource.Dataset)
                         {
-                            this.WriteHeaderRow(writer, itm, thisContext, columnList);
-                            writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                            if (sn++ == 0)
+                            {
+                                this.WriteHeaderRow(writer, itm, thisContext, columnList);
+                                writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                            }
+                            this.WriteDataRow(writer, itm, thisContext, columnList);
                         }
-                        this.WriteDataRow(writer, itm, thisContext, columnList);
+                        writer.WriteEndElement();
                     }
-                    writer.WriteEndElement();
-                }
-                else
-                {
-                    writer.WriteStartElement("thead", BiConstants.HtmlNamespace);
-                    writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
-                    writer.WriteElementString("th", BiConstants.HtmlNamespace, "REC");
-                    writer.WriteEndElement();
-                    writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
-                    writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
-                    writer.WriteElementString("td", BiConstants.HtmlNamespace, "0 REC");
-                    writer.WriteEndElement();
-                    writer.WriteEndElement();
-                }
+                    else
+                    {
+                        writer.WriteStartElement("thead", BiConstants.HtmlNamespace);
+                        writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
+                        writer.WriteElementString("th", BiConstants.HtmlNamespace, "REC");
+                        writer.WriteEndElement();
+                        writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                        writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
+                        writer.WriteElementString("td", BiConstants.HtmlNamespace, "0 REC");
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
 
-                writer.WriteComment($"end dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                    writer.WriteComment($"end dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                }
             }
             else
             {

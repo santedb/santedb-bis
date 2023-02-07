@@ -24,12 +24,14 @@ using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
+using SanteDB.Core.Data;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -43,13 +45,15 @@ namespace SanteDB.BI.Rendering
     public abstract class XsltReportRendererBase : IBiReportFormatProvider
     {
         private readonly BiConfigurationSection m_configuration;
+        private readonly IPolicyEnforcementService m_policyEnforcementService;
 
         /// <summary>
         /// DI constructor
         /// </summary>
-        public XsltReportRendererBase(IConfigurationManager configurationManager)
+        public XsltReportRendererBase(IConfigurationManager configurationManager, IPolicyEnforcementService policyEnforcementService)
         {
             this.m_configuration = configurationManager.GetSection<BiConfigurationSection>();
+            this.m_policyEnforcementService = policyEnforcementService;
         }
 
         // XSL
@@ -65,6 +69,8 @@ namespace SanteDB.BI.Rendering
         /// Rendering base
         /// </summary>
         public XsltReportRendererBase(Stream xslStream, bool emitPlainText)
+            : this(ApplicationServiceContext.Current.GetService<IConfigurationManager>(), 
+                  ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>())
         {
             this.m_xsl = new XslCompiledTransform(false);
             using (var xr = XmlReader.Create(xslStream))
@@ -73,6 +79,7 @@ namespace SanteDB.BI.Rendering
             }
 
             this.m_isText = emitPlainText;
+
         }
 
         /// <summary>
@@ -82,7 +89,7 @@ namespace SanteDB.BI.Rendering
         {
             foreach (var pol in reportDefinition.MetaData.Demands ?? new List<string>())
             {
-                ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(pol);
+                this.m_policyEnforcementService.Demand(pol);
             }
 
             // Get the view
@@ -97,29 +104,15 @@ namespace SanteDB.BI.Rendering
             var context = new RootRenderContext(reportDefinition, viewName, parameters, this.m_configuration?.MaxBiResultSetSize);
             try
             {
-                using (var tempMs = new MemoryStream())
+                using (var tmpStream = new TemporaryFileStream())
                 {
-                    using (var xw = XmlWriter.Create(tempMs, new XmlWriterSettings()
-                    {
-                        CloseOutput = false,
-#if DEBUG
-                        Indent = true,
-                        NewLineOnAttributes = true
-#else
-                Indent = false,
-                OmitXmlDeclaration = true
-#endif
-                    }))
-                    {
-                        ReportViewUtil.Write(xw, view.Body, context);
-                    }
-
-                    tempMs.Seek(0, SeekOrigin.Begin);
-                    var retVal = new MemoryStream();
+                    ReportViewUtil.Write(tmpStream, view.Body, context);
+                    tmpStream.Seek(0, SeekOrigin.Begin);
+                    var retVal = new TemporaryFileStream();
 
                     XsltArgumentList args = new XsltArgumentList();
                     args.AddParam("current-date", String.Empty, DateTime.Now.ToString("o"));
-                    using (var xr = XmlReader.Create(tempMs))
+                    using (var xr = XmlReader.Create(tmpStream))
                     {
                         if (this.m_isText)
                         {
@@ -148,8 +141,9 @@ namespace SanteDB.BI.Rendering
             catch (Exception e)
             {
                 this.m_tracer.TraceError("Could not export report {0} view {1} - {2}", reportDefinition.Id, viewName, e);
-                throw new BiException($"Could not export report view to CSV {view}", reportDefinition, e);
+                throw new BiException($"Could not export report view using XSLT {view}", reportDefinition, e);
             }
         }
+
     }
 }

@@ -31,14 +31,17 @@
     <None Remove="Model\csv.xsl" />
     <None Remove="Resources\csv.xsl" />
     <None Remove="Resources\excel-xml.xsl" />
+    <None Remove="Resources\xlsxwork.xsl" />
   </ItemGroup>
     
   <ItemGroup>
+    <EmbeddedResource Include="Resources\xlsxwork.xsl" />
     <EmbeddedResource Include="Resources\excel-xml.xsl" />
     <EmbeddedResource Include="Resources\csv.xsl" />
   </ItemGroup>  
   <ItemGroup>
     <PackageReference Include="Antlr3.Runtime" Version="3.5.1" />
+    <PackageReference Include="ClosedXML" Version="0.100.3" />
     <PackageReference Include="DynamicExpresso.Core" Version="2.13.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>  

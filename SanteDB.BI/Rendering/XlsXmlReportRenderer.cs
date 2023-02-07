@@ -18,25 +18,20 @@
  * User: fyfej
  * Date: 2022-5-30
  */
-using SanteDB.BI.Model;
-using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace SanteDB.BI.Services
+namespace SanteDB.BI.Rendering
 {
     /// <summary>
-    /// Represents a view renderer which can render a particular view given a particular context
+    /// A report renderer which can generate CSV files
     /// </summary>
-    public interface IBiReportFormatProvider 
+    public class XlsXmlReportRenderer : XsltReportRendererBase
     {
+
         /// <summary>
-        /// Render the specified report according to the format
+        /// Create new CSV renderer
         /// </summary>
-        /// <param name="parameters">The parameters used to populate the report</param>
-        /// <param name="reportDefinition">The report that should be rendered</param>
-        /// <param name="viewName">The name of the view to berendered</param>
-        /// <returns>The rendered output stream</returns>
-        Stream Render(BiReportDefinition reportDefinition, String viewName, IDictionary<String, Object> parameters);
+        public XlsXmlReportRenderer() : base(typeof(CsvReportRenderer).Assembly.GetManifestResourceStream("SanteDB.BI.Resources.excel-xml.xsl"), false)
+        {
+        }
+
     }
 }

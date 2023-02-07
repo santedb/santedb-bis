@@ -110,11 +110,8 @@ namespace SanteDB.BI.Rendering
                 }
 
                 // Load from cache instead of DB?
-                var cacheService = ApplicationServiceContext.Current.GetService<IAdhocCacheService>();
-                var key = $"{name}?{String.Join("&", this.Parameters.Select(o => $"{o.Key}={o.Value}"))}";
-                var cacheResult = cacheService?.Get<IEnumerable<dynamic>>(key);
 
-                int count = 10000;
+                int? count = null;
                 if (this.m_maxResultSetSize.HasValue)
                 {
                     count = this.m_maxResultSetSize.Value;
@@ -124,11 +121,7 @@ namespace SanteDB.BI.Rendering
                     count = tCount;
                 }
 
-                if (cacheResult != null)
-                {
-                    return new BisResultContext(null, this.Parameters, providerImplementation, cacheResult, DateTime.Now);
-                }
-                else if (viewDef is BiViewDefinition)
+                if (viewDef is BiViewDefinition)
                 {
                     retVal = providerImplementation.ExecuteView(viewDef as BiViewDefinition, this.Parameters, 0, count);
                 }
@@ -141,7 +134,6 @@ namespace SanteDB.BI.Rendering
                     throw new InvalidOperationException($"Cannot determine data source type of {name}");
                 }
 
-                cacheService?.Add(key, retVal.Dataset, new TimeSpan(0, 1, 0));
                 this.m_dataSources.Add(name, retVal);
             }
             return retVal;

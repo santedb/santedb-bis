@@ -46,24 +46,26 @@ namespace SanteDB.BI.Components.Base
             // Run dataset and start context
             if (element.Attribute("source") != null)
             {
-                var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
-                var thisContext = new RenderContext(context, dataSource.Dataset);
-
-                // Add watches and expressions
-                thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-                thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
-
-                writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
-
-                foreach (var itm in dataSource.Dataset)
+                using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
                 {
-                    foreach (var el in element.Nodes())
-                    {
-                        ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
-                    }
-                }
+                    var thisContext = new RenderContext(context, dataSource.Dataset);
 
-                writer.WriteComment($"end repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                    // Add watches and expressions
+                    thisContext.Tags.Add("watches", new Dictionary<String, Object>());
+                    thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
+
+                    writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
+
+                    foreach (var itm in dataSource.Dataset)
+                    {
+                        foreach (var el in element.Nodes())
+                        {
+                            ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
+                        }
+                    }
+
+                    writer.WriteComment($"end repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                }
             }
             else // Execute expression
             {

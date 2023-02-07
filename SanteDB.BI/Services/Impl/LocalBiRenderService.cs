@@ -26,6 +26,7 @@ using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Jobs;
 using SanteDB.Core.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,6 +41,9 @@ namespace SanteDB.BI.Services.Impl
 
         // Service manager
         private readonly IServiceManager m_serviceManager;
+
+        // Concurrent dictionary
+        private readonly ConcurrentDictionary<String, IBiReportFormatProvider> m_renderers = new ConcurrentDictionary<string, IBiReportFormatProvider>();
 
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(LocalBiRenderService));
 
@@ -116,8 +120,11 @@ namespace SanteDB.BI.Services.Impl
                 }
 
                 // Render the report
-                var renderer = this.m_serviceManager.CreateInjected(formatDefinition.Type) as IBiReportFormatProvider;
-
+                if (!this.m_renderers.TryGetValue(formatDefinition.Id, out var renderer))
+                {
+                    renderer = this.m_serviceManager.CreateInjected(formatDefinition.Type) as IBiReportFormatProvider;
+                    this.m_renderers.TryAdd(formatDefinition.Id, renderer);
+                }
                 mimeType = formatDefinition.ContentType;
                 return renderer.Render(reportDefinition, viewName, parameters);
             }

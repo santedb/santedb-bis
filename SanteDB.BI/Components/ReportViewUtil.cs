@@ -25,6 +25,7 @@ using SanteDB.Core;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -148,6 +149,22 @@ namespace SanteDB.BI.Components
             }
 
             return retVal;
+        }
+
+        /// <summary>
+        /// Write the output data to the stream
+        /// </summary>
+        internal static void Write(Stream writerStream, XNode formatNode, IRenderContext context)
+        {
+            using(var xw = XmlWriter.Create(writerStream, new XmlWriterSettings()
+            {
+                CloseOutput = false,
+                Indent = true,
+                NewLineOnAttributes = true
+            }))
+            {
+                Write(xw, formatNode, context);
+            }
         }
 
         /// <summary>
