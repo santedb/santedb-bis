@@ -110,7 +110,7 @@ namespace SanteDB.BI.Rendering
                                                 }
                                                 if (Int32.TryParse(xr.GetAttribute("colspan"), out var colspan))
                                                 {
-                                                    currentWorksheet.Range(currentWorksheet.ActiveCell.Address, currentWorksheet.Cell(currentWorksheet.ActiveCell.Address.RowNumber, currentWorksheet.ActiveCell.Address.ColumnNumber + colspan).Address).Merge();
+                                                    currentWorksheet.Range(currentWorksheet.ActiveCell.Address, currentWorksheet.Cell(currentWorksheet.ActiveCell.Address.RowNumber, currentWorksheet.ActiveCell.Address.ColumnNumber + colspan - 1).Address).Merge();
                                                 }
 
                                                 if (xr.LocalName == "th")
