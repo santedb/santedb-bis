@@ -23,6 +23,7 @@ using SanteDB.BI.Configuration;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
+using SanteDB.Core.Data;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System.Collections.Generic;
@@ -72,7 +73,7 @@ namespace SanteDB.BI.Rendering
             // Demand permission to render
             // Start a new root context
             var context = new RootRenderContext(reportDefinition, viewName, parameters, this.m_configuration?.MaxBiResultSetSize);
-            var retVal = new MemoryStream();
+            var retVal = new TemporaryFileStream();
             using (var xw = XmlWriter.Create(retVal, new XmlWriterSettings()
             {
                 CloseOutput = false,
