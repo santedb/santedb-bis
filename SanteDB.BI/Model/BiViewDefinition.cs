@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiViewDefinition), Namespace = BiConstants.XmlNamespace), JsonObject(nameof(BiViewDefinition))]
     [XmlRoot(nameof(BiViewDefinition), Namespace = BiConstants.XmlNamespace)]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
     public class BiViewDefinition : BiDefinition
     {
 

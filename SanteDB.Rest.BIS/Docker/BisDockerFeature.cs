@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Configuration;
 using SanteDB.BI.Services.Impl;
@@ -114,7 +114,7 @@ namespace SanteDB.Rest.BIS
                     {
                         new Rest.Common.Configuration.RestServiceBehaviorConfiguration(typeof(TokenAuthorizationAccessBehavior))
                     },
-                    Name = "BIS",
+                    ConfigurationName = BisMessageHandler.ConfigurationName,
                     Endpoints = new List<Rest.Common.Configuration.RestEndpointConfiguration>()
                     {
                         this.CreateEndpoint("http://0.0.0.0:8080/bis")
@@ -179,10 +179,10 @@ namespace SanteDB.Rest.BIS
                 }
             }
 
-            if(settings.TryGetValue(MaxResultsSetting, out var maxResults))
+            if (settings.TryGetValue(MaxResultsSetting, out var maxResults))
             {
                 var biConfig = configuration.GetSection<BiConfigurationSection>();
-                if(biConfig == null)
+                if (biConfig == null)
                 {
                     biConfig = new BiConfigurationSection();
                     configuration.AddSection(biConfig);

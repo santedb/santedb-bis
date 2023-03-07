@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2022-1-6
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -29,7 +29,6 @@ using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Jobs
 {
@@ -37,7 +36,7 @@ namespace SanteDB.BI.Jobs
     /// Materialized view job
     /// </summary>
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
-    public class BiMaterializeJob  : IJob
+    public class BiMaterializeJob : IJob
     {
 
         // Tracer 
@@ -111,8 +110,8 @@ namespace SanteDB.BI.Jobs
                 // TODO: Refactor on new enhanced persistence layer definition
                 using (AuthenticationContext.EnterSystemContext())
                 {
-                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status != BiDefinitionStatus.Deprecated && o.MetaData.Status != BiDefinitionStatus.Obsolete, 0, 100).ToArray();
-                    int i = 0;
+                    var definitions = biRepository.Query<BiQueryDefinition>(o => o.MetaData.Status != BiDefinitionStatus.Deprecated && o.MetaData.Status != BiDefinitionStatus.Obsolete);
+                    int i = 0, count = definitions.Count();
                     foreach (var itm in definitions)
                     {
 
@@ -122,7 +121,7 @@ namespace SanteDB.BI.Jobs
                         }
 
 
-                        this.m_stateManager.SetProgress(this, $"Refreshing {itm.Name ?? itm.Id}", ((float)i++ / (float)definitions.Length));
+                        this.m_stateManager.SetProgress(this, $"Refreshing {itm.Name ?? itm.Id}", ((float)i++ / (float)count));
 
                         var dataSource = biProvider;
                         var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;

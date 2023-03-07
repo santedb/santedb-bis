@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-10-29
+ * Date: 2022-5-30
  */
 using DynamicExpresso;
 using SanteDB.BI.Rendering;
@@ -24,7 +24,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -70,9 +69,13 @@ namespace SanteDB.BI.Components.Data
                         {
                             writer.WriteAttributeString("colspan", subFields.Count().ToString());
                             if (subFieldStack.Any())
+                            {
                                 subFieldStack.Peek().AddRange(subFields);
+                            }
                             else
+                            {
                                 subFieldStack.Enqueue(subFields.ToList());
+                            }
                         }
                         else
                         {
@@ -81,7 +84,10 @@ namespace SanteDB.BI.Components.Data
 
                         // Write out header elements
                         foreach (var el in header.Nodes())
+                        {
                             ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                        }
+
                         writer.WriteEndElement();
                     }
 
@@ -148,7 +154,10 @@ namespace SanteDB.BI.Components.Data
                 }
                 writer.WriteStartElement("td", BiConstants.HtmlNamespace);
                 foreach (var el in cell.Elements())
+                {
                     ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                }
+
                 writer.WriteEndElement();
             }
         }
@@ -164,28 +173,45 @@ namespace SanteDB.BI.Components.Data
             if (element.Attribute("source") != null)
             {
                 // Render from source
-                var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
-                var thisContext = new RenderContext(context, dataSource.Dataset);
-
-                // Add watches and expressions
-                thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-                thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
-
-                writer.WriteComment($"start dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
-
-                var sn = 0;
-                foreach (var itm in dataSource.Dataset)
+                using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
                 {
-                    if (sn++ == 0)
-                    {
-                        this.WriteHeaderRow(writer, itm, thisContext, columnList);
-                        writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
-                    }
-                    this.WriteDataRow(writer, itm, thisContext, columnList);
-                }
-                writer.WriteEndElement();
+                    var thisContext = new RenderContext(context, dataSource.Dataset);
 
-                writer.WriteComment($"end dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                    // Add watches and expressions
+                    thisContext.Tags.Add("watches", new Dictionary<String, Object>());
+                    thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
+
+                    writer.WriteComment($"start dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
+
+                    var sn = 0;
+                    if (dataSource.Dataset.Any())
+                    {
+                        foreach (var itm in dataSource.Dataset)
+                        {
+                            if (sn++ == 0)
+                            {
+                                this.WriteHeaderRow(writer, itm, thisContext, columnList);
+                                writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                            }
+                            this.WriteDataRow(writer, itm, thisContext, columnList);
+                        }
+                        writer.WriteEndElement();
+                    }
+                    else
+                    {
+                        writer.WriteStartElement("thead", BiConstants.HtmlNamespace);
+                        writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
+                        writer.WriteElementString("th", BiConstants.HtmlNamespace, "REC");
+                        writer.WriteEndElement();
+                        writer.WriteStartElement("tbody", BiConstants.HtmlNamespace);
+                        writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
+                        writer.WriteElementString("td", BiConstants.HtmlNamespace, "0 REC");
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteComment($"end dataTable : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                }
             }
             else
             {

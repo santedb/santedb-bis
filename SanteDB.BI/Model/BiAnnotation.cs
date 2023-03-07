@@ -16,9 +16,10 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -30,7 +31,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiAnnotation), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiAnnotation
     {
         /// <summary>
@@ -51,10 +52,14 @@ namespace SanteDB.BI.Model
                 if (value != null)
                 {
                     using (var sr = new StringReader(value))
+                    {
                         this.Body = XElement.Load(sr);
+                    }
                 }
                 else
+                {
                     this.Body = null;
+                }
             }
         }
 

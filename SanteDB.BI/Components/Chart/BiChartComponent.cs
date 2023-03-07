@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using DynamicExpresso;
 using Newtonsoft.Json;
@@ -45,176 +45,198 @@ namespace SanteDB.BI.Components.Chart
         /// </summary>
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
-            if(element == null)
+            if (element == null)
             {
                 throw new ArgumentNullException(nameof(element));
             }
-            else if(element.Attribute("source") == null)
+            else if (element.Attribute("source") == null)
             {
                 throw new InvalidOperationException("Cannot find root source");
             }
-            else if(writer == null)
+            else if (writer == null)
             {
                 throw new ArgumentNullException(nameof(writer));
             }
-            else if(context == null)
+            else if (context == null)
             {
                 throw new ArgumentException(nameof(context));
             }
-            else if(!(context.Root is RootRenderContext rootContext))
+            else if (!(context.Root is RootRenderContext rootContext))
             {
                 throw new InvalidOperationException("Invalid root context");
             }
-            var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
-            if (dataSource.Dataset.Count() == 0)
-                writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition.Name} - 0 REC");
-            else
-            {
-                // Render the object
-                writer.WriteStartElement("chart", BiConstants.HtmlNamespace);
-                writer.WriteAttributeString("type", $"'{element.Attribute("type").Value}'");
-                writer.WriteAttributeString("legend", $"{element.Attribute("legend")?.Value ?? "false" }");
-
-                var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
-                if (title != null)
-                    writer.WriteAttributeString("title", $"'{title.Value}'");
-
-                var chartContext = new RenderContext(context, dataSource.Dataset);
-                chartContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
-                // Now sort the result set by the key
-                var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
-                var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
-                var axisDataExpression = (labels ?? axis).Value;
-                var axisFormat = (labels ?? axis).Attribute("format")?.Value;
-                var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
-                var chartData = dataSource.Dataset.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)));
-
-                // If the axis is formatted, then group
-
-                var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => $"'{String.Format($"{{0:{axisFormat}}}", o)}'").Distinct();
-
-                // Is this a labeled data set?
-                if (labels != null)
+            using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value)) {
+                if (dataSource.Dataset.Count() == 0)
                 {
-                    writer.WriteAttributeString("labels", $"[{String.Join(",", axisElements)}]");
+                    writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");
                 }
-                else // it is an X/Y dataset
+                else
                 {
-                    writer.WriteStartAttribute("axis");
-                    writer.WriteString("{ type: '");
+                    // Render the object
+                    writer.WriteStartElement("chart", BiConstants.HtmlNamespace);
+                    writer.WriteAttributeString("type", $"'{element.Attribute("type").Value}'");
+                    writer.WriteAttributeString("legend", $"{element.Attribute("legend")?.Value ?? "false"}");
 
-                    // First determine type
-                    if (typeof(DateTime).IsAssignableFrom(axisSelector.Invoke(ReportViewUtil.ToParameterArray(chartData.First())).GetType()))
-                        writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{(axis.Attribute("time-unit")?.Value ?? "day")}' }}");
-                    else
-                        writer.WriteString("linear'");
-
-                    if (axis.Attribute("label") != null)
-                        writer.WriteString($", scaleLabel: '{ReportViewUtil.GetString(axis.Attribute("label").Value)}'");
-                    writer.WriteString("}");
-                    writer.WriteEndAttribute(); // axis
-                }
-
-                // Now process datasets
-                List<ExpandoObject> dataSetOptions = new List<ExpandoObject>();
-                var dataGroup = chartData.GroupBy(o => $"'{String.Format($"{{0:{axisFormat}}}", axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)))}'");
-
-                foreach (var ds in element.Elements((XNamespace)BiConstants.ComponentNamespace + "dataset"))
-                {
-                    try
+                    var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
+                    if (title != null)
                     {
-                        var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataGroup.First().First()), ds.Value);
+                        writer.WriteAttributeString("title", $"'{title.Value}'");
+                    }
 
-                        IDictionary<String, Object> data = new ExpandoObject();
-                        data.Add("label", ReportViewUtil.GetString(ds.Attribute("label")?.Value ?? "unknown"));
+                    var chartContext = new RenderContext(context, dataSource.Dataset);
+                    chartContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
+                    // Now sort the result set by the key
+                    var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
+                    var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
+                    var axisDataExpression = (labels ?? axis).Value;
+                    var axisFormat = (labels ?? axis).Attribute("format")?.Value;
+                    var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
+                    var chartData = dataSource.Dataset.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)));
 
-                        if (ds.Attribute("backgroundColor") != null)
-                            data.Add("backgroundColor", ds.Attribute("backgroundColor").Value);
-                        if (ds.Attribute("borderColor") != null)
-                            data.Add("borderColor", ds.Attribute("borderColor").Value);
-                        if (ds.Attribute("type") != null)
-                            data.Add("type", ds.Attribute("type").Value);
-                        if (ds.Attribute("fill") != null)
-                            data.Add("fill", Boolean.Parse(ds.Attribute("fill").Value));
+                    // If the axis is formatted, then group
 
-                        if (axis != null) // this is an X/Y plot
+                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => $"'{String.Format($"{{0:{axisFormat}}}", o)}'").Distinct();
+
+                    // Is this a labeled data set?
+                    if (labels != null)
+                    {
+                        writer.WriteAttributeString("labels", $"[{String.Join(",", axisElements)}]");
+                    }
+                    else // it is an X/Y dataset
+                    {
+                        writer.WriteStartAttribute("axis");
+                        writer.WriteString("{ type: '");
+
+                        // First determine type
+                        if (typeof(DateTime).IsAssignableFrom(axisSelector.Invoke(ReportViewUtil.ToParameterArray(chartData.First())).GetType()))
                         {
-                            switch (ds.Attribute("aggregate")?.Value ?? "sum")
-                            {
-                                case "count":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null) }).ToArray());
-                                    break;
-
-                                case "sum":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
-                                    break;
-
-                                case "avg":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
-                                    break;
-
-                                case "min":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
-                                    break;
-
-                                case "max":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
-                                    break;
-
-                                case "first":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First())) }).ToArray());
-                                    break;
-
-                                case "last":
-                                    data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last())) }).ToArray());
-                                    break;
-                            }
+                            writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{(axis.Attribute("time-unit")?.Value ?? "day")}' }}");
                         }
                         else
                         {
-                            switch (ds.Attribute("aggregate")?.Value ?? "sum")
-                            {
-                                case "count":
-                                    data.Add("data", dataGroup.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null)).ToArray());
-                                    break;
-
-                                case "sum":
-                                    data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
-                                    break;
-
-                                case "avg":
-                                    data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
-                                    break;
-
-                                case "min":
-                                    data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
-                                    break;
-
-                                case "max":
-                                    data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
-                                    break;
-
-                                case "first":
-                                    data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First()))).ToArray());
-                                    break;
-
-                                case "last":
-                                    data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last()))).ToArray());
-                                    break;
-                            }
+                            writer.WriteString("linear'");
                         }
 
-                        dataSetOptions.Add(data as ExpandoObject);
-                    }
-                    catch
-                    {
-                    }
-                }
+                        if (axis.Attribute("label") != null)
+                        {
+                            writer.WriteString($", scaleLabel: '{ReportViewUtil.GetString(axis.Attribute("label").Value)}'");
+                        }
 
-                // Serialize data set options
-                var optionJson = JsonConvert.SerializeObject(dataSetOptions);
-                writer.WriteAttributeString("data", optionJson);
-                writer.WriteEndElement(); // chart
+                        writer.WriteString("}");
+                        writer.WriteEndAttribute(); // axis
+                    }
+
+                    // Now process datasets
+                    List<ExpandoObject> dataSetOptions = new List<ExpandoObject>();
+                    var dataGroup = chartData.GroupBy(o => $"'{String.Format($"{{0:{axisFormat}}}", axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)))}'");
+
+                    foreach (var ds in element.Elements((XNamespace)BiConstants.ComponentNamespace + "dataset"))
+                    {
+                        try
+                        {
+                            var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataGroup.First().First()), ds.Value);
+
+                            IDictionary<String, Object> data = new ExpandoObject();
+                            data.Add("label", ReportViewUtil.GetString(ds.Attribute("label")?.Value ?? "unknown"));
+
+                            if (ds.Attribute("backgroundColor") != null)
+                            {
+                                data.Add("backgroundColor", ds.Attribute("backgroundColor").Value);
+                            }
+
+                            if (ds.Attribute("borderColor") != null)
+                            {
+                                data.Add("borderColor", ds.Attribute("borderColor").Value);
+                            }
+
+                            if (ds.Attribute("type") != null)
+                            {
+                                data.Add("type", ds.Attribute("type").Value);
+                            }
+
+                            if (ds.Attribute("fill") != null)
+                            {
+                                data.Add("fill", Boolean.Parse(ds.Attribute("fill").Value));
+                            }
+
+                            if (axis != null) // this is an X/Y plot
+                            {
+                                switch (ds.Attribute("aggregate")?.Value ?? "sum")
+                                {
+                                    case "count":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null) }).ToArray());
+                                        break;
+
+                                    case "sum":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        break;
+
+                                    case "avg":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        break;
+
+                                    case "min":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        break;
+
+                                    case "max":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        break;
+
+                                    case "first":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First())) }).ToArray());
+                                        break;
+
+                                    case "last":
+                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last())) }).ToArray());
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                switch (ds.Attribute("aggregate")?.Value ?? "sum")
+                                {
+                                    case "count":
+                                        data.Add("data", dataGroup.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null)).ToArray());
+                                        break;
+
+                                    case "sum":
+                                        data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        break;
+
+                                    case "avg":
+                                        data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        break;
+
+                                    case "min":
+                                        data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        break;
+
+                                    case "max":
+                                        data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        break;
+
+                                    case "first":
+                                        data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First()))).ToArray());
+                                        break;
+
+                                    case "last":
+                                        data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last()))).ToArray());
+                                        break;
+                                }
+                            }
+
+                            dataSetOptions.Add(data as ExpandoObject);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                    // Serialize data set options
+                    var optionJson = JsonConvert.SerializeObject(dataSetOptions);
+                    writer.WriteAttributeString("data", optionJson);
+                    writer.WriteEndElement(); // chart
+                }
             }
         }
 

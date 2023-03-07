@@ -16,10 +16,11 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -30,7 +31,7 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiDataSourceDefinition : BiDefinition
     {
 
@@ -44,9 +45,13 @@ namespace SanteDB.BI.Model
             set
             {
                 if (value != null)
+                {
                     this.ProviderType = Type.GetType(value);
+                }
                 else
+                {
                     this.ProviderType = null;
+                }
             }
         }
 

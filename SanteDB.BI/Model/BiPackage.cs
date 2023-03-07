@@ -16,11 +16,12 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using SanteDB.BI.Util;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -33,7 +34,7 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [XmlType(nameof(BiPackage), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiPackage : BiDefinition
     {
 
@@ -112,7 +113,9 @@ namespace SanteDB.BI.Model
             {
                 base.ShouldSerializeDefinitions = value;
                 foreach (var itm in new BiPackageEnumerator(this))
+                {
                     itm.ShouldSerializeDefinitions = value;
+                }
             }
         }
 

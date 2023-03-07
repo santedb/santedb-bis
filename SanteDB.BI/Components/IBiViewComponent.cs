@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Rendering;
 using System.Xml;
@@ -37,8 +37,8 @@ namespace SanteDB.BI.Components
         /// <summary>
         /// Returns true if this component renderer can render the specified element
         /// </summary>
-        /// <param name="source">The source renderer</param>
         /// <param name="element">The element being tested for render</param>
+        /// <param name="context">The rendering context in which the view component is being run</param>
         /// <returns>The render object</returns>
         bool Validate(XElement element, IRenderContext context);
 

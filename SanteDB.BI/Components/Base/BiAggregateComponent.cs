@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Rendering;
 using System;
@@ -47,54 +47,65 @@ namespace SanteDB.BI.Components.Base
             var fieldOrExpression = element.Value;
 
             // Run dataset and start context
-            var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(dataSourceName);
-
-            // Now we want to select the values for this object
-            if (String.IsNullOrEmpty(fieldOrExpression))
-                fieldOrExpression = "!null";
-
-            var expression = context.CompileExpression(fieldOrExpression);
-            object value = null;
-            switch (function)
+            using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(dataSourceName))
             {
-                case "sum":
-                    value = dataSource.Dataset.Sum(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
-                    break;
 
-                case "count":
-                    if (expression.ReturnType == typeof(bool))
-                        value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)));
-                    else
-                    {
-                        value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)) != null);
-                    }
-                    break;
+                // Now we want to select the values for this object
+                if (String.IsNullOrEmpty(fieldOrExpression))
+                {
+                    fieldOrExpression = "!null";
+                }
 
-                case "count-distinct":
-                    value = dataSource.Dataset.Select(o => expression.Invoke(ReportViewUtil.ToParameterArray(o))).Distinct().Count();
-                    break;
+                var expression = context.CompileExpression(fieldOrExpression);
+                object value = null;
+                switch (function)
+                {
+                    case "sum":
+                        value = dataSource.Dataset.Sum(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        break;
 
-                case "min":
-                    value = dataSource.Dataset.Min(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
-                    break;
+                    case "count":
+                        if (expression.ReturnType == typeof(bool))
+                        {
+                            value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        }
+                        else
+                        {
+                            value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)) != null);
+                        }
+                        break;
 
-                case "max":
-                    value = dataSource.Dataset.Max(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
-                    break;
+                    case "count-distinct":
+                        value = dataSource.Dataset.Select(o => expression.Invoke(ReportViewUtil.ToParameterArray(o))).Distinct().Count();
+                        break;
 
-                case "avg":
-                    value = dataSource.Dataset.Average(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
-                    break;
+                    case "min":
+                        value = dataSource.Dataset.Min(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        break;
 
-                default:
-                    throw new ArgumentOutOfRangeException($"Aggregate function {function} is not known");
+                    case "max":
+                        value = dataSource.Dataset.Max(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        break;
+
+                    case "avg":
+                        value = dataSource.Dataset.Average(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException($"Aggregate function {function} is not known");
+                }
+
+                // Is there a format?
+                if (!String.IsNullOrEmpty(element.Attribute("format")?.Value))
+                {
+                    writer.WriteString(String.Format($"{{0:{element.Attribute("format").Value}}}", value));
+                }
+                else
+                {
+                    writer.WriteString(value.ToString());
+                }
             }
 
-            // Is there a format?
-            if (!String.IsNullOrEmpty(element.Attribute("format")?.Value))
-                writer.WriteString(String.Format($"{{0:{element.Attribute("format").Value}}}", value));
-            else
-                writer.WriteString(value.ToString());
         }
 
         /// <summary>

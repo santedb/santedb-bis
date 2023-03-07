@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Rendering;
 using System;
@@ -46,7 +46,9 @@ namespace SanteDB.BI.Components.Base
             var fieldOrExpression = element.Value;
             var value = ReportViewUtil.GetValue(context, fieldOrExpression);
             if (value == null && !String.IsNullOrEmpty(element.Attribute("default")?.Value))
+            {
                 value = ReportViewUtil.GetValue(context, element.Attribute("default")?.Value);
+            }
 
             // Is the required value a change?
             if (element.Attribute("when")?.Value == "changed")
@@ -54,9 +56,13 @@ namespace SanteDB.BI.Components.Base
                 IDictionary<String, object> watches = context.Parent.Tags["watches"] as IDictionary<String, Object>;
 
                 if (!watches.TryGetValue(fieldOrExpression, out var exisitngValue))
+                {
                     watches.Add(fieldOrExpression, value);
+                }
                 else if (exisitngValue?.Equals(value) == true)
+                {
                     return;
+                }
             }
 
             // Is there a format?
@@ -66,12 +72,18 @@ namespace SanteDB.BI.Components.Base
                 if (!String.IsNullOrEmpty(format))
                 {
                     if (format.Contains("{0}"))
+                    {
                         writer.WriteString(String.Format(format, value));
+                    }
                     else
+                    {
                         writer.WriteString(String.Format($"{{0:{format}}}", value));
+                    }
                 }
                 else
+                {
                     writer.WriteString(value.ToString());
+                }
             }
 
         }

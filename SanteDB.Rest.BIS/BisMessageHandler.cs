@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using RestSrvr;
 using SanteDB.Core;
@@ -35,11 +35,11 @@ namespace SanteDB.Rest.BIS
     /// Represents a message handler for the BIS
     /// </summary>
     [Description("Exposes the SanteDB Business Intelligence functions (reports, queries, etc.) over HTTP REST")]
-    [ApiServiceProvider("Business Intelligence Service", typeof(BisServiceBehavior), configurationType: typeof(BisServiceConfigurationSection))]
+    [ApiServiceProvider("Business Intelligence Service", typeof(BisServiceBehavior), ServiceEndpointType.BusinessIntelligenceService, Configuration = typeof(BisServiceConfigurationSection))]
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(BisMessageHandler));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BisMessageHandler));
 
         // The REST host
         private RestService m_webHost;
@@ -48,6 +48,11 @@ namespace SanteDB.Rest.BIS
         /// True if the service is running
         /// </summary>
         public bool IsRunning => this.m_webHost?.IsRunning == true;
+
+        /// <summary>
+        /// Name of the service in the configuration file
+        /// </summary>
+        public const string ConfigurationName = "BIS";
 
         /// <summary>
         /// Gets the service name
@@ -100,13 +105,15 @@ namespace SanteDB.Rest.BIS
         public bool Start()
         {
             // Don't startup unless in SanteDB
-            if (!Assembly.GetEntryAssembly().GetName().Name.StartsWith("SanteDB"))
+            if (ApplicationServiceContext.Current.HostType == SanteDBHostType.Test)
+            {
                 return true;
+            }
 
             try
             {
                 this.Starting?.Invoke(this, EventArgs.Empty);
-                this.m_webHost = ApplicationServiceContext.Current.GetService<IRestServiceFactory>().CreateService(typeof(BisServiceBehavior));
+                this.m_webHost = ApplicationServiceContext.Current.GetService<IRestServiceFactory>().CreateService(ConfigurationName);
 
                 // Add service behaviors
                 foreach (ServiceEndpoint endpoint in this.m_webHost.Endpoints)

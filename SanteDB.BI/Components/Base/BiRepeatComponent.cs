@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using DynamicExpresso;
 using SanteDB.BI.Rendering;
@@ -46,20 +46,26 @@ namespace SanteDB.BI.Components.Base
             // Run dataset and start context
             if (element.Attribute("source") != null)
             {
-                var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value);
-                var thisContext = new RenderContext(context, dataSource.Dataset);
+                using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
+                {
+                    var thisContext = new RenderContext(context, dataSource.Dataset);
 
-                // Add watches and expressions
-                thisContext.Tags.Add("watches", new Dictionary<String, Object>());
-                thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
+                    // Add watches and expressions
+                    thisContext.Tags.Add("watches", new Dictionary<String, Object>());
+                    thisContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
 
-                writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
+                    writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
 
-                foreach (var itm in dataSource.Dataset)
-                    foreach (var el in element.Nodes())
-                        ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
+                    foreach (var itm in dataSource.Dataset)
+                    {
+                        foreach (var el in element.Nodes())
+                        {
+                            ReportViewUtil.Write(writer, el, new RenderContext(thisContext, itm));
+                        }
+                    }
 
-                writer.WriteComment($"end repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                    writer.WriteComment($"end repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")} ");
+                }
             }
             else // Execute expression
             {
@@ -67,8 +73,12 @@ namespace SanteDB.BI.Components.Base
                 if (value is IEnumerable enumerable)
                 {
                     foreach (var itm in enumerable)
+                    {
                         foreach (var el in element.Elements())
+                        {
                             ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                        }
+                    }
                 }
             }
         }

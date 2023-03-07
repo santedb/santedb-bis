@@ -16,10 +16,11 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -28,7 +29,7 @@ namespace SanteDB.BI.Model
     /// Represents a BI Aggregation definition
     /// </summary>
     [XmlType(nameof(BiAggregationDefinition), Namespace = BiConstants.XmlNamespace), JsonObject]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiAggregationDefinition : BiSqlDefinition
     {
         /// <summary>

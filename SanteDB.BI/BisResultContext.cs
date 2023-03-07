@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -28,7 +28,7 @@ namespace SanteDB.BI
     /// <summary>
     /// Represents an execution context containing results
     /// </summary>
-    public class BisResultContext
+    public class BisResultContext : IDisposable
     {
 
         /// <summary>
@@ -79,6 +79,15 @@ namespace SanteDB.BI
         /// </summary>
         public DateTimeOffset StopTime { get; private set; }
 
-
+        /// <summary>
+        /// Dispose of this object
+        /// </summary>
+        public void Dispose()
+        {
+            if(this.Dataset is IDisposable disp)
+            {
+                disp.Dispose();
+            }
+        }
     }
 }

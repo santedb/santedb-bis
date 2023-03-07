@@ -16,15 +16,14 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Model;
-using SanteDB.BI.Util;
-using SanteDB.Core;
 using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
@@ -43,7 +42,7 @@ namespace SanteDB.BI.Services.Impl
     public class AppletBiRepository : IBiMetadataRepository
     {
         // Tracer for this repository
-        private Tracer m_tracer = Tracer.GetTracer(typeof(AppletBiRepository));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(AppletBiRepository));
 
         /// <summary>
         /// Definition cache
@@ -90,19 +89,19 @@ namespace SanteDB.BI.Services.Impl
             this.m_defaultDataSource = defaultDataSource;
 
             // Re-scans the loaded applets for definitions when the collection has changed
-            this.m_appletManager.Applets.CollectionChanged += (oa, ea) =>
+            this.m_appletManager.Changed += (oa, ea) =>
             {
                 this.LoadAllDefinitions();
             };
 
-            if (this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
+            if (this.m_solutionManagerService != null && this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
             {
                 notify.CollectionChanged += (oa, eo) =>
                 {
                     this.LoadAllDefinitions();
                 };
             }
-            //this.LoadAllDefinitions();
+            this.LoadAllDefinitions();
         }
 
         /// <summary>
@@ -114,13 +113,19 @@ namespace SanteDB.BI.Services.Impl
                 definitions.TryGetValue(id, out Object asset))
             {
                 if (asset is AppletAsset)
+                {
                     using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(asset as AppletAsset)))
+                    {
                         asset = BiDefinition.Load(ms);
+                    }
+                }
 
                 var definition = asset as BiDefinition;
                 if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
                 definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
+                {
                     return (TBisDefinition)definition;
+                }
             }
             return null;
         }
@@ -132,7 +137,9 @@ namespace SanteDB.BI.Services.Impl
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+            {
                 this.m_policyEnforcementService.Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            }
 
             // Locate type definitions
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object> typeDefinitions))
@@ -146,9 +153,13 @@ namespace SanteDB.BI.Services.Impl
             {
                 // Can't replace sys object
                 if (existing is BiDefinition && !(existing as BiDefinition).IsSystemObject)
+                {
                     typeDefinitions[metadata.Id] = metadata;
+                }
                 else if (existing is AppletAsset && metadata is BiDefinition) // cant downgrade but can upgrade
+                {
                     typeDefinitions[metadata.Id] = metadata;
+                }
             }
             else
             {
@@ -163,23 +174,7 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition
         {
-            // TODO: If the definition is an applet asset then load it
-            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
-                return definitions.Values
-                    .Select(o =>
-                    {
-                        if (o is AppletAsset)
-                            using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(o as AppletAsset)))
-                                return BiDefinition.Load(ms);
-                        else
-                            return o;
-                    })
-                    .OfType<TBisDefinition>()
-                    .Where(filter.Compile())
-                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true)
-                    .Skip(offset)
-                    .Take(count ?? 100);
-            return new TBisDefinition[0];
+            return this.Query<TBisDefinition>(filter).Skip(offset).Take(count ?? 100);
         }
 
         /// <summary>
@@ -189,12 +184,16 @@ namespace SanteDB.BI.Services.Impl
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
+            {
                 this.m_policyEnforcementService.Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata);
+            }
 
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, object> definitions) &&
                 definitions.TryGetValue(id, out object existing) &&
                 (existing is AppletAsset || (existing as BiDefinition).IsSystemObject))
+            {
                 definitions.Remove(id);
+            }
         }
 
         /// <summary>
@@ -213,7 +212,9 @@ namespace SanteDB.BI.Services.Impl
 
                 // Doesn't have a solution manager
                 if (solutions == null)
+                {
                     this.ProcessApplet(this.m_appletManager.Applets);
+                }
                 else
                 {
                     solutions.Add(new Core.Applets.Model.AppletSolution() { Meta = new Core.Applets.Model.AppletInfo() { Id = String.Empty } });
@@ -240,7 +241,9 @@ namespace SanteDB.BI.Services.Impl
                         this.m_tracer.TraceVerbose("Attempting to load {0}", o.Name);
 
                         using (var ms = new MemoryStream(appletCollection.RenderAssetContent(o)))
+                        {
                             return new { Definition = BiDefinition.Load(ms), Asset = o };
+                        }
                     }
                     catch (Exception e)
                     {
@@ -257,7 +260,9 @@ namespace SanteDB.BI.Services.Impl
                 this.ProcessBisDefinition(itm.Definition);
 #if DEBUG
                 if (itm.Definition is BiReportDefinition || itm.Definition is BiViewDefinition || itm.Definition is BiQueryDefinition)
+                {
                     this.m_definitionCache[itm.Definition.GetType()][itm.Definition.Id] = itm.Asset;
+                }
 #endif
 
             }
@@ -268,10 +273,9 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void ProcessBisDefinition(BiDefinition definition)
         {
-            if (definition is BiPackage)
+            if (definition is BiPackage pkg)
             {
-                this.m_tracer.TraceInfo("Processing BIS Package: {0}", definition.Id);
-                var pkg = definition as BiPackage;
+                this.m_tracer.TraceInfo("Processing BI Package: {0}", definition.Id);
                 var objs = pkg.DataSources.OfType<BiDefinition>()
                     .Union(pkg.Formats.OfType<BiDefinition>())
                     .Union(pkg.Parameters.OfType<BiDefinition>())
@@ -288,9 +292,39 @@ namespace SanteDB.BI.Services.Impl
             }
             else
             {
-                this.m_tracer.TraceInfo("Processing BIS Definition: {0}", definition.Id);
+                this.m_tracer.TraceVerbose("Processing BI Definition: {0}", definition.Id);
                 this.Insert(definition);
             }
+        }
+
+        /// <inheritdoc/>
+        public IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter)
+            where TBisDefinition : BiDefinition
+        {
+            // TODO: If the definition is an applet asset then load it
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))
+            {
+                return new MemoryQueryResultSet<TBisDefinition>(definitions.Values
+                    .Select(o =>
+                    {
+                        if (o is AppletAsset)
+                        {
+                            using (var ms = new MemoryStream(this.m_appletManager.Applets.RenderAssetContent(o as AppletAsset)))
+                            {
+                                return BiDefinition.Load(ms);
+                            }
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    })
+                    .OfType<TBisDefinition>()
+                    .Where(filter.Compile())
+                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
+            }
+
+            return new MemoryQueryResultSet<TBisDefinition>();
         }
     }
 }

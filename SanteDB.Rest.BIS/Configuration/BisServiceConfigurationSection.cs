@@ -16,9 +16,10 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.Core.Configuration;
+using System.ComponentModel;
 using System.Xml.Serialization;
 
 namespace SanteDB.Rest.BIS.Configuration
@@ -29,5 +30,13 @@ namespace SanteDB.Rest.BIS.Configuration
     [XmlType(nameof(BisServiceConfigurationSection), Namespace = "http://santedb.org/configuration")]
     public class BisServiceConfigurationSection : IConfigurationSection
     {
+
+
+        /// <summary>
+        /// Auto forward requests to upstream
+        /// </summary>
+        [XmlAttribute("autoforwardToUpstream")]
+        [DisplayName("Auto-Forward Requests"), Description("When true, automatically forwards all requests to the upstream")]
+        public bool AutomaticallyForwardRequests { get; set; }
     }
 }

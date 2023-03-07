@@ -16,17 +16,16 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using DynamicExpresso;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
-using SanteDB.Core.Interfaces;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -145,8 +144,27 @@ namespace SanteDB.BI.Components
         {
             IBiViewComponent retVal = null;
             if (!m_componentCache.TryGetValue(elementName, out retVal) && !m_componentCache.TryGetValue(elementName.Namespace + "any", out retVal))
+            {
                 return null;
+            }
+
             return retVal;
+        }
+
+        /// <summary>
+        /// Write the output data to the stream
+        /// </summary>
+        internal static void Write(Stream writerStream, XNode formatNode, IRenderContext context)
+        {
+            using(var xw = XmlWriter.Create(writerStream, new XmlWriterSettings()
+            {
+                CloseOutput = false,
+                Indent = true,
+                NewLineOnAttributes = true
+            }))
+            {
+                Write(xw, formatNode, context);
+            }
         }
 
         /// <summary>
@@ -164,7 +182,9 @@ namespace SanteDB.BI.Components
                     writer.WriteComment($"WARNING: No component for {el.Name} is registered");
                 }
                 else if (component.Validate(el, context))
+                {
                     component.Render(el, writer, context);
+                }
                 else
                 {
 #if DEBUG

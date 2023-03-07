@@ -16,10 +16,9 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Model;
-using SanteDB.Core.Model;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -114,7 +113,9 @@ namespace SanteDB.BI.Services.Impl
                 // Same key, so lets create or accumulate
                 var column = itm[pivot.Columns];
                 if (!cobject.ContainsKey(column.ToString()))
+                {
                     cobject.Add(column.ToString(), new List<Object>() { itm[pivot.Value] });
+                }
                 else
                 {
                     var cvalue = cobject[column.ToString()] as List<Object>;
@@ -139,7 +140,10 @@ namespace SanteDB.BI.Services.Impl
 
                     var bucket = (value.Value as IEnumerable<Object>);
                     newItm[value.Key] = this.Aggregate((value.Value as List<Object>), pivot.AggregateFunction);
-                    if (!colNames.Contains(value.Key)) colNames.Add(value.Key);
+                    if (!colNames.Contains(value.Key))
+                    {
+                        colNames.Add(value.Key);
+                    }
                 }
                 aggBuckets.Add(newItm as ExpandoObject);
             }
@@ -151,10 +155,17 @@ namespace SanteDB.BI.Services.Impl
                 var tuple = (new ExpandoObject() as IDictionary<String, Object>);
                 tuple[pivot.Key] = itm[pivot.Key];
                 foreach (var col in colNames)
+                {
                     if (itm.ContainsKey(col))
+                    {
                         tuple[col] = itm[col];
+                    }
                     else
+                    {
                         tuple[col] = null;
+                    }
+                }
+
                 output.Add(tuple as ExpandoObject);
             }
 

@@ -16,13 +16,14 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Components;
 using SanteDB.BI.Configuration;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
+using SanteDB.Core.Data;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System.Collections.Generic;
@@ -58,17 +59,21 @@ namespace SanteDB.BI.Rendering
         {
 
             foreach (var pol in reportDefinition.MetaData.Demands ?? new List<string>())
+            {
                 ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>().Demand(pol);
+            }
 
             // Get the view 
             var view = string.IsNullOrEmpty(viewName) ? reportDefinition.Views.First() : reportDefinition.Views.FirstOrDefault(o => o.Name == viewName);
             if (view == null)
+            {
                 throw new KeyNotFoundException($"Report view {viewName} does not exist in {reportDefinition.Id}");
+            }
 
             // Demand permission to render
             // Start a new root context
             var context = new RootRenderContext(reportDefinition, viewName, parameters, this.m_configuration?.MaxBiResultSetSize);
-            var retVal = new MemoryStream();
+            var retVal = new TemporaryFileStream();
             using (var xw = XmlWriter.Create(retVal, new XmlWriterSettings()
             {
                 CloseOutput = false,

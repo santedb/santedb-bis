@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Rendering;
 using SanteDB.Core.Model.Map;
@@ -53,9 +53,13 @@ namespace SanteDB.BI.Components.Base
 
                 // Convert for comparison
                 if (xmlValue == "null" || xmlValue == null) // Null
+                {
                     value = null;
+                }
                 else if (!MapUtil.TryConvert(xmlValue, fieldValue?.GetType() ?? typeof(object), out value))
+                {
                     throw new InvalidOperationException($"Switch statement from {fieldValue} to {xmlValue}");
+                }
 
                 // Operator
                 bool opSuccess = false;
@@ -89,7 +93,10 @@ namespace SanteDB.BI.Components.Base
                             break;
                     }
 
-                    if (isNot) opSuccess = !opSuccess;
+                    if (isNot)
+                    {
+                        opSuccess = !opSuccess;
+                    }
                 }
                 catch (InvalidCastException)
                 {
@@ -99,7 +106,10 @@ namespace SanteDB.BI.Components.Base
                 if (opSuccess)
                 {
                     foreach (var itm in whenClauseElement.Nodes())
+                    {
                         ReportViewUtil.Write(writer, itm, context);
+                    }
+
                     return;
                 }
             }
@@ -107,8 +117,12 @@ namespace SanteDB.BI.Components.Base
             // Default condition?
             var defaultOption = element.Element((XNamespace)BiConstants.ComponentNamespace + "default");
             if (defaultOption != null)
+            {
                 foreach (var itm in defaultOption.Nodes())
+                {
                     ReportViewUtil.Write(writer, itm, context);
+                }
+            }
         }
 
         /// <summary>

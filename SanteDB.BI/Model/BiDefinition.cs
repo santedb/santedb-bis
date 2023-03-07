@@ -16,13 +16,14 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -50,7 +51,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [XmlInclude(typeof(BiSchemaViewDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public abstract class BiDefinition
     {
         // Serializers
@@ -77,7 +78,9 @@ namespace SanteDB.BI.Model
                 typeof(BiDataFlowDefinition)
             };
             foreach (var t in types)
+            {
                 s_serializers.Add(new XmlSerializer(t, types));
+            }
         }
 
         /// <summary>
@@ -105,11 +108,11 @@ namespace SanteDB.BI.Model
         [XmlAttribute("id"), JsonProperty("id"), QueryParameter("id")]
         public String Id { get; set; }
 
-        /// <summary>
-        /// Gets or sets the UUID
-        /// </summary>
-        [XmlAttribute("uuid"), JsonProperty("uuid"), QueryParameter("uuid")]
-        public Guid Uuid { get; set; }
+        ///// <summary>
+        ///// Gets or sets the UUID
+        ///// </summary>
+        //[XmlAttribute("uuid"), JsonProperty("uuid"), QueryParameter("uuid")]
+        //public Guid Uuid { get; set; }
 
         /// <summary>
         /// Gets or sets the label
@@ -155,7 +158,9 @@ namespace SanteDB.BI.Model
                 foreach (var sz in s_serializers)
                 {
                     if (sz.CanDeserialize(xr))
+                    {
                         return sz.Deserialize(xr) as BiDefinition;
+                    }
                 }
             }
             throw new InvalidDataException("Stream does not contain a valid BIS definition");

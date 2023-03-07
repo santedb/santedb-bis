@@ -16,11 +16,12 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -68,7 +69,7 @@ namespace SanteDB.BI.Model
     /// BI metadata
     /// </summary>
     [XmlType(nameof(BiMetadata), Namespace = BiConstants.XmlNamespace), JsonObject]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiMetadata
     {
 
@@ -78,8 +79,15 @@ namespace SanteDB.BI.Model
         public BiMetadata()
         {
             this.Demands = new List<string>();
+            this.Tags = new List<BiMetadataTag>();
             this.Status = BiDefinitionStatus.New;
         }
+
+        /// <summary>
+        /// Gets the list of tags
+        /// </summary>
+        [XmlElement("tag"), JsonProperty("tag")]
+        public List<BiMetadataTag> Tags { get; set; }
 
         /// <summary>
         /// Gets or sets the version of this object
@@ -111,6 +119,10 @@ namespace SanteDB.BI.Model
         [XmlArray("policies"), XmlArrayItem("demand"), JsonProperty("policies")]
         public List<string> Demands { get; set; }
 
-
+        /// <summary>
+        /// True if the report is public
+        /// </summary>
+        [XmlElement("public"), JsonProperty("public")]
+        public bool IsPublic { get; set; }
     }
 }

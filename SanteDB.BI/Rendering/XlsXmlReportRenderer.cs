@@ -18,26 +18,20 @@
  * User: fyfej
  * Date: 2022-5-30
  */
-using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
-using System.Xml.Serialization;
-
-namespace SanteDB.BI.Model
+namespace SanteDB.BI.Rendering
 {
     /// <summary>
-    /// A data flow step which streams data from another data flow step
+    /// A report renderer which can generate CSV files
     /// </summary>
-    [XmlType(nameof(BiDataFlowStreamStep), Namespace = BiConstants.XmlNamespace)]
-    [JsonObject]
-    [ExcludeFromCodeCoverage] // Serialization class
-    public abstract class BiDataFlowStreamStep : BiDataFlowStep
+    public class XlsXmlReportRenderer : XsltReportRendererBase
     {
 
         /// <summary>
-        /// Input for the data flow step
+        /// Create new CSV renderer
         /// </summary>
-        [XmlElement("input"), JsonProperty("input")]
-        public BiDataFlowStep InputFlow { get; set; }
+        public XlsXmlReportRenderer() : base(typeof(CsvReportRenderer).Assembly.GetManifestResourceStream("SanteDB.BI.Resources.excel-xml.xsl"), false)
+        {
+        }
 
     }
 }

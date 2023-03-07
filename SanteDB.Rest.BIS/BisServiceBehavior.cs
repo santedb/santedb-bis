@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using RestSrvr;
 using RestSrvr.Attributes;
@@ -26,15 +26,16 @@ using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
 using SanteDB.Core;
-using SanteDB.Core.Auditing;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Interop;
-using SanteDB.Core.Model;
+using SanteDB.Core.Model.Audit;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Audit;
 using SanteDB.Core.Security.Claims;
+using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
+using SanteDB.Rest.Common;
 using SanteDB.Rest.Common.Attributes;
 using System;
 using System.Collections;
@@ -51,7 +52,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// Default implementation of the BIS service contract
     /// </summary>
-    [ServiceBehavior(Name = "BIS", InstanceMode = ServiceInstanceMode.Singleton)]
+    [ServiceBehavior(Name = BisMessageHandler.ConfigurationName, InstanceMode = ServiceInstanceMode.Singleton)]
     public class BisServiceBehavior : IBisServiceContract
     {
 
@@ -67,7 +68,7 @@ namespace SanteDB.Rest.BIS
         };
 
         // Default tracer
-        private Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
 
         // Metadata repository
         private readonly IBiMetadataRepository m_metadataRepository;
@@ -75,22 +76,27 @@ namespace SanteDB.Rest.BIS
         // Service manager
         private readonly IServiceManager m_serviceManager;
 
+        readonly IAuditService _AuditService;
+
 
         /// <summary>
         /// BI Service behavior
         /// </summary>
         public BisServiceBehavior() : 
-            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), ApplicationServiceContext.Current.GetService<IBiMetadataRepository>())
+            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), 
+                ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(), 
+                ApplicationServiceContext.Current.GetAuditService())
         {
 
         }
         /// <summary>
         /// DI constructor
         /// </summary>
-        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository)
+        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService)
         {
             this.m_serviceManager = serviceManager;
             this.m_metadataRepository = metadataRepository;
+            _AuditService = auditService;
         }
 
         /// <summary>
@@ -98,21 +104,24 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         private Type GetResourceType(String resourceTypeName)
         {
-            return typeof(BiDefinition).Assembly.ExportedTypes.FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
+            return typeof(BiDefinition).Assembly.GetExportedTypesSafe().FirstOrDefault(o => o.GetCustomAttribute<XmlRootAttribute>()?.ElementName == resourceTypeName);
         }
 
         /// <summary>
         /// Create the specified BIS metadata object
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
-        public BiDefinition Create(string resourceType, BiDefinition body)
+        public virtual BiDefinition Create(string resourceType, BiDefinition body)
         {
             try
             {
                 // Ensure that endpoint agrees with the body definition
                 var rt = this.GetResourceType(resourceType);
                 if (body.GetType() != rt)
-                    throw new FaultException(400, "Invalid resource type");
+                {
+                    throw new FaultException(System.Net.HttpStatusCode.BadRequest, "Invalid resource type");
+                }
+
                 return this.m_metadataRepository.Insert(body);
             }
             catch (Exception e)
@@ -126,7 +135,7 @@ namespace SanteDB.Rest.BIS
         /// Delete the specified resource type
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
-        public BiDefinition Delete(string resourceType, string id)
+        public virtual BiDefinition Delete(string resourceType, string id)
         {
             try
             {
@@ -146,7 +155,7 @@ namespace SanteDB.Rest.BIS
         /// Get the specified resource type
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public BiDefinition Get(string resourceType, string id)
+        public virtual BiDefinition Get(string resourceType, string id)
         {
             try
             {
@@ -157,7 +166,9 @@ namespace SanteDB.Rest.BIS
 
                 // Resolve any refs in the object
                 if (retVal == null)
+                {
                     throw new KeyNotFoundException(id);
+                }
                 else
                 {
                     retVal = BiUtils.ResolveRefs(retVal);
@@ -175,11 +186,12 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Get service options
         /// </summary>
-        public ServiceOptions Options()
+        public virtual ServiceOptions Options()
         {
             return new ServiceOptions()
             {
                 InterfaceVersion = typeof(BisServiceBehavior).Assembly.GetName().Version.ToString(),
+                ServerVersion = $"{Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyProductAttribute>()?.Product} v{Assembly.GetEntryAssembly().GetName().Version} ({Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion})",
                 Resources = typeof(IBisServiceContract).GetCustomAttributes<ServiceKnownResourceAttribute>().Select(o => new ServiceResourceOptions(
                     o.Type.GetCustomAttribute<XmlRootAttribute>().ElementName,
                     o.Type,
@@ -198,10 +210,9 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Execute a ping
         /// </summary>
-        public void Ping()
+        public virtual void Ping()
         {
             RestOperationContext.Current.OutgoingResponse.StatusCode = (int)System.Net.HttpStatusCode.NoContent;
-
         }
 
         /// <summary>
@@ -211,7 +222,8 @@ namespace SanteDB.Rest.BIS
         /// <returns></returns>
         private BisResultContext HydrateQuery(String queryId)
         {
-            AuditData audit = new AuditData(DateTimeOffset.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, AuditUtil.CreateAuditActionCode(EventTypeCodes.SecondaryUseQuery));
+            var audit = _AuditService.Audit(DateTimeOffset.Now, ActionType.Execute, OutcomeIndicator.Success, EventIdentifierType.Query, EventTypeCodes.SecondaryUseQuery);
+
             try
             {
                 // First we want to grab the appropriate source for this ID
@@ -223,7 +235,10 @@ namespace SanteDB.Rest.BIS
                     {
                         var parmDef = this.m_metadataRepository.Get<BiParameterDefinition>(queryId);
                         if (parmDef == null)
+                        {
                             throw new KeyNotFoundException($"Could not find a Parameter, Query or View to hydrate named {queryId}");
+                        }
+
                         queryDef = parmDef?.Values as BiQueryDefinition;
                         queryDef.Id = queryDef.Id ?? queryId;
                     }
@@ -238,17 +253,22 @@ namespace SanteDB.Rest.BIS
                 viewDef = SanteDB.BI.Util.BiUtils.ResolveRefs(viewDef) as BiViewDefinition;
                 var dsource = viewDef.Query?.DataSources.FirstOrDefault(o => o.Name == "main") ?? viewDef.Query?.DataSources.FirstOrDefault();
                 if (dsource == null)
+                {
                     throw new KeyNotFoundException("Query does not contain a data source");
+                }
 
                 IBiDataSource providerImplementation = null;
                 if (dsource.ProviderType != null && this.m_metadataRepository.IsLocal)
+                {
                     providerImplementation = this.m_serviceManager.CreateInjected(dsource.ProviderType) as IBiDataSource;
+                }
                 else
+                {
                     providerImplementation = ApplicationServiceContext.Current.GetService<IBiDataSource>(); // Global default
-
+                }
 
                 // Populate data about the query
-                audit.AuditableObjects.Add(new AuditableObject()
+                audit = audit.WithAuditableObjects(new AuditableObject()
                 {
                     IDTypeCode = AuditableObjectIdType.ReportNumber,
                     LifecycleType = AuditableObjectLifecycle.Report,
@@ -275,9 +295,7 @@ namespace SanteDB.Rest.BIS
                             }).ToList(),
                             Columns = RestOperationContext.Current.IncomingRequest.QueryString.GetValues("_select").Select(o=>{
                                 var match = aggRx.Match(o);
-                                if(!match.Success)
-                                    throw new InvalidOperationException("Aggregation function must be in format AGGREGATOR(COLUMN)");
-                                return new BiAggregateSqlColumnReference()
+                                if(!match.Success) { throw new InvalidOperationException("Aggregation function must be in format AGGREGATOR(COLUMN)"); } return new BiAggregateSqlColumnReference()
                                 {
                                     Aggregation = (BiAggregateFunction)Enum.Parse(typeof(BiAggregateFunction), match.Groups[1].Value, true),
                                     ColumnSelector = match.Groups[2].Value,
@@ -289,31 +307,26 @@ namespace SanteDB.Rest.BIS
                 }
 
                 int offset = 0, count = 100;
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0", out offset))
-                    throw new FormatException("_offset is not in the correct format");
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100", out count))
-                    throw new FormatException("_count is not in the correct format");
-
+                _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpOffsetParameterName], out offset);
+                _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName], out count);
 
                 var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
                 return queryData;
             }
             catch (KeyNotFoundException)
             {
-                audit.Outcome = OutcomeIndicator.MinorFail;
+                audit = audit.WithOutcome(OutcomeIndicator.SeriousFail);
                 throw;
             }
             catch (Exception e)
             {
-                audit.Outcome = OutcomeIndicator.MinorFail;
+                audit = audit.WithOutcome(OutcomeIndicator.SeriousFail);
                 this.m_tracer.TraceError("Error rendering query: {0}", e);
-                throw new FaultException(500, $"Error rendering query {queryId}", e);
+                throw new FaultException(System.Net.HttpStatusCode.InternalServerError, $"Error rendering query {queryId}", e);
             }
             finally
             {
-                AuditUtil.AddLocalDeviceActor(audit);
-                AuditUtil.AddUserActor(audit);
-                AuditUtil.SendAudit(audit);
+                audit.WithRemoteSource(RemoteEndpointUtil.Current.GetRemoteClient()).WithLocalDestination().WithPrincipal().Send();
             }
         }
 
@@ -323,11 +336,13 @@ namespace SanteDB.Rest.BIS
         private IDictionary<String, Object> CreateParameterDictionary()
         {
             // Parameters
-            Dictionary<String, object> parameters = NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query).ToDictionary(o => o.Key, o => o.Value.Count == 1 ? o.Value.First() : (object)o.Value.ToArray());
+            Dictionary<String, object> parameters = RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString().ToDictionary().ToDictionary(o => o.Key, o => o.Value.Length == 1 ? o.Value[0] : (object)o.Value);
 
             // Context parameters
             foreach (var kv in this.m_contextParams)
+            {
                 if (!parameters.ContainsKey(kv.Key))
+                {
                     try
                     {
                         parameters.Add(kv.Key, kv.Value());
@@ -336,6 +351,8 @@ namespace SanteDB.Rest.BIS
                     {
                         this.m_tracer.TraceWarning("Cannot hydrate parameter {0} : {1}", kv.Key, e);
                     }
+                }
+            }
 
             return parameters;
         }
@@ -345,7 +362,7 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         /// Policies controlled by query implementation
         [Demand(PermissionPolicyIdentifiers.Login)]
-        public IEnumerable<dynamic> RenderQuery(string id)
+        public virtual IEnumerable<dynamic> RenderQuery(string id)
         {
             var retVal = this.HydrateQuery(id);
             return retVal.Dataset;
@@ -355,15 +372,12 @@ namespace SanteDB.Rest.BIS
         /// Search for BIS definitions
         /// </summary>
         [Demand(PermissionPolicyIdentifiers.ReadMetadata)]
-        public BiDefinitionCollection Search(string resourceType)
+        public virtual BiDefinitionCollection Search(string resourceType)
         {
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                var expression = typeof(QueryExpressionParser).GetGenericMethod(nameof(QueryExpressionParser.BuildLinqExpression),
-                    new Type[] { rt },
-                    new Type[] { typeof(NameValueCollection) }
-                ).Invoke(null, new Object[] { NameValueCollection.ParseQueryString(RestOperationContext.Current.IncomingRequest.Url.Query) });
+                var expression = QueryExpressionParser.BuildLinqExpression(rt, RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
 
                 int offset = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0"),
                     count = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100");
@@ -383,7 +397,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Update the specfied resource (delete/create)
         /// </summary>
-        public BiDefinition Update(string resourceType, string id, BiDefinition body)
+        public virtual BiDefinition Update(string resourceType, string id, BiDefinition body)
         {
             this.Delete(resourceType, id);
             return this.Create(resourceType, body);
@@ -396,13 +410,10 @@ namespace SanteDB.Rest.BIS
         /// <param name="format"></param>
         /// <returns></returns>
         [Demand(PermissionPolicyIdentifiers.Login)]
-        public Stream RenderReport(string id, string format)
+        public virtual Stream RenderReport(string id, string format)
         {
             try
             {
-
-                // Render the report
-                var parameters = this.CreateParameterDictionary();
 
                 // Get the view name
                 var view = RestOperationContext.Current.IncomingRequest.QueryString["_view"];
@@ -412,7 +423,10 @@ namespace SanteDB.Rest.BIS
                 // Set output headers
                 RestOperationContext.Current.OutgoingResponse.ContentType = mimeType;
                 if (RestOperationContext.Current.IncomingRequest.QueryString["_download"] == "true")
+                {
                     RestOperationContext.Current.OutgoingResponse.AddHeader("Content-Disposition", $"attachment; filename=\"{id}-{view}-{DateTime.Now.ToString("yyyy-MM-ddTHH_mm_ss")}.{format}\"");
+                }
+
                 return retVal;
             }
             catch (Exception e)

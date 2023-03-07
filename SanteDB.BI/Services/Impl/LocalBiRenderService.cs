@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Jobs;
 using SanteDB.BI.Model;
@@ -26,6 +26,7 @@ using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Jobs;
 using SanteDB.Core.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,6 +41,9 @@ namespace SanteDB.BI.Services.Impl
 
         // Service manager
         private readonly IServiceManager m_serviceManager;
+
+        // Concurrent dictionary
+        private readonly ConcurrentDictionary<String, IBiReportFormatProvider> m_renderers = new ConcurrentDictionary<string, IBiReportFormatProvider>();
 
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(LocalBiRenderService));
 
@@ -62,7 +66,7 @@ namespace SanteDB.BI.Services.Impl
             // Scan and initialize all BI materialized views
             ApplicationServiceContext.Current.Started += (o, e) =>
             {
-                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.MetaData.Status == BiDefinitionStatus.Active, 0, 100))
+                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.MetaData.Status == BiDefinitionStatus.Active))
                 {
                     try
                     {
@@ -81,7 +85,7 @@ namespace SanteDB.BI.Services.Impl
                         this.m_tracer.TraceInfo("Materializing views for {0}", queryDefinition.Id);
                         dataSource.CreateMaterializedView(queryDefinition);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         this.m_tracer.TraceWarning("Could not initialize materialized views for {0} - {1}", itm.Id, ex.Message);
                     }
@@ -103,17 +107,24 @@ namespace SanteDB.BI.Services.Impl
             {
 
                 // Get the report format 
-                var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == formatName, 0, 1).FirstOrDefault();
+                var formatDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Query<BiRenderFormatDefinition>(o => o.FormatExtension == formatName).FirstOrDefault();
                 if (formatDefinition == null)
+                {
                     throw new KeyNotFoundException($"Report format {formatName} is not registered");
+                }
 
                 var reportDefinition = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>().Get<BiReportDefinition>(reportId);
                 if (reportDefinition == null)
+                {
                     throw new KeyNotFoundException($"Report {reportId} is not registered");
+                }
 
                 // Render the report
-                var renderer = this.m_serviceManager.CreateInjected(formatDefinition.Type) as IBiReportFormatProvider;
-
+                if (!this.m_renderers.TryGetValue(formatDefinition.Id, out var renderer))
+                {
+                    renderer = this.m_serviceManager.CreateInjected(formatDefinition.Type) as IBiReportFormatProvider;
+                    this.m_renderers.TryAdd(formatDefinition.Id, renderer);
+                }
                 mimeType = formatDefinition.ContentType;
                 return renderer.Render(reportDefinition, viewName, parameters);
             }

@@ -16,8 +16,9 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2022-1-6
+ * Date: 2022-5-30
  */
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -27,7 +28,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiMaterializeDefinition), Namespace = BiConstants.XmlNamespace)]
     [XmlRoot(nameof(BiMaterializeDefinition), Namespace = BiConstants.XmlNamespace)]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiMaterializeDefinition
     {
 

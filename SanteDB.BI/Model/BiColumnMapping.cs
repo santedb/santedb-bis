@@ -16,10 +16,11 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -29,7 +30,7 @@ namespace SanteDB.BI.Model
     /// A column mapping between a souce and destination column
     /// </summary>
     [XmlType(nameof(BiColumnMapping), Namespace = BiConstants.XmlNamespace)]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiColumnMapping
     {
         /// <summary>
@@ -49,7 +50,7 @@ namespace SanteDB.BI.Model
     /// Schema definition for an input column with an optional transform
     /// </summary>
     [XmlType(nameof(BiColumnMappingSource), Namespace = BiConstants.XmlNamespace)]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiColumnMappingSource : BiSchemaColumnDefinition
     {
 
@@ -66,7 +67,7 @@ namespace SanteDB.BI.Model
     /// Indicates the source transform from another column
     /// </summary>
     [XmlType(nameof(BiColumnMappingTransformJoin), Namespace = BiConstants.XmlNamespace)]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    [ExcludeFromCodeCoverage] // Serialization class
     public class BiColumnMappingTransformJoin
     {
 

@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2021-8-27
+ * Date: 2022-5-30
  */
 using SanteDB.BI.Model;
 using System;
@@ -28,7 +28,7 @@ namespace SanteDB.BI.Services
     /// <summary>
     /// Represents a view renderer which can render a particular view given a particular context
     /// </summary>
-    public interface IBiReportFormatProvider
+    public interface IBiReportFormatProvider 
     {
         /// <summary>
         /// Render the specified report according to the format
