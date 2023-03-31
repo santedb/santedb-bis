@@ -44,6 +44,8 @@ namespace SanteDB.BI.Services
         /// <typeparam name="TBisDefinition">The type of definition to query for</typeparam>
         /// <param name="filter">The filter for query</param>
         /// <returns>Matching bis definitions </returns>
+        /// <param name="count">The count of BIS definitions to return</param>
+        /// <param name="offset">The offset of the first result</param>
         [Obsolete("Use Query(Expression<Func<TBidDefinition, bool>>)", true)]
         IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition;
 

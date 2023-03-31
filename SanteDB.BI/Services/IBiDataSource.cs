@@ -38,6 +38,7 @@ namespace SanteDB.BI.Services
         /// <param name="count">The number of results to return in the context</param>
         /// <param name="offset">The offset of the first result to retrieve</param>
         /// <returns>A query result indicating the results of the query</returns>
+        /// <param name="aggregation">The aggregation to apply to the result</param>
         BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int offset, int? count);
 
         /// <summary>
