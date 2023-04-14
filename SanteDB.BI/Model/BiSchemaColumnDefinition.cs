@@ -19,10 +19,18 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
+
+    
+
     /// <summary>
     /// Represents a definition for a column
     /// </summary>
@@ -65,9 +73,17 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the table that this column referneces (as a foreign key)
         /// </summary>
-        [XmlElement("references"), JsonProperty("references")]
-        public BiSchemaObjectReference References { get; set; }
+        [XmlElement("otherTable"), JsonProperty("otherTable")]
+        public BiObjectReference References { get; set; }
 
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            if (String.IsNullOrEmpty(this.Name))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table.column.name.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), DetectedIssueKeys.InvalidDataIssue);
+            }
+        }
 
     }
 }

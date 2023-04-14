@@ -19,7 +19,12 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -39,10 +44,25 @@ namespace SanteDB.BI.Model
         [XmlElement("dataSource"), JsonProperty("dataSource")]
         public BiDataSourceDefinition DataSource { get; set; }
 
-        /// <summary>
-        /// Gets or sets the transaction control (if true run in transaction)
-        /// </summary>
-        [XmlAttribute("transaction"), JsonProperty("transaction")]
-        public bool RunInTransaction { get; set; }
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.DataSource == null && String.IsNullOrEmpty(this.Ref))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].dataSource.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(DataSource)), Guid.Empty);
+            }
+            else if(this.DataSource != null)
+            {
+                foreach(var itm in this.DataSource.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+        }
     }
 }

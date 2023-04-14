@@ -18,8 +18,15 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using SixLabors.Fonts.Unicode;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
@@ -43,7 +50,36 @@ namespace SanteDB.BI.Model
         /// Gets or sets the target of the mapping
         /// </summary>
         [XmlElement("target"), JsonProperty("target")]
-        public String Target { get; set; }
+        public BiSchemaObjectReference Target { get; set; }
+
+        /// <summary>
+        /// Validate the mapping 
+        /// </summary>
+        internal IEnumerable<DetectedIssue> Validate()
+        {
+            if (this.Target == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[$].map.target.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Target)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.Target.Validate())
+                {
+                    yield return itm;
+                }
+            }
+            if (this.Source == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[$].map.source.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Source)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.Source.Validate())
+                {
+                    yield return itm;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -51,7 +87,7 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiColumnMappingSource), Namespace = BiConstants.XmlNamespace)]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiColumnMappingSource : BiSchemaColumnDefinition
+    public class BiColumnMappingSource : BiSchemaObjectReference
     {
 
         /// <summary>
@@ -61,6 +97,25 @@ namespace SanteDB.BI.Model
         [XmlElement("lookup", typeof(BiColumnMappingTransformJoin))]
         public Object TransformExpression { get; set; }
 
+        internal override IEnumerable<DetectedIssue> Validate()
+        {
+            foreach (var itm in base.Validate())
+            {
+                yield return itm;
+            }
+
+            if (this.TransformExpression == null && String.IsNullOrEmpty(this.Name))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[$].map.source.name.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
+            }
+            else if (this.TransformExpression is BiColumnMappingTransformJoin bcmtj)
+            {
+                foreach(var itm in bcmtj.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -68,19 +123,25 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiColumnMappingTransformJoin), Namespace = BiConstants.XmlNamespace)]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiColumnMappingTransformJoin
+    public class BiColumnMappingTransformJoin : BiDataFlowStreamStep
     {
-
         /// <summary>
-        /// Gets or sets the input stream step reference where the join should be sourced
+        /// Look up the join column
         /// </summary>
-        [XmlElement("input"), JsonProperty("input")]
-        public BiDataFlowStreamStep Input { get; set; }
+        [XmlAttribute("joinColumn"), JsonProperty("joinColumn")]
+        public String Column { get; set; }
 
-        /// <summary>
-        /// Gets or sets the join expression for the join operation
-        /// </summary>
-        [XmlElement("join"), JsonProperty("join")]
-        public String Join { get; set; }
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+            if(String.IsNullOrEmpty(this.Column))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[$].map.target.lookup.join.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Column)), Guid.Empty);
+            }
+        }
     }
+
 }

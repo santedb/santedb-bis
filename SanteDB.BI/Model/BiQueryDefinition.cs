@@ -19,7 +19,11 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Util;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -65,6 +69,29 @@ namespace SanteDB.BI.Model
         /// Query definitions are only serialized on parse for reading/installation
         /// </summary>
         public bool ShouldSerializeQueryDefinitions() => this.ShouldSerializeDefinitions;
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.DataSources == null || this.DataSources.Count == 0)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.source.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(DataSources)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            if(this.QueryDefinitions == null || this.QueryDefinitions.Count == 0)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(QueryDefinitions)), DetectedIssueKeys.InvalidDataIssue);
+            }
+
+            foreach(var itm in this.Parameters.OfType<BiDefinition>().Union(this.QueryDefinitions).SelectMany(o=>o.Validate(false)))
+            {
+                    yield return itm;
+            }
+        }
 
     }
 }

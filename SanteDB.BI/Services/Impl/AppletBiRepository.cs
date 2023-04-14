@@ -28,6 +28,7 @@ using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -47,7 +48,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Definition cache
         /// </summary>
-        private Dictionary<Type, Dictionary<String, Object>> m_definitionCache = new Dictionary<Type, Dictionary<string, Object>>();
+        private ConcurrentDictionary<Type, Dictionary<String, Object>> m_definitionCache = new ConcurrentDictionary<Type, Dictionary<string, Object>>();
 
         // Lock object
         private object m_lockObject = new object();
@@ -145,7 +146,7 @@ namespace SanteDB.BI.Services.Impl
             if (!this.m_definitionCache.TryGetValue(metadata.GetType(), out Dictionary<String, Object> typeDefinitions))
             {
                 typeDefinitions = new Dictionary<string, Object>();
-                this.m_definitionCache.Add(metadata.GetType(), typeDefinitions);
+                this.m_definitionCache.TryAdd(metadata.GetType(), typeDefinitions);
             }
 
             // Add the defintiion
@@ -205,9 +206,9 @@ namespace SanteDB.BI.Services.Impl
             {
                 this.m_tracer.TraceInfo("(Re)Loading all BIS Definitions from Applets");
                 // We only want to clear those assets which can be defined in applets
-                this.m_definitionCache.Remove(typeof(BiReportDefinition));
-                this.m_definitionCache.Remove(typeof(BiQueryDefinition));
-                this.m_definitionCache.Remove(typeof(BiParameterDefinition));
+                this.m_definitionCache.TryRemove(typeof(BiReportDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiQueryDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiParameterDefinition), out _);
                 var solutions = this.m_solutionManagerService?.Solutions.ToList();
 
                 // Doesn't have a solution manager

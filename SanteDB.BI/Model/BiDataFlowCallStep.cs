@@ -19,6 +19,8 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -40,12 +42,22 @@ namespace SanteDB.BI.Model
         /// </summary>
         [JsonProperty("parameters")]
         [XmlArray("parameters")]
-        [XmlArrayItem("int", typeof(BiDataCallParameter<Int32>))]
-        [XmlArrayItem("string", typeof(BiDataCallParameter<String>))]
-        [XmlArrayItem("bool", typeof(BiDataCallParameter<Boolean>))]
-        [XmlArrayItem("uuid", typeof(BiDataCallParameter<Guid>))]
-        [XmlArrayItem("date-time", typeof(BiDataCallParameter<DateTime>))]
-        public List<BiDataCallParameter> Parameters { get; set; }
+        [XmlArrayItem("int", typeof(BiDataFlowCallParameter<Int32>))]
+        [XmlArrayItem("string", typeof(BiDataFlowCallParameter<String>))]
+        [XmlArrayItem("bool", typeof(BiDataFlowCallParameter<Boolean>))]
+        [XmlArrayItem("uuid", typeof(BiDataFlowCallParameter<Guid>))]
+        [XmlArrayItem("date-time", typeof(BiDataFlowCallParameter<DateTime>))]
+        [XmlArrayItem("ref", typeof(BiDataFlowCallParameter<BiObjectReference>))]
+        public List<BiDataFlowParameterBase> Parameters { get; set; }
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            if(String.IsNullOrEmpty(this.Ref))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.mart.flow.call.ref.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Ref)), Guid.Empty);
+            }
+        }
 
     }
 }

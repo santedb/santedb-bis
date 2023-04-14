@@ -48,7 +48,7 @@ namespace SanteDB.BI.Components.Base
             {
                 using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
                 {
-                    var thisContext = new RenderContext(context, dataSource.Dataset);
+                    var thisContext = new RenderContext(context, dataSource.Records);
 
                     // Add watches and expressions
                     thisContext.Tags.Add("watches", new Dictionary<String, Object>());
@@ -56,7 +56,7 @@ namespace SanteDB.BI.Components.Base
 
                     writer.WriteComment($"start repeat : {(dataSource.QueryDefinition?.Id ?? "adhoc")}");
 
-                    foreach (var itm in dataSource.Dataset)
+                    foreach (var itm in dataSource.Records)
                     {
                         foreach (var el in element.Nodes())
                         {

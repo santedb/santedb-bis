@@ -18,18 +18,31 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using ClosedXML;
 using Newtonsoft.Json;
+using SanteDB.BI.Util;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.Configuration;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Serialization;
+using SharpCompress;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
+    [XmlType(nameof(TestXML), Namespace = BiConstants.XmlNamespace)]
+    public class TestXML
+    {
+
+    }
     /// <summary>
     /// Defines an abstract class for a BIS artifact definition
     /// </summary>
@@ -44,13 +57,9 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiDataFlowDefinition))]
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [XmlInclude(typeof(BiSchemaViewDefinition))]
-    [XmlInclude(typeof(BiTransformDefinition))]
+    [XmlInclude(typeof(BiDatamartDefinition))]
     [XmlInclude(typeof(BiPackage))]
     [XmlInclude(typeof(BiReportViewDefinition))]
-    [XmlInclude(typeof(BiTransformDefinition))]
-    [XmlInclude(typeof(BiSchemaTableDefinition))]
-    [XmlInclude(typeof(BiSchemaViewDefinition))]
-    [XmlInclude(typeof(BiDataFlowDefinition))]
     [ExcludeFromCodeCoverage] // Serialization class
     public abstract class BiDefinition
     {
@@ -64,19 +73,21 @@ namespace SanteDB.BI.Model
         {
             var types = new Type[]
             {
-                typeof(BiPackage),
-                typeof(BiQueryDefinition),
                 typeof(BiDataSourceDefinition),
+                typeof(BiRenderFormatDefinition),
+                typeof(BiQueryDefinition),
                 typeof(BiParameterDefinition),
                 typeof(BiReportDefinition),
                 typeof(BiViewDefinition),
                 typeof(BiReportViewDefinition),
-                typeof(BiRenderFormatDefinition),
-                typeof(BiTransformDefinition),
+                typeof(BiDatamartDefinition),
                 typeof(BiSchemaTableDefinition),
                 typeof(BiSchemaViewDefinition),
-                typeof(BiDataFlowDefinition)
+                typeof(BiDataFlowDefinition),
+                typeof(BiPackage)
             };
+
+
             foreach (var t in types)
             {
                 s_serializers.Add(new XmlSerializer(t, types));
@@ -167,9 +178,114 @@ namespace SanteDB.BI.Model
         }
 
         /// <summary>
+        /// Get an object in this object by ID
+        /// </summary>
+        /// <param name="id">The name of the object to find</param>
+        /// <returns></returns>
+        internal virtual BiDefinition FindObjectById(string id)
+        {
+            // Initialize the sub-properties 
+            foreach (var pi in this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                var piValue = pi.GetValue(this);
+                if (piValue is BiDefinition bid && bid.Id == id)
+                {
+                    return bid;
+                }
+                else if (piValue is IList list)
+                {
+                    foreach (var itm in list?.OfType<BiDefinition>())
+                    {
+                        if (itm.Id == id)
+                        {
+                            return itm;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Get an object in this object by name
+        /// </summary>
+        /// <param name="name">The name of the object to find</param>
+        /// <returns></returns>
+        internal virtual BiDefinition FindObjectByName(string name)
+        {
+            // Initialize the sub-properties 
+            foreach (var pi in this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                var piValue = pi.GetValue(this);
+                if (piValue is BiDefinition bid && bid.Name == name)
+                {
+                    return bid;
+                }
+                else if (piValue is IList list)
+                {
+                    foreach (var itm in list?.OfType<BiDefinition>())
+                    {
+                        if (itm.Name == name)
+                        {
+                            return itm;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Gets or sets the serialization definitions
         /// </summary>
         [XmlIgnore, JsonIgnore]
         internal virtual bool ShouldSerializeDefinitions { get; set; }
+
+        /// <summary>
+        /// Validate this BI definition
+        /// </summary>
+        public IEnumerable<DetectedIssue> Validate() => this.Validate(true);
+
+        /// <summary>
+        /// Validate the BI values
+        /// </summary>
+        internal virtual IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            if (String.IsNullOrEmpty(this.Id) && isRoot)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.id.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Id)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            if (String.IsNullOrEmpty(this.Name) && isRoot)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "bi.name.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            if (this.MetaData == null && isRoot)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.meta.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(MetaData)), DetectedIssueKeys.InvalidDataIssue);
+            }
+
+            if (isRoot && !BiUtils.CanResolveRefs(this, out var unresolved))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.ref.error", string.Format(ErrorMessages.REFERENCE_NOT_FOUND, unresolved.Ref), DetectedIssueKeys.OtherIssue);
+            }
+        }
+
+        /// <summary>
+        /// Get this instance as a summarized instanced
+        /// </summary>
+        /// <returns></returns>
+        public BiDefinition AsSummarized()
+        {
+            var retVal = Activator.CreateInstance(this.GetType()) as BiDefinition;
+            retVal.Id = this.Id;
+            if (this.Identifier != null)
+            {
+                retVal.Identifier = new BiIdentity().CopyObjectData(this.Identifier);
+            }
+            retVal.Name = this.Name;
+            retVal.Label = this.Label;
+            retVal.MetaData = new BiMetadata().CopyObjectData(this.MetaData);
+            return retVal;
+        }
     }
 }

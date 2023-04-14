@@ -19,8 +19,12 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -39,6 +43,26 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("map"), JsonProperty("map")]
         public List<BiColumnMapping> Mapping { get; set; }
+
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.Mapping == null || this.Mapping.Count == 0)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].mapping.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Mapping)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.Mapping.SelectMany(o=>o.Validate()))
+                {
+                    yield return itm;
+                }
+            }
+        }
 
     }
 }

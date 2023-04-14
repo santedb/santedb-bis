@@ -19,8 +19,11 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Attributes;
 using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -72,6 +75,28 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlIgnore]
         public Type Type { get; set; }
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+            if(String.IsNullOrEmpty(this.TypeXml))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.type.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Type)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            else if(this.Type == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.type.notfound", String.Format(ErrorMessages.TYPE_NOT_FOUND, this.TypeXml), DetectedIssueKeys.InvalidDataIssue);
+            }
+            if(String.IsNullOrEmpty(this.FormatExtension))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.extension.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(FormatExtension)), DetectedIssueKeys.InvalidDataIssue);
+            }
+
+        }
 
     }
 }

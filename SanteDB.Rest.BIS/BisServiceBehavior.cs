@@ -239,7 +239,7 @@ namespace SanteDB.Rest.BIS
                             throw new KeyNotFoundException($"Could not find a Parameter, Query or View to hydrate named {queryId}");
                         }
 
-                        queryDef = parmDef?.Values as BiQueryDefinition;
+                        queryDef = parmDef?.ValueDefinition as BiQueryDefinition;
                         queryDef.Id = queryDef.Id ?? queryId;
                     }
 
@@ -365,7 +365,7 @@ namespace SanteDB.Rest.BIS
         public virtual IEnumerable<dynamic> RenderQuery(string id)
         {
             var retVal = this.HydrateQuery(id);
-            return retVal.Dataset;
+            return retVal.Records;
         }
 
         /// <summary>
@@ -385,7 +385,7 @@ namespace SanteDB.Rest.BIS
                 return new BiDefinitionCollection((this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
                     new Type[] { rt },
                     new Type[] { expression.GetType(), typeof(int), typeof(int?) })
-                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BiDefinition>());
+                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BiDefinition>().Select(o=>o.AsSummarized()));
             }
             catch (Exception e)
             {

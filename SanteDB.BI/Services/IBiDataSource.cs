@@ -18,6 +18,7 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using SanteDB.BI.Datamart;
 using SanteDB.BI.Model;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace SanteDB.BI.Services
     public interface IBiDataSource
     {
 
+   
         /// <summary>
         /// Executes the specified <paramref name="queryDefinition"/> using the specified <paramref name="parameters"/>
         /// </summary>
@@ -39,11 +41,12 @@ namespace SanteDB.BI.Services
         /// <param name="offset">The offset of the first result to retrieve</param>
         /// <returns>A query result indicating the results of the query</returns>
         /// <param name="aggregation">The aggregation to apply to the result</param>
-        BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int offset, int? count);
+        BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int? offset = null, int? count = null);
 
         /// <summary>
         /// Materializes the specified materialized view definition
         /// </summary>
+        /// <param name="materializeDefinition">The materialized view definition</param>
         void CreateMaterializedView(BiQueryDefinition materializeDefinition);
 
         /// <summary>
@@ -58,9 +61,9 @@ namespace SanteDB.BI.Services
         /// <param name="parameters">The parameter values to supply</param>
         /// <param name="aggregation">The aggregation instructions to use</param>
         /// <param name="count">The maximum number of results to return</param>
-        /// <param name="offset">The offset of the first result</param>
+        /// <param name="offset">The offset of the first result if requested</param>
         /// <returns>A query result indicating the results of the query</returns>
-        BisResultContext ExecuteQuery(String queryId, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int offset, int? count);
+        BisResultContext ExecuteQuery(String queryId, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int? offset = null, int? count = null);
 
         /// <summary>
         /// Executes the specified view returning the context
@@ -70,6 +73,6 @@ namespace SanteDB.BI.Services
         /// <param name="offset">The offset of the first result to return in the result context</param>
         /// <param name="count">The number of results to retrieve</param>
         /// <returns>The constructed result context</returns>
-        BisResultContext ExecuteView(BiViewDefinition viewDef, IDictionary<string, object> parameters, int offset, int? count);
+        BisResultContext ExecuteView(BiViewDefinition viewDef, IDictionary<string, object> parameters, int? offset = null, int? count = null);
     }
 }

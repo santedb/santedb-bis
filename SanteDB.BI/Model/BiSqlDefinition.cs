@@ -18,6 +18,9 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -49,6 +52,33 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlText]
         public string Sql { get; set; }
+
+        /// <inheritdoc />
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach (var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(string.IsNullOrEmpty(this.Sql))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Sql)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            if(this.Materialize != null)
+            {
+                if(string.IsNullOrEmpty(this.Materialize.Name))
+                {
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.qry.materialize.name.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(BiMaterializeDefinition.Name)), Guid.Empty);
+                }
+                else if(String.IsNullOrEmpty(this.Materialize.Sql))
+                {
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.qry.materialize.sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(BiMaterializeDefinition.Sql)), Guid.Empty);
+                }
+            }
+
+        }
+
 
     }
 }

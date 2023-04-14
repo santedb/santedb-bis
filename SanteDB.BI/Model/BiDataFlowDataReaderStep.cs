@@ -19,8 +19,12 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -35,15 +39,49 @@ namespace SanteDB.BI.Model
     {
 
         /// <summary>
-        /// Gets or sets the data source
+        /// Gets or sets the input connection
         /// </summary>
         [XmlElement("connection"), JsonProperty("connection")]
-        public BiDataFlowConnectionStep Connection { get; set; }
+        public BiDataFlowConnectionStep InputConnection { get; set; }
 
         /// <summary>
         /// Gets or sets the definitions for the data source
         /// </summary>
-        [XmlArray("definitions"), XmlArrayItem("add"), JsonProperty("definitions")]
+        [XmlArray("sql"), XmlArrayItem("add"), JsonProperty("definitions")]
         public List<BiSqlDefinition> Definition { get; set; }
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach (var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.Definition == null || this.Definition.Count == 0)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Definition)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.Definition.SelectMany(o=>o.Validate(false)))
+                {
+                    yield return itm;
+                }
+            }
+
+            if (this.InputConnection == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputConnection)), Guid.Empty);
+            }
+            else
+            {
+                foreach (var itm in this.InputConnection.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+
+        }
     }
 }

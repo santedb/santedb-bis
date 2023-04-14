@@ -19,8 +19,12 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -32,26 +36,43 @@ namespace SanteDB.BI.Model
     [XmlRoot(nameof(BiDataFlowDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiDataFlowDefinition : BiDefinition
+    public class BiDataFlowDefinition : BiFlowStepCollectionBase
     {
 
         /// <summary>
-        /// True if this data flow can be called directly via API
+        /// Parameters to be passed
         /// </summary>
-        [JsonProperty("public"), XmlAttribute("public")]
-        public bool IsPbulic { get; set; }
+        [JsonProperty("parameters")]
+        [XmlArray("parameters")]
+        [XmlArrayItem("int", typeof(BiDataFlowParameter<Int32>))]
+        [XmlArrayItem("string", typeof(BiDataFlowParameter<String>))]
+        [XmlArrayItem("bool", typeof(BiDataFlowParameter<Boolean>))]
+        [XmlArrayItem("uuid", typeof(BiDataFlowParameter<Guid>))]
+        [XmlArrayItem("date-time", typeof(BiDataFlowParameter<DateTime>))]
+        [XmlArrayItem("ref", typeof(BiDataFlowParameter<BiObjectReference>))]
+        public List<BiDataFlowParameterBase> Parameters { get; set; }
 
-        /// <summary>
-        /// XmlElement
-        /// </summary>
-        [XmlElement("call", typeof(BiDataFlowCallStep))]
-        [XmlElement("reader", typeof(BiDataFlowDataReaderStep))]
-        [XmlElement("writer", typeof(BiDataFlowDataWriterStep))]
-        [XmlElement("connection", typeof(BiDataFlowConnectionStep))]
-        [XmlElement("map", typeof(BiDataFlowMappingStep))]
-        [XmlElement("pivot", typeof(BiDataFlowPivotStep))]
-        [XmlElement("log", typeof(BiDataFlowLogStep))]
-        [JsonProperty("step")]
-        public List<BiDataFlowStep> Steps { get; set; }
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.Parameters?.Count > 0)
+            {
+                var p = 0;
+                foreach(var itm in this.Parameters)
+                {
+                    p++;
+                    if(String.IsNullOrEmpty(itm.Name))
+                    {
+                        yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.schema.flow.parameter", String.Format(ErrorMessages.MISSING_VALUE, $"{this.Name}.{nameof(Parameters)}[{p}]"), Guid.Empty);
+                    }
+                }
+            }
+          
+        }
     }
 }

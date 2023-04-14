@@ -19,6 +19,10 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System.Collections.Generic;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
@@ -37,7 +41,22 @@ namespace SanteDB.BI.Model
         /// Input for the data flow step
         /// </summary>
         [XmlElement("input"), JsonProperty("input")]
-        public BiDataFlowStep InputFlow { get; set; }
+        public BiObjectReference InputFlow { get; set; }
 
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach (var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if (this.InputFlow == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputFlow)), Guid.Empty);
+            }
+
+        }
     }
 }

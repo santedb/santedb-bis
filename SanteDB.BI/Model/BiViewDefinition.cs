@@ -19,6 +19,9 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Util;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -61,6 +64,28 @@ namespace SanteDB.BI.Model
         /// </summary>
         public bool ShouldSerializePivot() => this.ShouldSerializeDefinitions;
 
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.Query == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.query.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Query)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            else
+            {
+                foreach(var de in this.Query.Validate(false))
+                {
+                    yield return de;
+                }
+            }
+            
+
+        }
 
     }
 }

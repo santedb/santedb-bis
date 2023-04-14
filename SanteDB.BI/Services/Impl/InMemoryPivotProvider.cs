@@ -18,12 +18,20 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Office2013.Excel;
 using SanteDB.BI.Model;
+using SanteDB.Core.Model.Query;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Microsoft.CSharp.RuntimeBinder;
+using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using Microsoft.CSharp;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -90,86 +98,112 @@ namespace SanteDB.BI.Services.Impl
         }
 
         /// <summary>
+        /// Perform a pivot internally
+        /// </summary>
+        public IEnumerable<dynamic> Pivot(IEnumerable<dynamic> sourceRecords, BiViewPivotDefinition pivot)
+        {
+            if (sourceRecords is IOrderableQueryResultSet iqrs)
+            {
+                var parm = Expression.Parameter(typeof(object));
+                CallSiteBinder keyBinder = Binder.GetMember(CSharpBinderFlags.None, pivot.Key, typeof(InMemoryPivotProvider), new CSharpArgumentInfo[0]);
+                var sortExpression = Expression.Lambda(Expression.Dynamic(keyBinder, typeof(object), parm), parm);
+                sourceRecords = iqrs.OrderBy(sortExpression).OfType<dynamic>();
+            }
+
+            IDictionary<String, Object> currentTuple = null;
+            foreach (IDictionary<String, Object> tuple in sourceRecords)
+            {
+                var keyValue = tuple[pivot.Key];
+                if (currentTuple == null)
+                {
+                    currentTuple = new ExpandoObject();
+                    currentTuple.Add(pivot.Key, keyValue);
+                }
+                else if (!keyValue.Equals(currentTuple[pivot.Key]))
+                {
+                    yield return this.AggregateTuple(currentTuple, pivot);
+
+                    currentTuple = new ExpandoObject();
+                    currentTuple.Add(pivot.Key, keyValue);
+                }
+
+                // Add extra columns that are in the result set but not the column selector, key, or value
+                foreach(var col in tuple.Where(o=>o.Key != pivot.Key && o.Key != pivot.Value && o.Key != pivot.ColumnSelector && !pivot.Columns.Contains(o.Key)))
+                {
+                    if(currentTuple.ContainsKey(col.Key))
+                    {
+                        currentTuple[col.Key] = col.Value;
+                    }
+                    else
+                    {
+                        currentTuple.Add(col.Key, col.Value);
+                    }
+                }
+
+                // Grouping / aggregator columns
+                var columnName = tuple[pivot.ColumnSelector]?.ToString();
+                if (!currentTuple.TryGetValue(columnName, out var items))
+                {
+                    items = new List<Object>() { tuple[pivot.Value] };
+                    currentTuple.Add(columnName, items);
+                }
+                else if (items is IList list)
+                {
+                    list.Add(tuple[pivot.Value]);
+                }
+                else
+                {
+                    currentTuple[columnName] = tuple[pivot.Value];
+                }
+
+                
+
+            }
+
+            yield return this.AggregateTuple(currentTuple, pivot);
+
+
+        }
+
+        /// <summary>
+        /// Aggreate the specified tuple
+        /// </summary>
+        private dynamic AggregateTuple(IDictionary<string, object> tupleToAggregate, BiViewPivotDefinition pivot)
+        {
+            // Fill in declared categories
+            if(pivot.Columns?.Any() == true)
+            {
+                pivot.Columns.ForEach(c =>
+                {
+                    if (!tupleToAggregate.ContainsKey(c))
+                    {
+                        tupleToAggregate.Add(c, null);
+                    }
+                });
+            }
+            return tupleToAggregate.GroupBy(o => o.Key, o =>
+            {
+                if (o.Key == pivot.Key)
+                {
+                    return o.Value;
+                }
+                else if (o.Value is IEnumerable<Object> list)
+                {
+                    return this.Aggregate(list, pivot.AggregateFunction);
+                }
+                else
+                {
+                    return o.Value;
+                }
+            }).ToDictionary(o => o.Key, o => o.First());
+        }
+
+        /// <summary>
         /// Pivot provider
         /// </summary>
         public BisResultContext Pivot(BisResultContext context, BiViewPivotDefinition pivot)
         {
-            var buckets = new List<ExpandoObject>();
-            // First we must order by the pivot 
-            context.Dataset.OrderBy(o => (o as IDictionary<String, Object>)[pivot.Key]);
-
-            // Algorithm for pivoting : 
-            IDictionary<String, Object> cobject = null;
-            foreach (IDictionary<String, Object> itm in context.Dataset)
-            {
-                var key = itm[pivot.Key];
-                if (cobject == null || !key.Equals(cobject[pivot.Key]) && cobject.Count > 0)
-                {
-                    cobject = new ExpandoObject();
-                    cobject.Add(pivot.Key, key);
-                    buckets.Add(cobject as ExpandoObject);
-                }
-
-                // Same key, so lets create or accumulate
-                var column = itm[pivot.Columns];
-                if (!cobject.ContainsKey(column.ToString()))
-                {
-                    cobject.Add(column.ToString(), new List<Object>() { itm[pivot.Value] });
-                }
-                else
-                {
-                    var cvalue = cobject[column.ToString()] as List<Object>;
-                    var avalue = itm[pivot.Value];
-                    cvalue.Add(avalue);
-                }
-            }
-
-            // Now we have our buckets, we want to apply our aggregation function
-            var colNames = new List<String>();
-            var aggBuckets = new List<ExpandoObject>();
-            foreach (IDictionary<String, Object> itm in buckets.ToArray())
-            {
-                var newItm = new ExpandoObject() as IDictionary<String, Object>;
-                foreach (var value in itm)
-                {
-                    if (value.Key == pivot.Key)
-                    {
-                        newItm[pivot.Key] = value.Value;
-                        continue; // Don't de-bucket the object
-                    }
-
-                    var bucket = (value.Value as IEnumerable<Object>);
-                    newItm[value.Key] = this.Aggregate((value.Value as List<Object>), pivot.AggregateFunction);
-                    if (!colNames.Contains(value.Key))
-                    {
-                        colNames.Add(value.Key);
-                    }
-                }
-                aggBuckets.Add(newItm as ExpandoObject);
-            }
-
-            // Add where necessary
-            var output = new List<ExpandoObject>();
-            foreach (IDictionary<String, Object> itm in aggBuckets)
-            {
-                var tuple = (new ExpandoObject() as IDictionary<String, Object>);
-                tuple[pivot.Key] = itm[pivot.Key];
-                foreach (var col in colNames)
-                {
-                    if (itm.ContainsKey(col))
-                    {
-                        tuple[col] = itm[col];
-                    }
-                    else
-                    {
-                        tuple[col] = null;
-                    }
-                }
-
-                output.Add(tuple as ExpandoObject);
-            }
-
-            return new BisResultContext(context.QueryDefinition, context.Arguments, context.DataSource, output, context.StartTime.DateTime);
+            return new BisResultContext(context.QueryDefinition, context.Arguments, context.DataSource, this.Pivot(context.Records, pivot), context.StartTime.DateTime);
         }
 
     }

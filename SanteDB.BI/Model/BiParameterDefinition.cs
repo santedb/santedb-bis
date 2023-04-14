@@ -19,7 +19,9 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
 using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -65,7 +67,12 @@ namespace SanteDB.BI.Model
         /// The type of data is a date with a time
         /// </summary>
         [XmlEnum("date-time")]
-        DateTime
+        DateTime,
+        /// <summary>
+        /// Decimal type
+        /// </summary>
+        [XmlEnum("decimal")]
+        Decimal
     }
 
     /// <summary>
@@ -117,9 +124,9 @@ namespace SanteDB.BI.Model
         /// Gets or sets the values for the parameter
         /// </summary>
         [XmlElement("query", typeof(BiQueryDefinition)),
-         XmlElement("values", typeof(BiParameterValueCollection)),
+         XmlElement("values", typeof(BiQueryParameterValueCollection)),
          JsonProperty("values")]
-        public Object Values { get; set; }
+        public object ValueDefinition { get; set; }
 
         /// <summary>
         /// Gets or sets the default value
@@ -142,5 +149,22 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlIgnore, JsonIgnore]
         public bool? Required { get; set; }
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate())
+            {
+                yield return itm;
+            }
+
+            if(this.ValueDefinition is BiQueryDefinition qd)
+            {
+                foreach(var itm in qd.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+        }
     }
 }

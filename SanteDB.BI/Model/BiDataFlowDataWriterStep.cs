@@ -19,6 +19,10 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
@@ -62,18 +66,7 @@ namespace SanteDB.BI.Model
     public class BiDataFlowDataWriterStep : BiDataFlowStreamStep
     {
 
-        /// <summary>
-        /// Gets or sets the connection on this writer
-        /// </summary>
-        [XmlElement("connection"), JsonProperty("connection")]
-        public BiDataFlowConnectionStep Connection { get; set; }
-
-        /// <summary>
-        /// When true, the table should be created
-        /// </summary>
-        [XmlAttribute("create"), JsonProperty("create")]
-        public bool CreateTable { get; set; }
-
+       
         /// <summary>
         /// Truncate the table
         /// </summary>
@@ -86,10 +79,50 @@ namespace SanteDB.BI.Model
         [XmlAttribute("mode"), JsonProperty("mode")]
         public DataWriterModeType Mode { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the output connection
+        /// </summary>
+        [XmlElement("connection"), JsonProperty("connection")]
+        public BiDataFlowConnectionStep OutputConnection { get; set; }
+
         /// <summary>
         /// Gets or sets the target of the writer
         /// </summary>
         [XmlElement("target"), JsonProperty("target")]
         public BiSchemaTableDefinition Target { get; set; }
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(this.OutputConnection == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].output.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(OutputConnection)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.OutputConnection.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+            if(this.Target == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].target.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Target)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.Target.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+        }
+
     }
 }

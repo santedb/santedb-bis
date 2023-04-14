@@ -66,7 +66,7 @@ namespace SanteDB.BI.Components.Chart
                 throw new InvalidOperationException("Invalid root context");
             }
             using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value)) {
-                if (dataSource.Dataset.Count() == 0)
+                if (!dataSource.Records.Any())
                 {
                     writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");
                 }
@@ -83,18 +83,17 @@ namespace SanteDB.BI.Components.Chart
                         writer.WriteAttributeString("title", $"'{title.Value}'");
                     }
 
-                    var chartContext = new RenderContext(context, dataSource.Dataset);
+                    var chartContext = new RenderContext(context, dataSource.Records);
                     chartContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
                     // Now sort the result set by the key
                     var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
                     var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
                     var axisDataExpression = (labels ?? axis).Value;
                     var axisFormat = (labels ?? axis).Attribute("format")?.Value;
-                    var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Dataset.First()), axisDataExpression);
-                    var chartData = dataSource.Dataset.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)));
+                    var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.First()), axisDataExpression);
+                    var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).ToList();
 
                     // If the axis is formatted, then group
-
                     var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => $"'{String.Format($"{{0:{axisFormat}}}", o)}'").Distinct();
 
                     // Is this a labeled data set?

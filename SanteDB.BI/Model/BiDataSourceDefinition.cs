@@ -19,7 +19,10 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
@@ -66,6 +69,35 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("connectionString"), JsonProperty("connectionString")]
         public String ConnectionString { get; set; }
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach(var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if(isRoot)
+            {
+                if(String.IsNullOrEmpty(this.ConnectionString))
+                {
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.connectionString.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(ConnectionString)), Guid.Empty);
+                }
+                if(String.IsNullOrEmpty(this.ProviderTypeXml))
+                {
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.provider.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(ProviderType)), Guid.Empty);
+                }
+                else if(this.ProviderType == null)
+                {
+                    yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.provider.type", String.Format(ErrorMessages.TYPE_NOT_FOUND, this.ProviderTypeXml), Guid.Empty);
+                }
+            }
+            else if(String.IsNullOrEmpty(this.Ref) && string.IsNullOrEmpty(this.ConnectionString))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.source.ref_or_direct", $"{nameof(Ref)} or {nameof(ConnectionString)} required", Guid.Empty);
+            }
+        }
 
     }
 }

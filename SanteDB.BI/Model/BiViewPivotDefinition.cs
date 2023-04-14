@@ -19,6 +19,13 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -40,7 +47,7 @@ namespace SanteDB.BI.Model
         /// Gets or sets the columns of the pivots
         /// </summary>
         [XmlAttribute("columnDef"), JsonProperty("columnDef")]
-        public string Columns { get; set; }
+        public string ColumnSelector { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the pivots
@@ -53,6 +60,35 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("fn"), JsonProperty("fn")]
         public BiAggregateFunction AggregateFunction { get; set; }
+
+        /// <summary>
+        /// Gets the columns
+        /// </summary>
+        [XmlArray("columns"), XmlArrayItem("add"), JsonProperty("columns")]
+        public List<String> Columns { get; set; }
+
+        /// <summary>
+        /// Validate the pivot
+        /// </summary>
+        internal IEnumerable<DetectedIssue> Validate()
+        {
+            if(string.IsNullOrEmpty(this.Key))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.pivot.key.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Key)), Guid.Empty);
+            }
+            if (string.IsNullOrEmpty(this.ColumnSelector))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.pivot.columnDef.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(ColumnSelector)), Guid.Empty);
+            }
+            if (string.IsNullOrEmpty(this.Value))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.pivot.value.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Value)), Guid.Empty);
+            }
+            if (this.Columns == null || !this.Columns.Any())
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.pivot.columns.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Value)), Guid.Empty);
+            }
+        }
 
     }
 }

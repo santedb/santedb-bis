@@ -61,34 +61,34 @@ namespace SanteDB.BI.Components.Base
                 switch (function)
                 {
                     case "sum":
-                        value = dataSource.Dataset.Sum(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        value = dataSource.Records.Sum(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
                         break;
 
                     case "count":
                         if (expression.ReturnType == typeof(bool))
                         {
-                            value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                            value = dataSource.Records.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)));
                         }
                         else
                         {
-                            value = dataSource.Dataset.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)) != null);
+                            value = dataSource.Records.Count(o => expression.Invoke(ReportViewUtil.ToParameterArray(o)) != null);
                         }
                         break;
 
                     case "count-distinct":
-                        value = dataSource.Dataset.Select(o => expression.Invoke(ReportViewUtil.ToParameterArray(o))).Distinct().Count();
+                        value = dataSource.Records.Select(o => expression.Invoke(ReportViewUtil.ToParameterArray(o))).Distinct().Count();
                         break;
 
                     case "min":
-                        value = dataSource.Dataset.Min(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        value = dataSource.Records.Min(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
                         break;
 
                     case "max":
-                        value = dataSource.Dataset.Max(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        value = dataSource.Records.Max(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
                         break;
 
                     case "avg":
-                        value = dataSource.Dataset.Average(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
+                        value = dataSource.Records.Average(o => (decimal)expression.Invoke(ReportViewUtil.ToParameterArray(o)));
                         break;
 
                     default:

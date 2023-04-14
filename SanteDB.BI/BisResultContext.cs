@@ -42,7 +42,7 @@ namespace SanteDB.BI
             )
         {
             this.Arguments = arguments;
-            this.Dataset = results;
+            this.Records = results;
             this.DataSource = source;
             this.QueryDefinition = definition;
             this.StartTime = startTime;
@@ -62,7 +62,7 @@ namespace SanteDB.BI
         /// <summary>
         /// Gets the dataset
         /// </summary>
-        public IEnumerable<dynamic> Dataset { get; private set; }
+        public IEnumerable<dynamic> Records { get; private set; }
 
         /// <summary>
         /// Gets the data source
@@ -84,7 +84,7 @@ namespace SanteDB.BI
         /// </summary>
         public void Dispose()
         {
-            if(this.Dataset is IDisposable disp)
+            if(this.Records is IDisposable disp)
             {
                 disp.Dispose();
             }
