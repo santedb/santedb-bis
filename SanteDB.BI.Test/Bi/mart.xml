@@ -19,6 +19,7 @@
     <public>false</public>
   </meta>
 
+  
   <produces id="org.santedb.bi.dataSource.warehouse" name="warehouse">
     <meta status="active">
       <policies>
@@ -28,6 +29,7 @@
     </meta>
   </produces>
 
+  
   <schema>
 
     <table name="SEC_USR_TBL">
