@@ -93,11 +93,10 @@ namespace SanteDB.BI.Model
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.provider.type", String.Format(ErrorMessages.TYPE_NOT_FOUND, this.ProviderTypeXml), Guid.Empty);
                 }
             }
-            else if(String.IsNullOrEmpty(this.Ref) && string.IsNullOrEmpty(this.ConnectionString))
-            {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.source.ref_or_direct", $"{nameof(Ref)} or {nameof(ConnectionString)} required", Guid.Empty);
-            }
         }
+
+        /// <inheritdoc/>
+        public override string ToString() => $"[{this.GetType().Name} {this.Name}({this.ConnectionString ?? "auto"})]";
 
     }
 }

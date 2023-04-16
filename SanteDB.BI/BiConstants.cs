@@ -39,5 +39,26 @@ namespace SanteDB.BI
         /// XML View component namespace
         /// </summary>
         public const string ComponentNamespace = "http://santedb.org/bi/view";
+
+        /// <summary>
+        /// Data flow audit parameter name
+        /// </summary>
+        public const string AuditDataFlowParameterName = "$audit";
+
+
+        /// <summary>
+        /// Data flow principal name parameter name
+        /// </summary>
+        public const string PrincipalDataFlowParameterName = "$principal";
+
+        /// <summary>
+        /// Data flow principal name parameter name
+        /// </summary>
+        public const string StartTimeDataFlowParameterName = "$startTime";
+
+        /// <summary>
+        /// The target mart
+        /// </summary>
+        public const string DataMartDataFlowParameterName = "$targetMart";
     }
 }

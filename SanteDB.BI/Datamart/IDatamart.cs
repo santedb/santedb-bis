@@ -1,4 +1,5 @@
-﻿using SanteDB.BI.Model;
+﻿using SanteDB.BI.Datamart.DataFlow;
+using SanteDB.BI.Model;
 using SanteDB.Core.Configuration.Data;
 using SanteDB.Core.Model.Interfaces;
 using System;
@@ -10,7 +11,7 @@ namespace SanteDB.BI.Datamart
     /// <summary>
     /// An abstract representation of a datamart which has been registered in the manager
     /// </summary>
-    public interface IBiDatamart : IIdentifiedResource, INonVersionedData
+    public interface IDatamart : IIdentifiedResource, INonVersionedData
     {
         /// <summary>
         /// Get the unique identifier for this datamart
@@ -35,7 +36,7 @@ namespace SanteDB.BI.Datamart
         /// <summary>
         /// Gets the log entries related to this datamart entry
         /// </summary>
-        IEnumerable<IBiDatamartExecutionEntry> Executions { get; }
+        IEnumerable<IDataFlowExecutionEntry> FlowExecutions { get; }
 
     }
 }

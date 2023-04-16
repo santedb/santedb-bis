@@ -40,15 +40,16 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// XmlElement
         /// </summary>
-        [XmlElement("parallel", typeof(BiDataFlowParallelStep))]
-        [XmlElement("call", typeof(BiDataFlowCallStep))]
-        [XmlElement("reader", typeof(BiDataFlowDataReaderStep))]
-        [XmlElement("writer", typeof(BiDataFlowDataWriterStep))]
-        [XmlElement("connection", typeof(BiDataFlowConnectionStep))]
-        [XmlElement("map", typeof(BiDataFlowMappingStep))]
-        [XmlElement("crosstab", typeof(BiDataFlowCrosstabStep))]
-        [XmlElement("transaction", typeof(BiDataFlowTransactionStep))]
-        [XmlElement("log", typeof(BiDataFlowLogStep))]
+        [XmlArray("pipeline")]
+        [XmlArrayItem("parallel", typeof(BiDataFlowParallelStep))]
+        [XmlArrayItem("call", typeof(BiDataFlowCallStep))]
+        [XmlArrayItem("reader", typeof(BiDataFlowDataReaderStep))]
+        [XmlArrayItem("writer", typeof(BiDataFlowDataWriterStep))]
+        [XmlArrayItem("connection", typeof(BiDataFlowConnectionStep))]
+        [XmlArrayItem("map", typeof(BiDataFlowMappingStep))]
+        [XmlArrayItem("crosstab", typeof(BiDataFlowCrosstabStep))]
+        [XmlArrayItem("transaction", typeof(BiDataFlowTransactionStep))]
+        [XmlArrayItem("log", typeof(BiDataFlowLogStep))]
         [JsonProperty("step")]
         public List<BiDataFlowStep> Steps { get; set; }
         

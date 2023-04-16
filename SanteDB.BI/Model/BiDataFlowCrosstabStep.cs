@@ -64,6 +64,8 @@ namespace SanteDB.BI.Model
             }
         }
 
+        /// <inheritdoc/>
+        public override string ToString() => $"[{this.GetType().Name} {this.Name}({this.Pivot})]";
 
     }
 }

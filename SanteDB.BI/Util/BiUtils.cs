@@ -18,6 +18,8 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Vml;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -27,6 +29,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Util
@@ -37,6 +40,7 @@ namespace SanteDB.BI.Util
     public static class BiUtils
     {
 
+        private static IBiMetadataRepository s_repository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
 
         /// <summary>
         /// Resolves all references to their proper objects
@@ -44,16 +48,15 @@ namespace SanteDB.BI.Util
         public static TBiDefinition ResolveRefs<TBiDefinition>(TBiDefinition definition)
             where TBiDefinition : BiDefinition
         {
-            return (TBiDefinition)ResolveRefs((BiDefinition)definition, new Stack<BiDefinition>());
+            return (TBiDefinition)ResolveRefs((BiDefinition)definition, new Stack<BiDefinition>(), new Dictionary<String, BiDefinition>());
         }
 
         /// <summary>
         /// Resolves all references and their proper objects from the metadata repository
         /// </summary>
-        public static BiDefinition ResolveRefs(BiDefinition definition, Stack<BiDefinition> parentScope)
+        private static BiDefinition ResolveRefs(BiDefinition definition, Stack<BiDefinition> parentScope, IDictionary<String, BiDefinition> resolved)
         {
 
-            // Create new instance
             if (definition == null)
             {
                 return null;
@@ -62,66 +65,78 @@ namespace SanteDB.BI.Util
             {
                 return definition;
             }
+            else if (parentScope.Contains(definition))
+            {
+                return definition;
+            }
+
 
             try
             {
-                parentScope.Push(definition);
 
-                var localName = definition.Name;
-                var localLabel = definition.Label;
-                var localRequired = (definition as BiParameterDefinition)?.Required;
-                var newDef = Activator.CreateInstance(definition.GetType()) as BiDefinition;
-                newDef.CopyObjectData(definition);
-                definition = newDef;
+                var clonedDefinition = Activator.CreateInstance(definition.GetType()) as BiDefinition;
+                clonedDefinition.CopyObjectData(definition);
+                parentScope.Push(clonedDefinition);
 
-                // Reference?
-                if (!String.IsNullOrEmpty(definition.Ref))
+                if (!String.IsNullOrEmpty(clonedDefinition.Ref))
                 {
-                    var refId = definition.Ref;
-                    definition.Ref = null;
-                    BiDefinition retVal = null;
-                    if (refId.StartsWith("#"))
+                    var refId = clonedDefinition.Ref;
+
+                    // Check for already resolved 
+                    if (resolved.TryGetValue(refId, out var resolvedTarget))
+                    {
+
+                    }
+                    else if (refId.StartsWith("#")) // identity reference
                     {
                         refId = refId.Substring(1);
 
-                        var repository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
-                        // Attempt to lookup
-                        retVal = ResolveRefs(repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
-                            new Type[] { definition.GetType() },
-                            new Type[] { typeof(String) }).Invoke(repository, new object[] { refId }) as BiDefinition) ??
-                            parentScope.Select(o=>o.FindObjectById(refId)).OfType<BiDefinition>().FirstOrDefault();
+                        // Check local definition first by id
+                        resolvedTarget = parentScope.Select(o => o.FindObjectById(refId)).OfType<BiDefinition>().FirstOrDefault() ??
+                            ResolveRefs(s_repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
+                                new Type[] { definition.GetType() },
+                                new Type[] { typeof(String) }).Invoke(s_repository, new object[] { refId }) as BiDefinition);
+                        resolved.Add(clonedDefinition.Ref, resolvedTarget);
+                    }
+                    else // resolve by local name
+                    {
+                        resolvedTarget = parentScope.Select(o => o.FindObjectByName(refId)).OfType<BiDefinition>().FirstOrDefault();
+                        resolved.Add(clonedDefinition.Ref, resolvedTarget);
+
+                    }
+
+                    if(resolvedTarget == null)
+                    {
+                        throw new BiException($"{clonedDefinition.Ref} @ {String.Join("/", parentScope.Select(o=>o.Name ?? o.Id ?? o.GetType().Name))} not found", definition, null);
+                    }
+
+
+                    // Clone the return value - as we don't want to muck up repository copy of the object
+                    var retVal = ResolveRefs(resolvedTarget, parentScope, resolved);
+                    retVal.Label = definition.Label ?? definition.Label;
+                    if (retVal is BiParameterDefinition bid && definition is BiParameterDefinition did)
+                    {
+                        bid.Required = did.Required;
+                    }
+                    retVal.Name = definition.Name ?? retVal.Name;
+
+                    // This value is a resolved wrapper - so we want to set its resolved property
+                    if (clonedDefinition is BiObjectReference bor)
+                    {
+                        bor.Resolved = retVal;
+                        return clonedDefinition;
                     }
                     else
                     {
-                        retVal = parentScope.Select(o => o.FindObjectByName(refId)).OfType<BiDefinition>().FirstOrDefault();
+                        clonedDefinition.Ref = null;
+                        return retVal;
                     }
-                    if (retVal == null)
-                    {
-                        throw new Exceptions.BiException($"{newDef.GetType().Name} #{refId} does not exist or you do not have permission", definition, null);
-                    }
-
-                    if (!String.IsNullOrEmpty(localName))
-                    {
-                        retVal.Name = localName;
-                    }
-
-                    if (!String.IsNullOrEmpty(localLabel))
-                    {
-                        retVal.Label = localLabel;
-                    }
-
-                    if (localRequired.HasValue)
-                    {
-                        (retVal as BiParameterDefinition).Required = localRequired.Value;
-                    }
-
-                    return retVal;
                 }
                 else  // Cascade
                 {
-                    foreach (var pi in definition.GetType().GetRuntimeProperties().Where(p=>!p.HasCustomAttribute<XmlIgnoreAttribute>()))
+                    foreach (var pi in clonedDefinition.GetType().GetRuntimeProperties().Where(p => !p.HasCustomAttribute<XmlIgnoreAttribute>() && p.CanWrite))
                     {
-                        var val = pi.GetValue(definition);
+                        var val = pi.GetValue(clonedDefinition);
                         if (val is IList)
                         {
                             var nvList = Activator.CreateInstance(val.GetType()) as IList;
@@ -129,7 +144,15 @@ namespace SanteDB.BI.Util
                             {
                                 if (itm is BiDefinition bid)
                                 {
-                                    nvList.Add(ResolveRefs(bid, parentScope));
+                                    nvList.Add(ResolveRefs(bid, parentScope, resolved));
+                                }
+                                else if (itm is BiDataFlowCallArgument<BiObjectReference> bica)
+                                {
+                                    nvList.Add(new BiDataFlowCallArgument<BiObjectReference>()
+                                    {
+                                        Value = (BiObjectReference)ResolveRefs(bica.Value, parentScope, resolved),
+                                        Name = bica.Name
+                                    });
                                 }
                                 else
                                 {
@@ -137,25 +160,17 @@ namespace SanteDB.BI.Util
                                 }
                             }
 
-                            pi.SetValue(definition, nvList);
-                        }
-                        else if(val is BiObjectReference bsor)
-                        {
-                            bsor.Resolved = ResolveRefs(bsor, parentScope);
+                            pi.SetValue(clonedDefinition, nvList);
                         }
                         else if (val is BiDefinition bid)
                         {
-                            pi.SetValue(definition, ResolveRefs(bid, parentScope));
+                            pi.SetValue(clonedDefinition, ResolveRefs(bid, parentScope, resolved));
                         }
                     }
                 }
 
-                if (!String.IsNullOrEmpty(localName))
-                {
-                    definition.Name = localName;
-                }
 
-                return definition;
+                return clonedDefinition;
             }
             finally
             {
@@ -176,7 +191,7 @@ namespace SanteDB.BI.Util
                 unresolved = null;
                 return true;
             }
-            catch(BiException be)
+            catch (BiException be)
             {
                 unresolved = be.Definition;
                 return false;

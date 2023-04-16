@@ -19,6 +19,11 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Datamart.DataFlow;
+using SanteDB.Core.BusinessRules;
+using SanteDB.Core.i18n;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
@@ -30,14 +35,42 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiDataFlowTransactionStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [ExcludeFromCodeCoverage]
-    public class BiDataFlowTransactionStep : BiFlowStepCollectionBase
+    public class BiDataFlowTransactionStep : BiFlowStepCollectionBase, IDataFlowStreamStepDefinition
     {
 
         /// <summary>
-        /// The connection reference
+        /// Gets or sets the input connection
         /// </summary>
-        [XmlAttribute("for"), JsonProperty("for")]
-        public string ConnectionRef { get; set; }
+        [XmlElement("connection"), JsonProperty("connection")]
+        public BiObjectReference InputConnection { get; set; }
 
+        /// <inheritdoc/>
+        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputConnection.Resolved as BiDataFlowConnectionStep;
+
+        /// <inheritdoc/>
+        internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
+        {
+            foreach (var itm in base.Validate(isRoot))
+            {
+                yield return itm;
+            }
+
+            if (this.InputConnection == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputConnection)), Guid.Empty);
+            }
+            else if (this.InputConnection.Resolved == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, $"bi.mart.flow.step[{this.Name}].input.notFound", string.Format(ErrorMessages.OBJECT_NOT_FOUND, this.InputConnection.Ref), Guid.Empty);
+
+            }
+            else
+            {
+                foreach (var itm in this.InputConnection.Resolved.Validate(false))
+                {
+                    yield return itm;
+                }
+            }
+        }
     }
 }

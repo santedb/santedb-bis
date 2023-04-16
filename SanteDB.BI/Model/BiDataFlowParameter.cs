@@ -49,6 +49,27 @@ namespace SanteDB.BI.Model
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
     public class BiDataFlowParameter<T> : BiDataFlowParameterBase
     {
+
+        /// <inheritdoc/>
+        public override string ToString() => $"{this.Name}: {typeof(T).Name}";
+    }
+
+    /// <summary>
+    /// Argument base
+    /// </summary>
+    [XmlType(nameof(BiDataFlowArgumentBase), Namespace = BiConstants.XmlNamespace)]
+    [JsonObject]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
+    public abstract class BiDataFlowArgumentBase : BiDataFlowParameterBase
+    {
+
+        /// <summary>
+        /// Get the value of the argument
+        /// </summary>
+        internal abstract object SimpleValue { get; }
+
+        /// <inheritdoc/>
+        public override string ToString() => $"{this.Name}: {this.SimpleValue}";
     }
 
     /// <summary>
@@ -57,7 +78,7 @@ namespace SanteDB.BI.Model
     [XmlType(Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Model classes - ignored
-    public class BiDataFlowCallParameter<T> : BiDataFlowParameterBase
+    public class BiDataFlowCallArgument<T> : BiDataFlowArgumentBase
     {
 
         /// <summary>
@@ -65,6 +86,12 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("value"), JsonProperty("value")]
         public T Value { get; set; }
+
+        /// <summary>
+        /// Get the simple value
+        /// </summary>
+        [JsonIgnore, XmlIgnore]
+        internal override object SimpleValue => this.Value;
 
     }
 }

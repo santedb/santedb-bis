@@ -79,12 +79,18 @@ namespace SanteDB.BI.Model
         [XmlArray("dataFlows"), XmlArrayItem("flow"), JsonProperty("dataFlows")]
         public List<BiDataFlowDefinition> DataFlows { get; set; }
 
+        /// <summary>
+        /// Entry flow
+        /// </summary>
+        [XmlElement("startFlow"), JsonProperty("startFlow")]
+        public BiObjectReference EntryFlow { get; set; }
+
         /// <inheritdoc />
         internal override BiDefinition FindObjectByName(string name)
         {
             return this.SchemaObjects.Find(o => o.Name == name) ??
                 this.DataFlows.Find(o => o.Name == name) ??
-                this.DataFlows.SelectMany(o => o.Steps).OfType<BiDefinition>().FirstOrDefault(o => o.Name == name) ??
+                this.DataFlows.Select(o => o.FindObjectByName(name)).FirstOrDefault() ??
                 base.FindObjectByName(name);
         }
 
@@ -113,10 +119,7 @@ namespace SanteDB.BI.Model
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.mart.produces.id.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Id)), Guid.Empty);
             }
 
-            if (!BiUtils.CanResolveRefs(this, out var unresolved))
-            {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.ref.missing", String.Format(ErrorMessages.REFERENCE_NOT_FOUND, unresolved.Ref), Guid.Empty);
-            }
+
             foreach (var itm in this.SchemaObjects.OfType<BiDefinition>().Union(this.DataFlows))
             {
                 foreach (var de in itm.Validate(false))
@@ -124,6 +127,14 @@ namespace SanteDB.BI.Model
                     yield return de;
                 }
             }
+
+            if (this.EntryFlow != null && !(this.EntryFlow.Resolved is BiDataFlowDefinition) && !this.DataFlows.Any(f=>f.Name == "main"))
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.mart.flows.startFlow.missing", String.Format(ErrorMessages.MISSING_ENTRY_POINT, this.EntryFlow.Ref), Guid.Empty);
+            }
+
+
+
         }
     }
 }

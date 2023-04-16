@@ -60,11 +60,9 @@ namespace SanteDB.BI.Services.Impl
                     aggFn = nameof(Enumerable.Count);
                     break;
                 case BiAggregateFunction.First:
-                    aggFn = nameof(Enumerable.First);
-                    break;
+                    return bucket.FirstOrDefault();
                 case BiAggregateFunction.Last:
-                    aggFn = nameof(Enumerable.Last);
-                    break;
+                    return bucket.LastOrDefault();
                 case BiAggregateFunction.Max:
                     aggFn = nameof(Enumerable.Max);
                     break;
@@ -78,6 +76,7 @@ namespace SanteDB.BI.Services.Impl
                     throw new InvalidOperationException($"Cannot apply aggregate function {aggregateFunction} on pivot");
             }
 
+            // For numeric types we have to use reflection
             var ftype = bucket.First().GetType();
             var aggMethod = typeof(Enumerable).GetGenericMethod(aggFn,
                 new Type[] { ftype },

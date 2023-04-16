@@ -24,6 +24,7 @@ using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -42,6 +43,7 @@ namespace SanteDB.BI.Model
         [XmlIgnore, JsonIgnore]
         public BiDefinition Resolved { get; internal set; }
 
+        /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
             if(string.IsNullOrEmpty(this.Ref))
@@ -50,9 +52,11 @@ namespace SanteDB.BI.Model
             }
             if(this.Resolved == null && !BiUtils.CanResolveRefs(this, out var unresolved))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.ref.notfound", string.Format(ErrorMessages.REFERENCE_NOT_FOUND, this.Resolved), Guid.Empty);
-
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, "bi.ref.notfound", string.Format(ErrorMessages.REFERENCE_NOT_FOUND, this.Resolved), Guid.Empty);
             }
         }
+
+        /// <inheritdoc/>
+        public override string ToString() => $"[{this.GetType().Name}#{this.Ref} ({this.Resolved})]";
     }
 }

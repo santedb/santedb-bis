@@ -30,6 +30,30 @@ namespace SanteDB.BI.Model
 {
 
     /// <summary>
+    /// Indicates the writer output stream mode 
+    /// 
+    /// </summary>
+    [XmlType(nameof(DataWriterRejectHandling), Namespace = BiConstants.XmlNamespace)]
+    public enum DataWriterRejectHandling
+    {
+        /// <summary>
+        /// Halt the execution
+        /// </summary>
+        [XmlEnum("halt")]
+        Halt,
+        /// <summary>
+        /// Stream rejects 
+        /// </summary>
+        [XmlEnum("output")]
+        StreamOut,
+        /// <summary>
+        /// Log the rejects
+        /// </summary>
+        [XmlEnum("log")]
+        Log
+    }
+
+    /// <summary>
     /// Indicates the writer mode
     /// </summary>
     [XmlType(nameof(DataWriterModeType), Namespace = BiConstants.XmlNamespace)]
@@ -65,8 +89,7 @@ namespace SanteDB.BI.Model
     [ExcludeFromCodeCoverage] // Serialization class
     public class BiDataFlowDataWriterStep : BiDataFlowStreamStep
     {
-
-       
+               
         /// <summary>
         /// Truncate the table
         /// </summary>
@@ -79,12 +102,17 @@ namespace SanteDB.BI.Model
         [XmlAttribute("mode"), JsonProperty("mode")]
         public DataWriterModeType Mode { get; set; }
 
+        /// <summary>
+        /// Gets or sets the output mode for reject tracing
+        /// </summary>
+        [XmlAttribute("rejects"), JsonProperty("rejects")]
+        public DataWriterRejectHandling RejectHandling { get; set; }
 
         /// <summary>
         /// Gets or sets the output connection
         /// </summary>
         [XmlElement("connection"), JsonProperty("connection")]
-        public BiDataFlowConnectionStep OutputConnection { get; set; }
+        public BiObjectReference OutputConnection { get; set; }
 
         /// <summary>
         /// Gets or sets the target of the writer

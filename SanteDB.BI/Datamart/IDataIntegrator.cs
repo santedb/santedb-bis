@@ -28,7 +28,7 @@ namespace SanteDB.BI.Datamart
     /// <summary>
     /// Implementers are responsible for binding the BI layer to a persistence layer (such as the ORM)
     /// </summary>
-    public interface IBiDataIntegrator : IDisposable
+    public interface IDataIntegrator : IDisposable
     {
 
         /// <summary>
@@ -114,8 +114,9 @@ namespace SanteDB.BI.Datamart
         /// Execute a query <paramref name="queryToExecute"/> returning the results
         /// </summary>
         /// <param name="queryToExecute">The SQL to execute</param>
+        /// <param name="outputSchema">The output schema</param>
         /// <returns>The results loaded from the database</returns>
-        IEnumerable<dynamic> Query(BiSqlDefinition queryToExecute);
+        IEnumerable<dynamic> Query(IEnumerable<BiSqlDefinition> queryToExecute, IDictionary<String, BiDataType> outputSchema = null);
 
         /// <summary>
         /// Inserts the specified <paramref name="dataToInsert"/> in <paramref name="target"/>
@@ -123,7 +124,7 @@ namespace SanteDB.BI.Datamart
         /// <param name="target">The target object where data should be manipulated</param>
         /// <param name="dataToInsert">The data to be inserted</param>
         /// <returns>The inserted data</returns>
-        IEnumerable<dynamic> Insert(BiSchemaTableDefinition target, IEnumerable<dynamic> dataToInsert);
+        dynamic Insert(BiSchemaTableDefinition target, dynamic dataToInsert);
 
         /// <summary>
         /// Inserts or updates the <paramref name="dataToInsert"/> in <paramref name="target"/>
@@ -131,7 +132,7 @@ namespace SanteDB.BI.Datamart
         /// <param name="target">The target schema object where the data should be inserted or updated</param>
         /// <param name="dataToInsert">The data to insert or update</param>
         /// <returns>The updated data</returns>
-        IEnumerable<dynamic> InsertOrUpdate(BiSchemaTableDefinition target, IEnumerable<dynamic> dataToInsert);
+        dynamic InsertOrUpdate(BiSchemaTableDefinition target, dynamic dataToInsert);
 
         /// <summary>
         /// Update the <paramref name="dataToUpdate"/> in <paramref name="target"/>
@@ -139,7 +140,7 @@ namespace SanteDB.BI.Datamart
         /// <param name="target">Where data should be updated</param>
         /// <param name="dataToUpdate">The data which should be updated</param>
         /// <returns>The updated data</returns>
-        IEnumerable<dynamic> Update(BiSchemaTableDefinition target, IEnumerable<dynamic> dataToUpdate);
+        dynamic Update(BiSchemaTableDefinition target, dynamic dataToUpdate);
 
         /// <summary>
         /// Deletes <paramref name="dataToDelete"/> from <paramref name="target"/>
@@ -147,7 +148,7 @@ namespace SanteDB.BI.Datamart
         /// <param name="target">The schema object where data is to be deleted</param>
         /// <param name="dataToDelete">The data to be deleted</param>
         /// <returns>The deleted records </returns>
-        IEnumerable<dynamic> Delete(BiSchemaTableDefinition target, IEnumerable<dynamic> dataToDelete);
+        dynamic Delete(BiSchemaTableDefinition target, dynamic dataToDelete);
 
         /// <summary>
         /// Execute a query and don't return the result

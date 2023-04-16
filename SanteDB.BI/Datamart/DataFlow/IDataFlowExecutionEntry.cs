@@ -1,39 +1,42 @@
 ﻿using SanteDB.Core.Model.Interfaces;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
+using System.Text;
 
-namespace SanteDB.BI.Datamart
+namespace SanteDB.BI.Datamart.DataFlow
 {
 
     /// <summary>
     /// The log entry type
     /// </summary>
-    public enum BiExecutionPurposeType
+    public enum DataFlowExecutionPurposeType
     {
+        /// <summary>
+        /// The purpose of this session is to run diagnostics
+        /// </summary>
+        Diagnostics = 0x1,
         /// <summary>
         /// The execution is being started to refresh the data in the data mart
         /// </summary>
-        Refresh = 0x1,
+        Refresh = 0x2,
         /// <summary>
         /// The execution is for migrating schema
         /// </summary>
-        SchemaManagement =0x2,
+        SchemaManagement = 0x4,
         /// <summary>
         /// Execution purpose is for database management
         /// </summary>
-        DatabaseManagement =0x4,
+        DatabaseManagement = 0x8,
         /// <summary>
         /// Execution is for read only operations
         /// </summary>
-        Discovery = 0x8
+        Discovery = 0x10
     }
 
     /// <summary>
     /// The outcome of the entry
     /// </summary>
-    public enum BiExecutionOutcomeType
+    public enum DataFlowExecutionOutcomeType
     {
         /// <summary>
         /// Status is unknown
@@ -56,18 +59,18 @@ namespace SanteDB.BI.Datamart
     /// <summary>
     /// Datamart execution entry
     /// </summary>
-    public interface IBiDatamartExecutionEntry : IIdentifiedResource
+    public interface IDataFlowExecutionEntry : IIdentifiedResource
     {
 
         /// <summary>
         /// Gets the type of the log entry
         /// </summary>
-        BiExecutionPurposeType Purpose { get; }
+        DataFlowExecutionPurposeType Purpose { get; }
 
         /// <summary>
         /// Gets the outcome of the log entry
         /// </summary>
-        BiExecutionOutcomeType Outcome { get; }
+        DataFlowExecutionOutcomeType Outcome { get; }
 
         /// <summary>
         /// Gets the started date of the log entry
@@ -87,29 +90,6 @@ namespace SanteDB.BI.Datamart
         /// <summary>
         /// Get the log entries
         /// </summary>
-        IEnumerable<IBiDatamartLogEntry> LogEntries { get; }
-    }
-
-    /// <summary>
-    /// Represents a single log entry for the datamart
-    /// </summary>
-    public interface IBiDatamartLogEntry : IIdentifiedResource
-    {
-
-        /// <summary>
-        /// Gets the priority of the log entry
-        /// </summary>
-        EventLevel Priority { get; }
-
-        /// <summary>
-        /// Gets the started date of the log entry
-        /// </summary>
-        DateTimeOffset Timestamp { get; }
-
-        /// <summary>
-        /// Gets the text of the log entry
-        /// </summary>
-        string Text { get; }
-
+        IEnumerable<IDataFlowLogEntry> LogEntries { get; }
     }
 }

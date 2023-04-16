@@ -40,6 +40,13 @@ namespace SanteDB.BI.Model
     {
 
         /// <summary>
+        /// HACK: To satisfy the resolveRefs some parameters need to be bound to values
+        /// </summary>
+        internal class BiDataFlowParameterBindingRef : BiDefinition
+        {
+        }
+
+        /// <summary>
         /// Parameters to be passed
         /// </summary>
         [JsonProperty("parameters")]
@@ -52,27 +59,50 @@ namespace SanteDB.BI.Model
         [XmlArrayItem("ref", typeof(BiDataFlowParameter<BiObjectReference>))]
         public List<BiDataFlowParameterBase> Parameters { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets the object this flow returns
+        /// </summary>
+        [XmlElement("return"), JsonProperty("return")]
+        public BiObjectReference ReturnObject { get; set; }
+
+
+        /// <inheritdoc/>
+        internal override BiDefinition FindObjectByName(string name)
+        {
+            var parameterMatch = this.Parameters?.OfType<BiDataFlowParameter<BiObjectReference>>().FirstOrDefault(o => o.Name == name);
+            if (parameterMatch != null)
+            {
+                return new BiDataFlowParameterBindingRef() { Name = name };
+            }
+            return base.FindObjectByName(name);
+        }
+
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.Parameters?.Count > 0)
+            if (this.Parameters?.Count > 0)
             {
                 var p = 0;
-                foreach(var itm in this.Parameters)
+                foreach (var itm in this.Parameters)
                 {
                     p++;
-                    if(String.IsNullOrEmpty(itm.Name))
+                    if (String.IsNullOrEmpty(itm.Name))
                     {
                         yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.schema.flow.parameter", String.Format(ErrorMessages.MISSING_VALUE, $"{this.Name}.{nameof(Parameters)}[{p}]"), Guid.Empty);
                     }
                 }
             }
-          
+
+            if (this.ReturnObject?.Resolved != null)
+            {
+                this.ReturnObject.Resolved.Validate(false);
+            }
         }
     }
 }

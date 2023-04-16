@@ -20,10 +20,10 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// Execute the <paramref name="flowStep"/> using <paramref name="input"/> as a source of data
         /// </summary>
         /// <param name="flowStep">The flow step to be executed</param>
-        /// <param name="input">The input data objects to be processed</param>
         /// <param name="executionContext">The current execution context</param>
+        /// <param name="scope">The current scope of the context</param>
         /// <returns>The transformed or input data objects</returns>
-        IEnumerable<dynamic> Execute(BiDataFlowStep flowStep, IEnumerable<dynamic> input, IBiDataFlowExecutionContext executionContext);
+        IEnumerable<dynamic> Execute(BiDataFlowStep flowStep, DataFlowScope scope);
 
     }
 }

@@ -29,6 +29,25 @@ using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
+
+    /// <summary>
+    /// Data flow connection mode
+    /// </summary>
+    [XmlType(nameof(BiDataFlowConnectionMode), Namespace = BiConstants.XmlNamespace)]
+    public enum BiDataFlowConnectionMode
+    {
+        /// <summary>
+        /// Read only
+        /// </summary>
+        [XmlEnum("read-only")]
+        ReadOnly,
+        /// <summary>
+        /// Read or write
+        /// </summary>
+        [XmlEnum("read-write")]
+        ReadWrite
+    }
+
     /// <summary>
     /// Represents a connection
     /// </summary>
@@ -43,6 +62,12 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("dataSource"), JsonProperty("dataSource")]
         public BiDataSourceDefinition DataSource { get; set; }
+
+        /// <summary>
+        /// Gets or sets the mode
+        /// </summary>
+        [XmlAttribute("mode"), JsonProperty("mode")]
+        public BiDataFlowConnectionMode Mode { get; set; }
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
@@ -64,5 +89,9 @@ namespace SanteDB.BI.Model
                 }
             }
         }
+
+
+        /// <inheritdoc/>
+        public override string ToString() => $"[{this.GetType().Name} {this.Name} = {this.Mode}({this.DataSource})]";
     }
 }

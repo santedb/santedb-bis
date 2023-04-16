@@ -19,6 +19,7 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
@@ -35,20 +36,29 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiDataFlowDataReaderStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiDataFlowDataReaderStep : BiDataFlowStep
+    public class BiDataFlowDataReaderStep : BiDataFlowStep, IDataFlowStreamStepDefinition
     {
 
         /// <summary>
         /// Gets or sets the input connection
         /// </summary>
         [XmlElement("connection"), JsonProperty("connection")]
-        public BiDataFlowConnectionStep InputConnection { get; set; }
+        public BiObjectReference InputConnection { get; set; }
 
         /// <summary>
         /// Gets or sets the definitions for the data source
         /// </summary>
         [XmlArray("sql"), XmlArrayItem("add"), JsonProperty("definitions")]
         public List<BiSqlDefinition> Definition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the schema of the reader
+        /// </summary>
+        [XmlElement("schema"), JsonProperty("schema")]
+        public BiSchemaTableDefinition Schema { get; set; }
+
+        /// <inheritdoc/>
+        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputConnection.Resolved as BiDataFlowConnectionStep;
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
@@ -74,13 +84,19 @@ namespace SanteDB.BI.Model
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputConnection)), Guid.Empty);
             }
+            else if (this.InputConnection.Resolved == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, $"bi.mart.flow.step[{this.Name}].input.notFound", string.Format(ErrorMessages.OBJECT_NOT_FOUND, this.InputConnection.Ref), Guid.Empty);
+
+            }
             else
             {
-                foreach (var itm in this.InputConnection.Validate(false))
+                foreach (var itm in this.InputConnection.Resolved.Validate(false))
                 {
                     yield return itm;
                 }
             }
+
 
         }
     }

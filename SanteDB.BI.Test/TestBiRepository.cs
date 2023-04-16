@@ -73,6 +73,7 @@ namespace SanteDB.BI.Test
                 items = new Dictionary<string, object>();
                 this.m_definitionCache.Add(typeof(TBisDefinition), items);
             }
+            items.Remove(metadata.Id);
             items.Add(metadata.Id, metadata);
             return metadata;
         }

@@ -20,6 +20,7 @@
  */
 using ClosedXML;
 using Newtonsoft.Json;
+using SanteDB.BI.Exceptions;
 using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Configuration;
@@ -213,8 +214,12 @@ namespace SanteDB.BI.Model
         /// <returns></returns>
         internal virtual BiDefinition FindObjectByName(string name)
         {
+            if (this.Name == name)
+            {
+                return this;
+            }
             // Initialize the sub-properties 
-            foreach (var pi in this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            foreach (var pi in this.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Where(p => typeof(BiDefinition).IsAssignableFrom(p.PropertyType) || typeof(IList).IsAssignableFrom(p.PropertyType)))
             {
                 var piValue = pi.GetValue(this);
                 if (piValue is BiDefinition bid && bid.Name == name)
@@ -244,7 +249,18 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Validate this BI definition
         /// </summary>
-        public IEnumerable<DetectedIssue> Validate() => this.Validate(true);
+        public IEnumerable<DetectedIssue> Validate() 
+        {
+            try
+            {
+                var copy = BiUtils.ResolveRefs(this);
+                return copy.Validate(true);
+            }
+            catch(BiException e)
+            {
+                return new DetectedIssue[] { new DetectedIssue(DetectedIssuePriorityType.Error, "bi.resolve", e.Message, Guid.Empty) };
+            }
+        }
 
         /// <summary>
         /// Validate the BI values
@@ -287,5 +303,38 @@ namespace SanteDB.BI.Model
             retVal.MetaData = new BiMetadata().CopyObjectData(this.MetaData);
             return retVal;
         }
+
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if(obj is BiDefinition bid)
+            {
+                return bid.Id == this.Id &&
+                    bid.Name == this.Name &&
+                    bid.Ref == this.Ref;
+            }
+            return base.Equals(obj);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            var hash = 0;
+            if (!String.IsNullOrEmpty(this.Name))
+            {
+                hash += this.Name.GetHashCode() * 17;
+            }
+            if (!String.IsNullOrEmpty(this.Id))
+            {
+                hash += this.Id.GetHashCode() * 17;
+            }
+            if (!String.IsNullOrEmpty(this.Ref))
+            {
+                hash += this.Ref.GetHashCode() * 17;
+            }
+            return hash;
+        }
+
     }
 }

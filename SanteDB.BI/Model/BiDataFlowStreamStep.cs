@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
+using SanteDB.BI.Datamart.DataFlow;
 
 namespace SanteDB.BI.Model
 {
@@ -34,14 +35,17 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiDataFlowStreamStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [ExcludeFromCodeCoverage] // Serialization class
-    public abstract class BiDataFlowStreamStep : BiDataFlowStep
+    public abstract class BiDataFlowStreamStep : BiDataFlowStep, IDataFlowStreamStepDefinition
     {
 
         /// <summary>
         /// Input for the data flow step
         /// </summary>
         [XmlElement("input"), JsonProperty("input")]
-        public BiObjectReference InputFlow { get; set; }
+        public BiObjectReference InputObject { get; set; }
+
+        /// <inheritdoc/>
+        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputObject?.Resolved as BiDataFlowStep;
 
 
         /// <inheritdoc/>
@@ -52,9 +56,21 @@ namespace SanteDB.BI.Model
                 yield return itm;
             }
 
-            if (this.InputFlow == null)
+            if (this.InputObject == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputFlow)), Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputObject)), Guid.Empty);
+            }
+            else if(this.InputObject.Resolved == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, $"bi.mart.flow.step[{this.Name}].input.notFound", string.Format(ErrorMessages.OBJECT_NOT_FOUND, this.InputObject.Ref), Guid.Empty);
+
+            }
+            else
+            {
+                foreach (var itm in this.InputObject.Resolved.Validate(false))
+                {
+                    yield return itm;
+                }
             }
 
         }

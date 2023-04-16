@@ -49,5 +49,9 @@ namespace SanteDB.BI.Model
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Id}].name.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
             }
         }
+
+        /// <inheritdoc />
+        public override string ToString() => $"[{this.GetType().Name} {this.Name}]";
+
     }
 }

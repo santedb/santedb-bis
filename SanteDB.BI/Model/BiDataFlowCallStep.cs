@@ -24,6 +24,7 @@ using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -38,26 +39,49 @@ namespace SanteDB.BI.Model
     {
 
         /// <summary>
+        /// Get the data flow target
+        /// </summary>
+        [XmlElement("dataFlow"), JsonProperty("dataFlow")]
+        public BiObjectReference TargetMethod { get; set; }
+
+        /// <summary>
         /// Parameters to be passed
         /// </summary>
-        [JsonProperty("parameters")]
-        [XmlArray("parameters")]
-        [XmlArrayItem("int", typeof(BiDataFlowCallParameter<Int32>))]
-        [XmlArrayItem("string", typeof(BiDataFlowCallParameter<String>))]
-        [XmlArrayItem("bool", typeof(BiDataFlowCallParameter<Boolean>))]
-        [XmlArrayItem("uuid", typeof(BiDataFlowCallParameter<Guid>))]
-        [XmlArrayItem("date-time", typeof(BiDataFlowCallParameter<DateTime>))]
-        [XmlArrayItem("ref", typeof(BiDataFlowCallParameter<BiObjectReference>))]
-        public List<BiDataFlowParameterBase> Parameters { get; set; }
+        [JsonProperty("args")]
+        [XmlArray("args")]
+        [XmlArrayItem("int", typeof(BiDataFlowCallArgument<Int32>))]
+        [XmlArrayItem("string", typeof(BiDataFlowCallArgument<String>))]
+        [XmlArrayItem("bool", typeof(BiDataFlowCallArgument<Boolean>))]
+        [XmlArrayItem("uuid", typeof(BiDataFlowCallArgument<Guid>))]
+        [XmlArrayItem("date-time", typeof(BiDataFlowCallArgument<DateTime>))]
+        [XmlArrayItem("ref", typeof(BiDataFlowCallArgument<BiObjectReference>))]
+        public List<BiDataFlowArgumentBase> Arguments { get; set; }
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            if(String.IsNullOrEmpty(this.Ref))
+           
+            if(this.TargetMethod == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.mart.flow.call.ref.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Ref)), Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.mart.flow.call.dataFlow.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(TargetMethod)), Guid.Empty);
+            }
+            else
+            {
+                foreach(var itm in this.TargetMethod.Validate(false))
+                {
+                    yield return itm;
+                }
             }
         }
 
+        /// <inheritdoc/>
+        internal override BiDefinition FindObjectByName(string name)
+        {
+            return this.Arguments.Find(o=>o.Name == name)?.SimpleValue as BiDefinition ??
+                base.FindObjectByName(name);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString() => $"[{this.GetType().Name} {this.TargetMethod?.Resolved?.Name ?? this.TargetMethod?.Ref ?? this.Name}({String.Join(",", this.Arguments.Select(a => a.ToString()))})]";
     }
 }

@@ -18,6 +18,7 @@ using DocumentFormat.OpenXml.Office2016.Excel;
 using System.IO;
 using SanteDB.BI.Util;
 using SanteDB.BI.Exceptions;
+using SanteDB.BI.Datamart.DataFlow;
 
 namespace SanteDB.BI.Test
 {
@@ -132,13 +133,13 @@ namespace SanteDB.BI.Test
                     datamart = manager.Register(coreMart);
                 }
 
-                var cExecutions = datamart.Executions.Count();
-                using (var executionContext = manager.GetExecutionContext(datamart, BiExecutionPurposeType.Discovery))
+                var cExecutions = datamart.FlowExecutions.Count();
+                using (var executionContext = manager.GetExecutionContext(datamart, Datamart.DataFlow.DataFlowExecutionPurposeType.Discovery))
                 {
                     Assert.AreEqual(executionContext.Datamart.Key, datamart.Key);
-                    executionContext.SetOutcome(BiExecutionOutcomeType.Success);
+                    executionContext.SetOutcome(DataFlowExecutionOutcomeType.Success);
                 }
-                Assert.AreEqual(cExecutions + 1, datamart.Executions.Count());
+                Assert.AreEqual(cExecutions + 1, datamart.FlowExecutions.Count());
             }
         }
 
@@ -164,7 +165,7 @@ namespace SanteDB.BI.Test
                     datamart = manager.Register(coreMart);
                 }
 
-                using (var executionContext = manager.GetExecutionContext(datamart, BiExecutionPurposeType.DatabaseManagement | BiExecutionPurposeType.SchemaManagement))
+                using (var executionContext = manager.GetExecutionContext(datamart, DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement))
                 {
                     Assert.AreEqual(executionContext.Datamart.Key, datamart.Key);
 
@@ -227,7 +228,7 @@ namespace SanteDB.BI.Test
 
                     outputIntegrator.Close();
 
-                    executionContext.SetOutcome(BiExecutionOutcomeType.Success);
+                    executionContext.SetOutcome(DataFlowExecutionOutcomeType.Success);
                 }
             }
         }
@@ -298,6 +299,9 @@ namespace SanteDB.BI.Test
                 var dataSourceProvider = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(qdef.DataSources.First().ProviderType) as IBiDataSource;
                 var queryResult = dataSourceProvider.ExecuteQuery(qdef, new Dictionary<String, Object>(), null);
                 Assert.AreEqual(0, queryResult.Records.Count());
+
+                // RUN the flow
+                manager.Refresh(coreMart);
             }
         }
     }

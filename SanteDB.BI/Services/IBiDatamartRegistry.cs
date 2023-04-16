@@ -21,20 +21,20 @@ namespace SanteDB.BI.Services
         /// <summary>
         /// Gets the datamarts which are configured with this manager
         /// </summary>
-        IQueryResultSet<IBiDatamart> Find(Expression<Func<IBiDatamart, bool>> query);
+        IQueryResultSet<IDatamart> Find(Expression<Func<IDatamart, bool>> query);
 
         /// <summary>
         /// Create a new BI datamart based on <paramref name="dataMartDefinition"/>
         /// </summary>
         /// <param name="dataMartDefinition">The datamart definition</param>
         /// <returns>The registered IBiDatamart</returns>
-        IBiDatamart Register(BiDatamartDefinition dataMartDefinition);
+        IDatamart Register(BiDatamartDefinition dataMartDefinition);
 
         /// <summary>
         /// Removes the <paramref name="datamart"/> from the manager
         /// </summary>
         /// <param name="datamart">The datamart to un-register</param>
-        void Unregister(IBiDatamart datamart);
+        void Unregister(IDatamart datamart);
 
         /// <summary>
         /// Begins the refresh process for the datamart object
@@ -42,7 +42,7 @@ namespace SanteDB.BI.Services
         /// <param name="datamart">The datamart to be refreshed</param>
         /// <param name="purpose">The purpose the execution context is being requested</param>
         /// <returns>The execution context which can be used by the executors to </returns>
-        IBiDataFlowExecutionContext GetExecutionContext(IBiDatamart datamart, BiExecutionPurposeType purpose);
+        IDataFlowExecutionContext GetExecutionContext(IDatamart datamart, DataFlowExecutionPurposeType purpose);
 
     }
 }
