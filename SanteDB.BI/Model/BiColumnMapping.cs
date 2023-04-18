@@ -93,20 +93,16 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// The column transformation expression
         /// </summary>
-        [XmlElement("transform", typeof(String))]
+        [XmlElement("fixed", typeof(String))]
         [XmlElement("lookup", typeof(BiColumnMappingTransformJoin))]
         public Object TransformExpression { get; set; }
 
         internal override IEnumerable<DetectedIssue> Validate()
         {
-            foreach (var itm in base.Validate())
-            {
-                yield return itm;
-            }
-
+           
             if (this.TransformExpression == null && String.IsNullOrEmpty(this.Name))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[$].map.source.name.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name ?? this.TransformExpression}].map.source.name.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
             }
             else if (this.TransformExpression is BiColumnMappingTransformJoin bcmtj)
             {

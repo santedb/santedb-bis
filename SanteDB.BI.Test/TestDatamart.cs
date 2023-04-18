@@ -200,18 +200,19 @@ namespace SanteDB.BI.Test
 
                 // We should be able to register and then resolve refs
                 repository.Register(coreMart);
-                manager.Migrate(coreMart);
-                var qdef = BiUtils.ResolveRefs(queryDefinition); // this should work now
-                Assert.AreEqual(coreMart.Produces.Id, qdef.DataSources.First().Id);
+                //  manager.Migrate(coreMart);
 
                 // Test we can actually run the query
                 
-                var dataSourceProvider = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(qdef.DataSources.First().ProviderType) as IBiDataSource;
-                var queryResult = dataSourceProvider.ExecuteQuery(qdef, new Dictionary<String, Object>(), null);
-                Assert.AreEqual(0, queryResult.Records.Count());
-
                 // RUN the flow
                 manager.Refresh(coreMart);
+
+                var qdef = BiUtils.ResolveRefs(queryDefinition); // this should work now
+                var dataSourceProvider = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(qdef.DataSources.First().ProviderType) as IBiDataSource;
+                Assert.AreEqual(coreMart.Produces.Id, qdef.DataSources.First().Id);
+                var queryResult = dataSourceProvider.ExecuteQuery(qdef, new Dictionary<String, Object>(), null);
+                Assert.GreaterOrEqual(0, queryResult.Records.Count());
+
             }
         }
     }

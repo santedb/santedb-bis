@@ -1,13 +1,16 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
+using SanteDB.Core;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Services;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using System.Linq;
 using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
@@ -18,8 +21,13 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
     internal class LogExecutor : IDataFlowStepExecutor
     {
 
+        public LogExecutor(IThreadPoolService thp)
+        {
+            this.m_threadPool = thp;            
+        }
         // TRacer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(LogExecutor));
+        private readonly IThreadPoolService m_threadPool;
 
         /// <inheritdoc/>
         public Type Handles => typeof(BiDataFlowLogStep);
@@ -43,16 +51,13 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                     var sw = new Stopwatch();
                     sw.Start();
 
-                    if(!scope.TryGetSysVar(bls.InputObject.Ref, out IEnumerable<dynamic> sourceStream))
-                    {
-                        sourceStream = bls.InputObject.ResolveReferenceTo<BiDataFlowStep>(scope).Execute(scope);
-                        scope.SetSysVar(bls.InputObject.Ref, sourceStream);
-                    }
-                    
+                    var inputStream = bls.InputObject.ResolveReferenceTo<BiDataFlowStep>(scope).Execute(scope);
+
+
                     var nRecs = 0;
-                    foreach (var itm in sourceStream)
+                    foreach (var itm in inputStream)
                     {
-                        this.Emit(bls.Destination, scope, bls.Priority, bls.Format(itm));
+                        this.Emit(bls.Destination, scope, bls.Priority, bls.Format((object)itm));
                         myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                         myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
                         myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);

@@ -41,7 +41,7 @@
   </section>
   <section xsi:type="DataConfigurationSection">
     <connectionStrings>
-      <add name="TEST_CONNECTION" value="Data Source=|DataDirectory|\santedb_test.sqlite;Foreign Keys=true" provider="sqlite" />
+      <add name="TEST_CONNECTION" value="Data Source=|DataDirectory|\santedb_test.sqlite; Foreign Keys=true; Pooling=false;" provider="sqlite" />
     </connectionStrings>
   </section>
   <section xsi:type="OrmConfigurationSection">

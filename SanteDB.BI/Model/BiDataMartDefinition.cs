@@ -55,7 +55,7 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Identifies that this mart extends another
         /// </summary>
-        [XmlElement("extend"), JsonProperty("extend")]
+        [XmlElement("extends"), JsonProperty("extends")]
         public BiObjectReference Extends { get; set; }
 
         /// <summary>

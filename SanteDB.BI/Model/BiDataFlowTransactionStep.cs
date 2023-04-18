@@ -45,8 +45,8 @@ namespace SanteDB.BI.Model
         public BiObjectReference InputConnection { get; set; }
 
         /// <inheritdoc/>
-        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputConnection.Resolved as BiDataFlowConnectionStep;
-
+        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputConnection?.Resolved as BiDataFlowConnectionStep;
+        
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {

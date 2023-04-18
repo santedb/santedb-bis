@@ -17,4 +17,15 @@ namespace SanteDB.BI.Datamart.DataFlow
         BiDataFlowStep InputStep { get; }
 
     }
+
+    /// <summary>
+    /// Multiple stream input
+    /// </summary>
+    internal interface IDataFlowMultiStreamStepDefinition : IDataFlowStreamStepDefinition
+    {
+        /// <summary>
+        /// Gets the input step
+        /// </summary>
+        IEnumerable<BiDataFlowStep> InputSteps { get; }
+    }
 }

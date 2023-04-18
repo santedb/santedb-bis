@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -41,6 +42,23 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             {
                 scope.Context.DiagnosticSession?.LogEndAction(myAction);
             }
+        }
+
+        /// <summary>
+        /// Create a stream tuple
+        /// </summary>
+        protected DataFlowStreamTuple CreateStreamTuple(object tuple)
+        {
+            switch(tuple)
+            {
+                case DataFlowStreamTuple tup:
+                    return tup;
+                case IDictionary<String, Object> dict:
+                    return new DataFlowStreamTuple(dict);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tuple));
+            }
+
         }
 
         /// <summary>

@@ -48,13 +48,13 @@ namespace SanteDB.BI.Util
         public static TBiDefinition ResolveRefs<TBiDefinition>(TBiDefinition definition)
             where TBiDefinition : BiDefinition
         {
-            return (TBiDefinition)ResolveRefs((BiDefinition)definition, new Stack<BiDefinition>(), new Dictionary<String, BiDefinition>());
+            return (TBiDefinition)ResolveRefs((BiDefinition)definition, new Stack<BiDefinition>());
         }
 
         /// <summary>
         /// Resolves all references and their proper objects from the metadata repository
         /// </summary>
-        private static BiDefinition ResolveRefs(BiDefinition definition, Stack<BiDefinition> parentScope, IDictionary<String, BiDefinition> resolved)
+        private static BiDefinition ResolveRefs(BiDefinition definition, Stack<BiDefinition> parentScope)
         {
 
             if (definition == null)
@@ -83,11 +83,8 @@ namespace SanteDB.BI.Util
                     var refId = clonedDefinition.Ref;
 
                     // Check for already resolved 
-                    if (resolved.TryGetValue(refId, out var resolvedTarget))
-                    {
-
-                    }
-                    else if (refId.StartsWith("#")) // identity reference
+                    BiDefinition resolvedTarget = null;
+                    if (refId.StartsWith("#")) // identity reference
                     {
                         refId = refId.Substring(1);
 
@@ -96,12 +93,12 @@ namespace SanteDB.BI.Util
                             ResolveRefs(s_repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
                                 new Type[] { definition.GetType() },
                                 new Type[] { typeof(String) }).Invoke(s_repository, new object[] { refId }) as BiDefinition);
-                        resolved.Add(clonedDefinition.Ref, resolvedTarget);
+                        //resolved.Add(clonedDefinition.Ref, resolvedTarget);
                     }
                     else // resolve by local name
                     {
                         resolvedTarget = parentScope.Select(o => o.FindObjectByName(refId)).OfType<BiDefinition>().FirstOrDefault();
-                        resolved.Add(clonedDefinition.Ref, resolvedTarget);
+                        //resolved.Add(clonedDefinition.Ref, resolvedTarget);
 
                     }
 
@@ -112,7 +109,7 @@ namespace SanteDB.BI.Util
 
 
                     // Clone the return value - as we don't want to muck up repository copy of the object
-                    var retVal = ResolveRefs(resolvedTarget, parentScope, resolved);
+                    var retVal = ResolveRefs(resolvedTarget, parentScope);
                     retVal.Label = definition.Label ?? definition.Label;
                     if (retVal is BiParameterDefinition bid && definition is BiParameterDefinition did)
                     {
@@ -144,13 +141,13 @@ namespace SanteDB.BI.Util
                             {
                                 if (itm is BiDefinition bid)
                                 {
-                                    nvList.Add(ResolveRefs(bid, parentScope, resolved));
+                                    nvList.Add(ResolveRefs(bid, parentScope));
                                 }
                                 else if (itm is BiDataFlowCallArgument<BiObjectReference> bica)
                                 {
                                     nvList.Add(new BiDataFlowCallArgument<BiObjectReference>()
                                     {
-                                        Value = (BiObjectReference)ResolveRefs(bica.Value, parentScope, resolved),
+                                        Value = (BiObjectReference)ResolveRefs(bica.Value, parentScope),
                                         Name = bica.Name
                                     });
                                 }
@@ -164,7 +161,7 @@ namespace SanteDB.BI.Util
                         }
                         else if (val is BiDefinition bid)
                         {
-                            pi.SetValue(clonedDefinition, ResolveRefs(bid, parentScope, resolved));
+                            pi.SetValue(clonedDefinition, ResolveRefs(bid, parentScope));
                         }
                     }
                 }

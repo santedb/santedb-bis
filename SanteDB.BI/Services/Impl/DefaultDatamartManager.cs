@@ -18,6 +18,7 @@ using SanteDB.Core.Model.Audit;
 using DocumentFormat.OpenXml.InkML;
 using SanteDB.Core.Exceptions;
 using SanteDB.BI.Util;
+using DocumentFormat.OpenXml.Presentation;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -217,9 +218,9 @@ namespace SanteDB.BI.Services.Impl
         }
 
         /// <summary>
-        /// Performs the appropriate logic to migrate
+        /// Create the database if needed
         /// </summary>
-        private void MigrateInternal(IDataFlowExecutionContext context, IDataIntegrator integrator, BiDatamartDefinition datamartDefinition, IAuditBuilder audit)
+        private void CreateDatabaseInternal(IDataFlowExecutionContext context, IDataIntegrator integrator, BiDatamartDefinition datamartDefinition, IAuditBuilder audit)
         {
             if (!integrator.DatabaseExists())
             {
@@ -238,8 +239,15 @@ namespace SanteDB.BI.Services.Impl
                 });
             }
 
-            integrator.OpenWrite();
+        }
+        /// <summary>
+        /// Performs the appropriate logic to migrate
+        /// </summary>
+        private void MigrateInternal(IDataFlowExecutionContext context, IDataIntegrator integrator, BiDatamartDefinition datamartDefinition, IAuditBuilder audit)
+        {
 
+            this.CreateDatabaseInternal(context, integrator, datamartDefinition, audit);
+            integrator.OpenWrite();
 
             var toMigrate = datamartDefinition.SchemaObjects.Where(o => integrator.NeedsMigration(o));
             if (toMigrate.Any())
@@ -283,7 +291,7 @@ namespace SanteDB.BI.Services.Impl
                 // Remove this datamart from the registration since we don't want other people messing it up
                 this.m_pepService.Demand(PermissionPolicyIdentifiers.WriteWarehouseData);
 
-                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.Refresh))
+                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.Refresh | DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement))
                 {
 
                     using (var integrator = context.GetIntegrator(datamartDefinition.Produces))

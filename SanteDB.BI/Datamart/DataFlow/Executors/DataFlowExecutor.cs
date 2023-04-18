@@ -74,7 +74,6 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 {
                     try
                     {
-
                         var executeRoot = bfd.GetExecutionTreeRoot();
                         scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bfd.FormatExecutionPlan());
                         // Now we process the terminal objects and execute them

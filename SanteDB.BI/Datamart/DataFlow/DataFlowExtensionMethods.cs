@@ -66,7 +66,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// </summary>
         /// <param name="me">The step collection to evaulate</param>
         /// <returns>The step roots</returns>
-        public static IEnumerable<BiDataFlowStep> GetExecutionTreeRoot(this BiFlowStepCollectionBase me) => me.Steps.Where(step => !me.Steps.OfType<IDataFlowStreamStepDefinition>().Any(q => q.InputStep?.Name == step.Name));
+        public static IEnumerable<BiDataFlowStep> GetExecutionTreeRoot(this BiFlowStepCollectionBase me) => me.Steps.Where(step => String.IsNullOrEmpty(step.Name) || !me.Steps.OfType<IDataFlowStreamStepDefinition>().Any(q => q.InputStep?.Name == step.Name) && !me.Steps.OfType<IDataFlowMultiStreamStepDefinition>().Any(m=>m.InputSteps.Any(s=>s?.Name == step.Name)));
 
         /// <summary>
         /// Get the full execution plan
@@ -86,6 +86,16 @@ namespace SanteDB.BI.Datamart.DataFlow
                 {
                     yield return itm;
                 }
+
+                if (me is IDataFlowMultiStreamStepDefinition mstrDef)
+                {
+                    foreach (var itm in mstrDef.InputSteps.SelectMany(m=>m.GetExecutionPlan()))
+                    {
+                        yield return itm;
+                    }
+
+                }
+
                 yield return me;
             }
             else

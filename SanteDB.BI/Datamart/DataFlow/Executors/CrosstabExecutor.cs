@@ -5,6 +5,7 @@ using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors

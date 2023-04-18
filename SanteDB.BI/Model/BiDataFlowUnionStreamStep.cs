@@ -19,34 +19,31 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
-using System.Collections.Generic;
 using System;
-using System.Diagnostics.CodeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
-using SanteDB.BI.Datamart.DataFlow;
 
 namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// A data flow step which streams data from another data flow step
+    /// Data flow union stream step
     /// </summary>
-    [XmlType(nameof(BiDataFlowStreamStep), Namespace = BiConstants.XmlNamespace)]
-    [JsonObject]
-    [ExcludeFromCodeCoverage] // Serialization class
-    public abstract class BiDataFlowStreamStep : BiDataFlowStep, IDataFlowStreamStepDefinition
+    [XmlType(nameof(BiDataFlowUnionStreamStep), Namespace = BiConstants.XmlNamespace)]
+    public class BiDataFlowUnionStreamStep : BiDataFlowStreamStep, IDataFlowMultiStreamStepDefinition
     {
 
         /// <summary>
         /// Input for the data flow step
         /// </summary>
-        [XmlElement("input"), JsonProperty("input")]
-        public BiObjectReference InputObject { get; set; }
+        [XmlElement("with"), JsonProperty("with")]
+        public List<BiObjectReference> UnionWith { get; set; }
 
         /// <inheritdoc/>
-        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputObject?.Resolved as BiDataFlowStep;
-
+        IEnumerable<BiDataFlowStep> IDataFlowMultiStreamStepDefinition.InputSteps => this.UnionWith?.Select(o=>o.Resolved as BiDataFlowStep) ?? new BiDataFlowStep[0];
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
@@ -56,23 +53,15 @@ namespace SanteDB.BI.Model
                 yield return itm;
             }
 
-            if (this.InputObject == null)
+            if (this.UnionWith != null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].input.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(InputObject)), Guid.Empty);
-            }
-            else if (this.InputObject.Resolved == null)
-            {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Warning, $"bi.mart.flow.step[{this.Name}].input.notFound", string.Format(ErrorMessages.OBJECT_NOT_FOUND, this.InputObject.Ref), Guid.Empty);
-
-            }
-            else
-            {
-                foreach (var itm in this.InputObject.Resolved.Validate(false))
+                foreach (var itm in this.UnionWith.SelectMany(u=>u.Validate(false)))
                 {
                     yield return itm;
                 }
             }
 
         }
+
     }
 }

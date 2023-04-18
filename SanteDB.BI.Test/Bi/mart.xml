@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="~/.ref/schema/BusinessIntelligence.xsd" type="application/xml" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <BiDatamartDefinition xmlns="http://santedb.org/bi" id="org.santedb.bi.datamart.core"
     name="core-datamart" label="core-datamart">
 
@@ -19,7 +20,7 @@
     <public>false</public>
   </meta>
 
-  
+
   <produces id="org.santedb.bi.dataSource.warehouse" name="warehouse">
     <meta status="active">
       <policies>
@@ -29,8 +30,14 @@
     </meta>
   </produces>
 
-  
+
   <schema>
+
+    <table name="REJECT_TBL">
+      <column type="uuid" key="true" notNull="true" unique="true" name="RECORD_ID"/>
+      <column type="string" name="TYPE" />
+      <column type="string" name="REASON" />
+    </table>
 
     <table name="SEC_USR_TBL">
       <column type="uuid" key="true" notNull="true" unique="true" name="USR_ID"/>
@@ -68,7 +75,7 @@
     </table>
 
     <table name="ENT_ID_TBL">
-      <column type="uuid" key="true" name="ENT_ID_ID" />
+      <column type="uuid" key="true" name="ID_ID" />
       <column type="ref" index="true" name="ENT_ID">
         <otherTable ref="ENT_TBL"/>
       </column>
@@ -78,7 +85,7 @@
       <column type="date" name="ISSUED" />
       <column type="date" name="EXPIRY" />
     </table>
-    
+
     <table name="ENT_ADDR_TBL">
       <column type="uuid" key="true" name="ADDR_ID" />
       <column type="ref" index="true" name="ENT_ID">
@@ -101,7 +108,7 @@
       <column type="ref" index="true" name="ENT_ID">
         <otherTable ref="ENT_TBL"/>
       </column>
-      <column type="string" name="USE_TYPE" />
+      <column type="string" notNull="true" name="USE_TYPE" />
       <column type="string" name="NAME" />
       <column type="string" name="NAME_PREFIX" />
       <column type="string" name="NAME_GIVEN" />
@@ -236,7 +243,7 @@
     </table>
 
     <table name="ACT_ID_TBL">
-      <column type="uuid" key="true" name="ACT_ID_ID" />
+      <column type="uuid" key="true" name="ID_ID" />
       <column type="ref" index="true" name="ACT_ID">
         <otherTable ref="ACT_TBL"/>
       </column>
@@ -246,7 +253,7 @@
       <column type="date" name="ISSUED" />
       <column type="date" name="EXPIRY" />
     </table>
-    
+
     <table name="OBS_TBL">
       <column type="string" name="INTERPRETATION"/>
       <column type="string" name="VALUE_STR" />
@@ -419,7 +426,7 @@
             </columns>
           </pivot>
         </crosstab>
-        <map name="map_addresses">
+        <transform name="map_addresses">
           <input ref="pivot_addresses" />
           <map>
             <source name="ADDR_ID" />
@@ -465,12 +472,53 @@
             <source name="CensusTract" />
             <target name="ADDR_CENSUS" />
           </map>
-        </map>
-        <writer mode="insert" name="write_addresses">
+        </transform>
+        <writer mode="insert" truncate="true" name="write_addresses">
           <input ref="map_addresses" />
           <connection ref="output" />
           <target ref="ENT_ADDR_TBL" />
         </writer>
+        <filter name="filter_rejects">
+          <input ref="write_addresses" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <transform name="transform_rejects">
+          <input ref="filter_rejects" />
+          <map>
+            <source name="ADDR_ID" />
+            <target name="RECORD_ID" />
+          </map>
+          <map>
+            <source>
+              <fixed>ENT_ADDR_TBL</fixed>
+            </source>
+            <target name="TYPE" />
+          </map>
+          <map>
+            <source name="$reject.reason" />
+            <target name="REASON" />
+          </map>
+        </transform>
+        <writer mode="insertUpdate" truncate="false" name="write_rejects">
+          <input ref="transform_rejects" />
+          <connection ref="output" />
+          <target ref="REJECT_TBL" />
+        </writer>
+        <filter name="filter_rejects2">
+          <input ref="write_rejects" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <halt name="halt_rejects">
+          <input ref="filter_rejects2" />
+        </halt>
       </pipeline>
     </flow>
     <flow name="names">
@@ -521,7 +569,7 @@
             </columns>
           </pivot>
         </crosstab>
-        <map name="map_names">
+        <transform name="map_names">
           <input ref="pivot_names" />
           <map>
             <source name="ENT_ID" />
@@ -555,12 +603,53 @@
             <source name="Family" />
             <target name="NAME_FAMILY" />
           </map>
-        </map>
-        <writer mode="insert" name="write_names">
+        </transform>
+        <writer truncate="true" mode="insert" name="write_names">
           <input ref="map_names" />
           <connection ref="output" />
           <target ref="ENT_NAME_TBL" />
         </writer>
+        <filter name="filter_rejects">
+          <input ref="write_names" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <transform name="transform_rejects">
+          <input ref="filter_rejects" />
+          <map>
+            <source name="NAME_ID" />
+            <target name="RECORD_ID" />
+          </map>
+          <map>
+            <source>
+              <fixed>ENT_NAME_TBL</fixed>
+            </source>
+            <target name="TYPE" />
+          </map>
+          <map>
+            <source name="$reject.reason" />
+            <target name="REASON" />
+          </map>
+        </transform>
+        <writer mode="insertUpdate" truncate="false" name="write_rejects">
+          <input ref="transform_rejects" />
+          <connection ref="output" />
+          <target ref="REJECT_TBL" />
+        </writer>
+        <filter name="filter_rejects2">
+          <input ref="write_rejects" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <halt name="halt_rejects">
+          <input ref="filter_rejects2" />
+        </halt>
       </pipeline>
     </flow>
     <flow name="users">
@@ -595,6 +684,7 @@
 	                SEC_USR_TBL 
 	                INNER JOIN SEC_PROV_TBL AS CRT_PROV ON (SEC_USR_TBL.CRT_PROV_ID = CRT_PROV.PROV_ID)
 	                LEFT JOIN SEC_PROV_TBL AS OBS_PROV ON (SEC_USR_TBL.OBSLT_PROV_ID = OBS_PROV.PROV_ID)
+                ORDER BY SEC_USR_TBL.CRT_UTC ASC;
               ]]>
             </add>
           </sql>
@@ -604,6 +694,18 @@
           <connection ref="output" />
           <target ref="SEC_USR_TBL" />
         </writer>
+        <filter name="filter_rejects">
+          <input ref="write_users" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <halt name="halt_rejects">
+          <input ref="filter_rejects" />
+          Halting execution - {{ username }} rejected {{ $reject.reason }}
+        </halt>
       </pipeline>
     </flow>
     <flow name="identifiers">
@@ -625,7 +727,7 @@
               </providers>
               <![CDATA[ 
                         SELECT 
-                            ENT_ID_TBL.ENT_ID_ID,
+                            ENT_ID_TBL.ENT_ID_ID AS ID_ID,
                             ENT_ID_TBL.ENT_ID,
                             ID_VAL AS VALUE,
                             ID_DMN_TBL.NSID AS ISSUER,
@@ -654,7 +756,7 @@
               </providers>
               <![CDATA[ 
                         SELECT 
-                            ACt_ID_TBL.ACT_ID_ID,
+                            ACt_ID_TBL.ACT_ID_ID AS ID_ID,
                             ACT_ID_TBL.ACT_ID,
                             ID_VAL AS VALUE,
                             ID_DMN_TBL.NSID AS ISSUER,
@@ -681,6 +783,51 @@
           <connection ref="output" />
           <target ref="ACT_ID_TBL" />
         </writer>
+        <union name="union_rejects">
+          <input ref="write_ent_ids" />
+          <with ref="write_act_ids" />
+        </union>
+        <filter name="filter_rejects">
+          <input ref="union_rejects" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <transform name="transform_rejects">
+          <input ref="filter_rejects" />
+          <map>
+            <source name="ID_ID" />
+            <target name="RECORD_ID" />
+          </map>
+          <map>
+            <source>
+              <fixed>ENT_ID_TBL OR ACT_ID_TBL</fixed>
+            </source>
+            <target name="TYPE" />
+          </map>
+          <map>
+            <source name="$reject.reason" />
+            <target name="REASON" />
+          </map>
+        </transform>
+        <writer mode="insertUpdate" truncate="false" name="write_rejects">
+          <input ref="transform_rejects" />
+          <connection ref="output" />
+          <target ref="REJECT_TBL" />
+        </writer>
+        <filter name="filter_rejects2">
+          <input ref="write_rejects" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <halt name="halt_rejects">
+          <input ref="filter_rejects2" />
+        </halt>
       </pipeline>
     </flow>
     <flow name="entities">
@@ -714,7 +861,7 @@
                             INNER JOIN SEC_PROV_TBL ON (ENT_VRSN_TBL.CRT_PROV_ID = SEC_PROV_TBL.PROV_ID)
                         WHERE
                             ENT_VRSN_TBL.HEAD = TRUE
-                            AND ENT_VRSN_TBL.OBSLT_UTC IS NULL
+                            --AND ENT_VRSN_TBL.OBSLT_UTC IS NULL
                         ]]>
             </add>
           </sql>
@@ -724,6 +871,18 @@
           <connection ref="output" />
           <target ref="ENT_TBL" />
         </writer>
+        <filter name="filter_rejects">
+          <input ref="write_entities" />
+          <all>
+            <when field="$reject" op="eq">
+              <bool>true</bool>
+            </when>
+          </all>
+        </filter>
+        <halt name="halt_rejects">
+          <input ref="filter_rejects" />
+          Halting execution - {{ ent_id }} rejected {{ $reject.reason }}
+        </halt>
       </pipeline>
     </flow>
   </dataFlows>

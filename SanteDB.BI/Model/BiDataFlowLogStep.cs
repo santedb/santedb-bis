@@ -21,6 +21,7 @@
 using DynamicExpresso;
 using Newtonsoft.Json;
 using SanteDB.BI.Datamart.DataFlow;
+using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
@@ -73,9 +74,6 @@ namespace SanteDB.BI.Model
     public class BiDataFlowLogStep : BiDataFlowStreamStep
     {
 
-        // Lambda from the message property
-        private static readonly Regex m_formatRegex = new Regex(@"\{\{(.+?)\}\}", RegexOptions.Compiled);
-
         /// <summary>
         /// The priority of the object to log
         /// </summary>
@@ -98,28 +96,7 @@ namespace SanteDB.BI.Model
         /// Get a string formatted to the message with the specified input object
         /// </summary>
         /// <param name="scopedObject">The object to emit the log for</param>
-        internal String Format(object scopedObject)
-        {
-            if(scopedObject is IDictionary<String, Object> dict)
-            {
-                if (String.IsNullOrEmpty(this.Message?.Trim()))
-                {
-                    return String.Join(",", dict.Values);
-                }
-                else
-                {
-                    return m_formatRegex.Replace(this.Message.Trim(), o => dict.TryGetValue(o.Groups[1].Value.Trim(), out var v) ? v.ToString() : String.Empty);
-                }
-            }
-            else if(scopedObject is DataFlowScope dfs)
-            {
-                return m_formatRegex.Replace(this.Message.Trim(), o => dfs[o.Groups[1].Value.Trim()].ToString());
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(IDictionary), scopedObject.GetType()));
-            }
-        }
+        internal String Format(object scopedObject) => this.Message.FormatString(scopedObject);
 
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {

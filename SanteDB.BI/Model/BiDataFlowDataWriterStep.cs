@@ -29,29 +29,6 @@ using System.Xml.Serialization;
 namespace SanteDB.BI.Model
 {
 
-    /// <summary>
-    /// Indicates the writer output stream mode 
-    /// 
-    /// </summary>
-    [XmlType(nameof(DataWriterRejectHandling), Namespace = BiConstants.XmlNamespace)]
-    public enum DataWriterRejectHandling
-    {
-        /// <summary>
-        /// Halt the execution
-        /// </summary>
-        [XmlEnum("halt")]
-        Halt,
-        /// <summary>
-        /// Stream rejects 
-        /// </summary>
-        [XmlEnum("output")]
-        StreamOut,
-        /// <summary>
-        /// Log the rejects
-        /// </summary>
-        [XmlEnum("log")]
-        Log
-    }
 
     /// <summary>
     /// Indicates the writer mode
@@ -101,12 +78,6 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("mode"), JsonProperty("mode")]
         public DataWriterModeType Mode { get; set; }
-
-        /// <summary>
-        /// Gets or sets the output mode for reject tracing
-        /// </summary>
-        [XmlAttribute("rejects"), JsonProperty("rejects")]
-        public DataWriterRejectHandling RejectHandling { get; set; }
 
         /// <summary>
         /// Gets or sets the output connection

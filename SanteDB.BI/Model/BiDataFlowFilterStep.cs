@@ -23,25 +23,24 @@ using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// Represents an abstract flow step
+    /// Represents a stream step that filters records 
     /// </summary>
-    [XmlType(nameof(BiDataFlowStep), Namespace = BiConstants.XmlNamespace)]
-    [JsonObject]
-    public abstract class BiDataFlowStep : BiDefinition
+    [XmlType(nameof(BiDataFlowFilterStep), Namespace = BiConstants.XmlNamespace)]
+    public class BiDataFlowFilterStep : BiDataFlowStreamStep
     {
 
         /// <summary>
-        /// Gets or sets the filter for the flow step (where the execute can selectively route data to the step)
+        /// Filter to apply
         /// </summary>
-        [XmlIgnore, JsonIgnore]
-        internal String Filter { get; set; }
+        [XmlArray("all"), XmlArrayItem("when"), JsonProperty("when")]
+        public List<BiDataFlowStreamFilterSetting> When { get; set; }
 
-       
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
@@ -50,14 +49,11 @@ namespace SanteDB.BI.Model
                 yield return itm;
             }
 
-            if (String.IsNullOrEmpty(this.Name) && String.IsNullOrEmpty(this.Ref))
+            foreach(var itm in this.When.SelectMany(o=>o.Validate()))
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.GetType().Name}].name.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
+                yield return itm;
             }
+
         }
-
-        /// <inheritdoc />
-        public override string ToString() => $"[{this.GetType().Name} {this.Name}]";
-
     }
 }
