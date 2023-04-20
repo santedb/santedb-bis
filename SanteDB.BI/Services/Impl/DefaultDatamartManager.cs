@@ -60,7 +60,7 @@ namespace SanteDB.BI.Services.Impl
                     if (registeredData != null)
                     {
                         // Un-register de-activated marts
-                        if (itm.MetaData?.Status == BiDefinitionStatus.Obsolete)
+                        if (itm.Status == BiDefinitionStatus.Obsolete)
                         {
                             this.m_tracer.TraceInfo("Un-Registering obsolete datamart {0}...", itm.Id);
                             this.m_datamartRegistry.Unregister(registeredData);
@@ -85,6 +85,12 @@ namespace SanteDB.BI.Services.Impl
 
         /// <inheritdoc/>
         public string ServiceName => "Default Datamart Manager";
+
+        /// <summary>
+        /// Diagnostic event received
+        /// </summary>
+        public event EventHandler DiagnosticEventReceived;
+
 
         /// <summary>
         /// Get a registered datamart from the registry
@@ -272,7 +278,7 @@ namespace SanteDB.BI.Services.Impl
         }
 
         /// <inheritdoc/>
-        public void Refresh(BiDatamartDefinition datamartDefinition)
+        public IDataFlowDiagnosticSession Refresh(BiDatamartDefinition datamartDefinition, bool diagnostics)
         {
 
             var audit = this.m_auditService.Audit()
@@ -291,7 +297,13 @@ namespace SanteDB.BI.Services.Impl
                 // Remove this datamart from the registration since we don't want other people messing it up
                 this.m_pepService.Demand(PermissionPolicyIdentifiers.WriteWarehouseData);
 
-                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.Refresh | DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement))
+                var purpose = DataFlowExecutionPurposeType.Refresh | DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement;
+                if (diagnostics)
+                {
+                    purpose |= DataFlowExecutionPurposeType.Diagnostics;
+                }
+
+                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, purpose))
                 {
 
                     using (var integrator = context.GetIntegrator(datamartDefinition.Produces))
@@ -301,7 +313,21 @@ namespace SanteDB.BI.Services.Impl
                             this.m_metadataRepository.Remove<BiDataSourceDefinition>(datamartDefinition.Produces.Id);
 
                             datamartDefinition = BiUtils.ResolveRefs(datamartDefinition);
-                            
+
+                            if (context.DiagnosticSession != null)
+                            {
+                                context.DiagnosticSession.ActionStarted += (o, e) =>
+                                {
+                                    this.DiagnosticEventReceived?.Invoke(o, e);
+                                    e.Action.SampleCollected += this.RelaySampleCollected;
+                                };
+                                context.DiagnosticSession.ActionEnded += (o, e) =>
+                                {
+                                    this.DiagnosticEventReceived?.Invoke(o, e);
+                                    e.Action.SampleCollected -= this.RelaySampleCollected;
+                                };
+                            }
+
                             this.MigrateInternal(context, integrator, datamartDefinition, audit);
                             this.m_metadataRepository.Insert(integrator.DataSource);
 
@@ -334,6 +360,7 @@ namespace SanteDB.BI.Services.Impl
                         {
                             this.m_metadataRepository.Insert(integrator.DataSource);
                         }
+                        return context.DiagnosticSession;
                     }
                 }
             }
@@ -343,5 +370,10 @@ namespace SanteDB.BI.Services.Impl
                 throw new BiException(this.m_localization.GetString(ErrorMessageStrings.DATAMART_CREATE_ERROR, new { id = datamartDefinition.Id }), datamartDefinition, e);
             }
         }
+
+        /// <summary>
+        /// Relay an event for a sample collection
+        /// </summary>
+        private void RelaySampleCollected(object sender, DiagnosticSampleEventArgs e) => this.DiagnosticEventReceived?.Invoke(sender, e);
     }
 }

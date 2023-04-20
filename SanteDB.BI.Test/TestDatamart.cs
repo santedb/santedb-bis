@@ -205,8 +205,9 @@ namespace SanteDB.BI.Test
                 // Test we can actually run the query
                 
                 // RUN the flow
-                manager.Refresh(coreMart);
-
+                var sessionInfo = manager.Refresh(coreMart, true);
+                var sessionData = sessionInfo.GetSessionData();
+                Assert.IsNotNull(sessionData);
                 var qdef = BiUtils.ResolveRefs(queryDefinition); // this should work now
                 var dataSourceProvider = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(qdef.DataSources.First().ProviderType) as IBiDataSource;
                 Assert.AreEqual(coreMart.Produces.Id, qdef.DataSources.First().Id);

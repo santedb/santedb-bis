@@ -3,6 +3,52 @@ using System;
 
 namespace SanteDB.BI.Datamart.DataFlow
 {
+    /// <summary>
+    /// Diagnostic action event arguments
+    /// </summary>
+    public class DiagnosticActionEventArgs : EventArgs
+    {
+
+        /// <summary>
+        /// Gets the action that started or ended
+        /// </summary>
+        public IDataFlowDiagnosticAction Action { get; }
+
+        /// <summary>
+        /// Create a new diagnostic sample event args
+        /// </summary>
+        public DiagnosticActionEventArgs(IDataFlowDiagnosticAction action)
+        {
+            this.Action = action;
+        }
+    }
+
+
+    /// <summary>
+    /// Diagnostic sample event arguments
+    /// </summary>
+    public class DiagnosticSampleEventArgs : EventArgs
+    {
+
+        /// <summary>
+        /// Gets the type of sample
+        /// </summary>
+        public DataFlowDiagnosticSampleType SampleType { get; }
+
+        /// <summary>
+        /// Gets the value of the sample
+        /// </summary>
+        public object SampleValue { get; }
+
+        /// <summary>
+        /// Create a new diagnostic sample event args
+        /// </summary>
+        public DiagnosticSampleEventArgs(DataFlowDiagnosticSampleType sampleType, object value)
+        {
+            this.SampleType = sampleType;
+            this.SampleValue = value;
+        }
+    }
 
     /// <summary>
     /// Idnetiifes the type of diagnostic sample collected
@@ -34,11 +80,31 @@ namespace SanteDB.BI.Datamart.DataFlow
     {
 
         /// <summary>
+        /// Get the name of the action
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Get the start of the action
+        /// </summary>
+        DateTimeOffset StartOfAction { get; }
+
+        /// <summary>
+        /// Get the end of the action
+        /// </summary>
+        DateTimeOffset? EndOfAction { get; }
+
+        /// <summary>
         /// Log a sample
         /// </summary>
         /// <param name="sampleTag">The object tag to set</param>
         /// <param name="sample">The sample to emit</param>
         void LogSample<T>(DataFlowDiagnosticSampleType sampleTag, T sample);
+
+        /// <summary>
+        /// Diagnostic sample has been received
+        /// </summary>
+        event EventHandler<DiagnosticSampleEventArgs> SampleCollected;
 
     }
 
@@ -47,6 +113,16 @@ namespace SanteDB.BI.Datamart.DataFlow
     /// </summary>
     public interface IDataFlowDiagnosticSession
     {
+
+        /// <summary>
+        /// Diagnostic sample has been received
+        /// </summary>
+        event EventHandler<DiagnosticActionEventArgs> ActionStarted;
+
+        /// <summary>
+        /// Diagnostic sample has been received
+        /// </summary>
+        event EventHandler<DiagnosticActionEventArgs> ActionEnded;
 
         /// <summary>
         /// Gets the context to which this diagnostic session applies

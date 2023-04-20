@@ -49,20 +49,10 @@ namespace SanteDB.BI.Model
         public List<BiAggregationDefinition> AggregationDefinitions { get; set; }
 
         /// <summary>
-        /// True if aggregations should be serialized
-        /// </summary>
-        public bool ShouldSerializeAggregationDefinitions() => this.ShouldSerializeDefinitions;
-
-        /// <summary>
         /// Gets or sets the pivot to perform
         /// </summary>
         [XmlElement("pivot"), JsonProperty("pivot")]
         public BiViewPivotDefinition Pivot { get; set; }
-
-        /// <summary>
-        /// True if pivot should be serialized
-        /// </summary>
-        public bool ShouldSerializePivot() => this.ShouldSerializeDefinitions;
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)

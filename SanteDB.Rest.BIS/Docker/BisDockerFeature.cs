@@ -193,9 +193,9 @@ namespace SanteDB.Rest.BIS
             var serviceTypes = new Type[]
             {
                 typeof(BisMessageHandler),
-                typeof(AppletBiRepository),
                 typeof(InMemoryPivotProvider),
-                typeof(LocalBiRenderService)
+                typeof(LocalBiRenderService),
+                typeof(DefaultDatamartManager)
             };
             var serviceConfiguration = configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders;
             serviceConfiguration.AddRange(serviceTypes.Where(t => !serviceConfiguration.Any(c => c.Type == t)).Select(t => new TypeReferenceConfiguration(t)));

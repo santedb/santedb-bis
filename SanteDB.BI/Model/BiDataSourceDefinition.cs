@@ -98,5 +98,11 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         public override string ToString() => $"[{this.GetType().Name} {this.Name}({this.ConnectionString ?? "auto"})]";
 
+
+        /// <summary>
+        /// Return as a summarized data
+        /// </summary>
+        /// <returns></returns>
+        public override BiDefinition AsSummarized() => this;
     }
 }

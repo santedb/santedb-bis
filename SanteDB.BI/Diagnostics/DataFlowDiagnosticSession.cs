@@ -1,6 +1,7 @@
 ﻿using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
+using SharpCompress;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -53,6 +54,8 @@ namespace SanteDB.BI.Diagnostics
         private readonly IDictionary<DataFlowDiagnosticSampleType, DataFlowDiagnosticSample> m_samples = new ConcurrentDictionary<DataFlowDiagnosticSampleType, DataFlowDiagnosticSample>();
         private readonly List<DataFlowDiagnosticActionInfo> m_children;
 
+        /// <inheritdoc/>
+        public event EventHandler<DiagnosticSampleEventArgs> SampleCollected;
 
         /// <summary>
         /// Data flow diagnostic action
@@ -64,7 +67,13 @@ namespace SanteDB.BI.Diagnostics
             this.StartOfAction = DateTimeOffset.Now;
             this.m_children = new List<DataFlowDiagnosticActionInfo>();
             this.Parent = parentAction;
+            this.Uuid = Guid.NewGuid();
         }
+
+        /// <summary>
+        /// Get the UUID of the action
+        /// </summary>
+        internal Guid Uuid { get; }
 
         /// <summary>
         /// The flow step type
@@ -136,6 +145,9 @@ namespace SanteDB.BI.Diagnostics
             {
                 this.m_samples.Add(sampleType, new DataFlowDiagnosticSample(sampleType, value));
             }
+
+            this.SampleCollected?.Invoke(this, new DiagnosticSampleEventArgs(sampleType, value));
+
         }
     }
 
@@ -147,6 +159,8 @@ namespace SanteDB.BI.Diagnostics
 
 
         private DataFlowDiagnosticActionInfo m_currentAction;
+        private LinkedList<DataFlowDiagnosticActionInfo> m_completedActions = new LinkedList<DataFlowDiagnosticActionInfo>();
+        private readonly DateTimeOffset m_createdTime = DateTimeOffset.Now;
 
         /// <summary>
         /// Creates a new data flow diagnostic session
@@ -160,30 +174,35 @@ namespace SanteDB.BI.Diagnostics
         public IDataFlowExecutionContext Context { get; }
 
         /// <inheritdoc/>
+        public event EventHandler<DiagnosticActionEventArgs> ActionStarted;
+        /// <inheritdoc/>
+        public event EventHandler<DiagnosticActionEventArgs> ActionEnded;
+
+        /// <inheritdoc/>
         public object GetSessionData()
         {
-            var sd = this.m_currentAction;
-            while(sd.Parent != null)
-            {
-                sd = sd.Parent;
-            }
-            return sd;
+            return new DataFlowDiagnosticReport(this.m_createdTime.DateTime, this.m_completedActions);
         }
 
         /// <inheritdoc/>
         public void LogEndAction(IDataFlowDiagnosticAction expectedAction)
         {
-            if(this.m_currentAction == null)
+            if(!(this.m_currentAction is DataFlowDiagnosticActionInfo actionInfo) || 
+                actionInfo.Uuid != this.m_currentAction.Uuid)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(LogEndAction)));
             }
 
             this.m_currentAction.End();
-            this.m_currentAction = this.m_currentAction.Parent;
-            if(this.m_currentAction != expectedAction && this.m_currentAction != null)
+
+            // Ended?
+            if(this.m_currentAction.Parent == null)
             {
-                this.LogEndAction(expectedAction);
+                this.m_completedActions.AddLast(this.m_currentAction);
             }
+
+            this.m_currentAction = this.m_currentAction.Parent;
+            this.ActionEnded?.Invoke(this, new DiagnosticActionEventArgs(expectedAction));
         }
 
 
@@ -193,7 +212,10 @@ namespace SanteDB.BI.Diagnostics
             var childAction = new DataFlowDiagnosticActionInfo(flowStep, this.m_currentAction);
             this.m_currentAction?.AddChild(childAction);
             this.m_currentAction = childAction;
+            this.ActionStarted?.Invoke(this, new DiagnosticActionEventArgs(childAction));
+
             return this.m_currentAction;
         }
+
     }
 }

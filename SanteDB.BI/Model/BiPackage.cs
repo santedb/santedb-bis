@@ -105,22 +105,6 @@ namespace SanteDB.BI.Model
         [XmlArray("reports"), XmlArrayItem("add"), JsonProperty("reports")]
         public List<BiReportDefinition> Reports { get; set; }
 
-        /// <summary>
-        /// True if the definitions should be serialized
-        /// </summary>
-        internal override bool ShouldSerializeDefinitions
-        {
-            get => base.ShouldSerializeDefinitions;
-            set
-            {
-                base.ShouldSerializeDefinitions = value;
-                foreach (var itm in new BiPackageEnumerator(this))
-                {
-                    itm.ShouldSerializeDefinitions = value;
-                }
-            }
-        }
-
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {

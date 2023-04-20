@@ -44,17 +44,6 @@ namespace SanteDB.BI.Model
         [XmlElement("div", Namespace = BiConstants.HtmlNamespace), JsonIgnore]
         public XElement Body { get; set; }
 
-        /// <summary>
-        /// Gets whether the body should be serialized
-        /// </summary>
-        public bool ShouldSerializeBody() => this.ShouldSerializeDefinitions;
-
-        /// <summary>
-        /// Include body in serialization
-        /// </summary>
-        [XmlIgnore, JsonIgnore]
-        public bool IncludeBody { get => this.ShouldSerializeDefinitions; set => this.ShouldSerializeDefinitions = value; }
-
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {

@@ -62,13 +62,8 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Gets or sets the SQL definition
         /// </summary>
-        [XmlArray("definitions"), XmlArrayItem("add"), JsonIgnore]
+        [XmlArray("definitions"), XmlArrayItem("add"), JsonProperty("queryDefinitions")]
         public List<BiSqlDefinition> QueryDefinitions { get; set; }
-
-        /// <summary>
-        /// Query definitions are only serialized on parse for reading/installation
-        /// </summary>
-        public bool ShouldSerializeQueryDefinitions() => this.ShouldSerializeDefinitions;
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)

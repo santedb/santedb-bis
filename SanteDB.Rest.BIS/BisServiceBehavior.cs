@@ -172,7 +172,6 @@ namespace SanteDB.Rest.BIS
                 else
                 {
                     retVal = BiUtils.ResolveRefs(retVal);
-                    (retVal as BiReportDefinition)?.Views?.ForEach(o => o.IncludeBody = true);
                     return retVal;
                 }
             }

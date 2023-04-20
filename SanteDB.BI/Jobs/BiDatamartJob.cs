@@ -1,0 +1,113 @@
+﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Presentation;
+using SanteDB.BI.Datamart.DataFlow;
+using SanteDB.BI.Model;
+using SanteDB.BI.Services;
+using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Jobs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace SanteDB.BI.Jobs
+{
+    /// <summary>
+    /// A JOB which refreshes BI datamarts
+    /// </summary>
+    public class BiDatamartJob : IJob
+    {
+
+        private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BiDatamartJob));
+        private readonly Guid m_jobId = Guid.Parse("751B0333-952B-4250-B117-D2E6A70C4ECD");
+        private readonly IBiMetadataRepository m_biMetaRepository;
+        private readonly IBiDatamartRepository m_biRepository;
+        private readonly IBiDatamartManager m_biManager;
+        private readonly IJobStateManagerService m_stateManager;
+
+        /// <summary>
+        /// DI ctor
+        /// </summary>
+        public BiDatamartJob(IBiMetadataRepository biMetaRepository, IBiDatamartManager biManager, IBiDatamartRepository biRepository, IJobStateManagerService stateManagerService)
+        {
+            this.m_biMetaRepository = biMetaRepository;
+            this.m_biRepository = biRepository;
+            this.m_biManager = biManager;
+            this.m_stateManager = stateManagerService;
+            this.m_biManager.DiagnosticEventReceived += (o, e) =>
+            {
+
+                switch (e)
+                {
+                    case DiagnosticSampleEventArgs sample:
+
+                        if (sample.SampleType == DataFlowDiagnosticSampleType.RecordThroughput && o is IDataFlowDiagnosticAction act)
+                        {
+                            var currentState = this.m_stateManager.GetJobState(this);
+                            this.m_stateManager.SetProgress(this, $"{act.Name} ({sample.SampleValue} r/s)", currentState.Progress);
+                        }
+                        break;
+                    case DiagnosticActionEventArgs action:
+                        var state = this.m_stateManager.GetJobState(this);
+                        this.m_stateManager.SetProgress(this, $"{action.Action.Name}", state.Progress);
+                        break;
+                }
+            };
+        }
+
+        /// <inheritdoc/>
+        public Guid Id => this.m_jobId;
+
+        /// <inheritdoc/>
+        public string Name => "Refresh Datamarts";
+
+        /// <inheritdoc/>
+        public string Description => "Refreshes the BI data marts in SanteDB";
+
+        /// <inheritdoc/>
+        public bool CanCancel => false;
+
+        /// <inheritdoc/>
+        public IDictionary<string, Type> Parameters => new Dictionary<String, Type>
+        {
+            { "diagnostic", typeof(bool) }
+        };
+
+        /// <inheritdoc/>
+        public void Cancel()
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc/>
+        public void Run(object sender, EventArgs e, object[] parameters)
+        {
+            try
+            {
+                this.m_stateManager.SetState(this, JobStateType.Running);
+
+                if(parameters.Length == 0)
+                {
+                    parameters =new object[]{ false };
+                }
+
+                // All active and registered repository metadata stuff
+                var registeredMarts = this.m_biRepository.Find(o => true).ToArray();
+                var martCount = 0;
+                foreach (var itm in registeredMarts)
+                {
+                    var dataMartDefinition = this.m_biMetaRepository.Get<BiDatamartDefinition>(itm.Id);
+                    this.m_stateManager.SetProgress(this, $"Refresh {itm.Name}", (float)martCount / registeredMarts.Length);
+                    this.m_biManager.Refresh(dataMartDefinition, (bool)parameters[0]);
+                }
+
+                this.m_stateManager.SetState(this, JobStateType.Completed);
+            }
+            catch(Exception ex)
+            {
+                this.m_tracer.TraceError("Error refreshing datamarts: {0}", e);
+                this.m_stateManager.SetState(this, JobStateType.Aborted);
+            }
+        }
+    }
+}

@@ -39,11 +39,45 @@ using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
-    [XmlType(nameof(TestXML), Namespace = BiConstants.XmlNamespace)]
-    public class TestXML
+    /// <summary>
+    /// Identifies the states which a definition can carry
+    /// </summary>
+    [XmlType(nameof(BiDefinitionStatus), Namespace = BiConstants.XmlNamespace)]
+    public enum BiDefinitionStatus
     {
-
+        /// <summary>
+        /// The definition is new and has not been reviewed
+        /// </summary>
+        [XmlEnum("new")]
+        New = 0x0,
+        /// <summary>
+        /// The definition is in draft form
+        /// </summary>
+        [XmlEnum("draft")]
+        Draft = 0x1,
+        /// <summary>
+        /// The definition is in review
+        /// </summary>
+        [XmlEnum("in-review")]
+        InReview = 0x2,
+        /// <summary>
+        /// The definition is reviewed and active
+        /// </summary>
+        [XmlEnum("active")]
+        Active = 0x3,
+        /// <summary>
+        /// The definition still works, however is deprecated
+        /// </summary>
+        [XmlEnum("deprecated")]
+        Deprecated = 0x4,
+        /// <summary>
+        /// The definition is obsolete and should not be used
+        /// </summary>
+        [XmlEnum("obsolete")]
+        Obsolete = 0x5
     }
+
+
     /// <summary>
     /// Defines an abstract class for a BIS artifact definition
     /// </summary>
@@ -62,7 +96,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiPackage))]
     [XmlInclude(typeof(BiReportViewDefinition))]
     [ExcludeFromCodeCoverage] // Serialization class
-    public abstract class BiDefinition
+    public class BiDefinition
     {
         // Serializers
         private static List<XmlSerializer> s_serializers = new List<XmlSerializer>(10);
@@ -151,11 +185,16 @@ namespace SanteDB.BI.Model
         public BiIdentity Identifier { get; set; }
 
         /// <summary>
+        /// Gets or sets the status of the BI artifact
+        /// </summary>
+        [XmlAttribute("status"), JsonProperty("status")]
+        public BiDefinitionStatus Status { get; set; }
+
+        /// <summary>
         /// Saves this metadata definition to the specified stream
         /// </summary>
         public void Save(Stream s)
         {
-            this.ShouldSerializeDefinitions = true;
             XmlModelSerializerFactory.Current.CreateSerializer(this.GetType()).Serialize(s, this);
         }
 
@@ -241,12 +280,6 @@ namespace SanteDB.BI.Model
         }
 
         /// <summary>
-        /// Gets or sets the serialization definitions
-        /// </summary>
-        [XmlIgnore, JsonIgnore]
-        internal virtual bool ShouldSerializeDefinitions { get; set; }
-
-        /// <summary>
         /// Validate this BI definition
         /// </summary>
         public IEnumerable<DetectedIssue> Validate() 
@@ -290,7 +323,7 @@ namespace SanteDB.BI.Model
         /// Get this instance as a summarized instanced
         /// </summary>
         /// <returns></returns>
-        public BiDefinition AsSummarized()
+        public virtual BiDefinition AsSummarized()
         {
             var retVal = Activator.CreateInstance(this.GetType()) as BiDefinition;
             retVal.Id = this.Id;
@@ -332,6 +365,10 @@ namespace SanteDB.BI.Model
             if (!String.IsNullOrEmpty(this.Ref))
             {
                 hash += this.Ref.GetHashCode() * 17;
+            }
+            if(hash == 0)
+            {
+                return base.GetHashCode();
             }
             return hash;
         }

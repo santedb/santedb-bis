@@ -76,6 +76,7 @@ namespace SanteDB.BI.Model
         [XmlIgnore]
         public Type Type { get; set; }
 
+        
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
@@ -98,5 +99,15 @@ namespace SanteDB.BI.Model
 
         }
 
+        /// <summary>
+        /// Return as a summarized data
+        /// </summary>
+        /// <returns></returns>
+        public override BiDefinition AsSummarized()
+        {
+            var retVal = base.AsSummarized() as BiRenderFormatDefinition;
+            retVal.FormatExtension = this.FormatExtension;
+            return retVal;
+        }
     }
 }

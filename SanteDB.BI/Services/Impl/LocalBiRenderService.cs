@@ -66,7 +66,7 @@ namespace SanteDB.BI.Services.Impl
             // Scan and initialize all BI materialized views
             ApplicationServiceContext.Current.Started += (o, e) =>
             {
-                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.MetaData.Status == BiDefinitionStatus.Active))
+                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.Status == BiDefinitionStatus.Active))
                 {
                     try
                     {
