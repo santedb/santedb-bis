@@ -92,7 +92,7 @@ namespace SanteDB.BI.Util
                         resolvedTarget = parentScope.Select(o => o.FindObjectById(refId)).OfType<BiDefinition>().FirstOrDefault() ??
                             ResolveRefs(s_repository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
                                 new Type[] { definition.GetType() },
-                                new Type[] { typeof(String) }).Invoke(s_repository, new object[] { refId }) as BiDefinition);
+                                new Type[] { typeof(String) }).Invoke(s_repository, new object[] { refId }) as BiDefinition, parentScope);
                         //resolved.Add(clonedDefinition.Ref, resolvedTarget);
                     }
                     else // resolve by local name
@@ -104,7 +104,7 @@ namespace SanteDB.BI.Util
 
                     if(resolvedTarget == null)
                     {
-                        throw new BiException($"{clonedDefinition.Ref} @ {String.Join("/", parentScope.Select(o=>o.Name ?? o.Id ?? o.GetType().Name))} not found", definition, null);
+                        throw new BiException($"{clonedDefinition.Ref} @ {String.Join("/", parentScope.Reverse().Select(o=>o.Name ?? o.Id ?? o.GetType().Name))} not found", definition, null);
                     }
 
 

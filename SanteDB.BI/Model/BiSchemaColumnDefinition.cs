@@ -106,6 +106,7 @@ namespace SanteDB.BI.Model
             }
             switch(value)
             {
+
                 case DateTime a:
                 case DateTimeOffset b:
                     return expectedType == BiDataType.DateTime || expectedType == BiDataType.Date;
@@ -118,9 +119,12 @@ namespace SanteDB.BI.Model
                 case byte h:
                 case ulong i:
                     return expectedType == BiDataType.Integer ||
-                        expectedType == BiDataType.DateTime || expectedType == BiDataType.Date; // HACK: SQLITE dates are represented as integers as well and the BI layer doesnt differentiate between them sometimes
+                        expectedType == BiDataType.DateTime || expectedType == BiDataType.Date ||
+                        (expectedType == BiDataType.Boolean && (long)value <= 1 && (long)value>=0); // HACK: SQLITE dates are represented as integers as well and the BI layer doesnt differentiate between them sometimes
                 case Guid j:
                     return expectedType == BiDataType.Uuid;
+                case bool k:
+                    return expectedType == BiDataType.Boolean;
                 default:
                     if (value is Decimal) return expectedType == BiDataType.Decimal;
                     else return true;

@@ -7,9 +7,23 @@
 	<PropertyGroup Condition="'$(VersionNumber)' == ''">
     <VersionNumber>3.0-debug</VersionNumber>
   </PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Bi\acts.xml" />
+	  <None Remove="Bi\addresses.xml" />
+	  <None Remove="Bi\entities.xml" />
+	  <None Remove="Bi\identifiers.xml" />
+	  <None Remove="Bi\names.xml" />
+	  <None Remove="Bi\users.xml" />
+	</ItemGroup>
 	
   <ItemGroup>
+	  <EmbeddedResource Include="Bi\addresses.xml" />
+	  <EmbeddedResource Include="Bi\acts.xml" />
+	  <EmbeddedResource Include="Bi\entities.xml" />
+	  <EmbeddedResource Include="Bi\identifiers.xml" />
 	  <EmbeddedResource Include="Bi\mart.xml" />
+	  <EmbeddedResource Include="Bi\names.xml" />
+	  <EmbeddedResource Include="Bi\users.xml" />
 	  <EmbeddedResource Include="TestConfig.xml" />
 	</ItemGroup>
 

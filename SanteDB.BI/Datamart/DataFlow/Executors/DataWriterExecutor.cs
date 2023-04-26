@@ -58,7 +58,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             var sw = new Stopwatch();
             sw.Start();
             var nRecs = 0;
-            foreach (var itm in inputStream)
+            foreach (IDictionary<String, Object> itm in inputStream)
             {
                 var record = itm;
 
@@ -66,7 +66,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 {
                     this.m_tracer.TraceWarning("Data Flow Data {0} failed pre-validation", record);
                     record.Add("$reject", true);
-                    record.Add("$reject.reason", issue.Id);
+                    record.Add("$reject.reason", issue.Text);
                     yield return record;
                     continue;
                 }
