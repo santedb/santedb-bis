@@ -41,8 +41,12 @@
       <connection ref="output" />
       <target ref="SEC_USR_TBL" />
     </writer>
-    <filter name="filter_rejects">
+    <log name="log_users">
       <input ref="write_users" />
+      {{ username }}
+    </log>
+    <filter name="filter_rejects">
+      <input ref="log_users" />
       <all>
         <when field="$reject" op="eq">
           <bool>true</bool>

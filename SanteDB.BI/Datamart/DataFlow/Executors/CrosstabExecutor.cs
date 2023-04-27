@@ -43,8 +43,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
                 foreach (var itm in this.m_pivotProvider.Pivot(inputStream, flowStep.Pivot))
                 {
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                     yield return itm;
                 }

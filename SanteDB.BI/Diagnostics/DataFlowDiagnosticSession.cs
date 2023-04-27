@@ -130,16 +130,19 @@ namespace SanteDB.BI.Diagnostics
         /// </summary>
         public void LogSample<T>(DataFlowDiagnosticSampleType sampleType, T value)
         {
-            if (sampleType.HasFlag(DataFlowDiagnosticSampleType.PointInTime)) // replace
+            if(sampleType == DataFlowDiagnosticSampleType.LoggedData)
             {
-                var originalSample = sampleType ^ DataFlowDiagnosticSampleType.PointInTime;
-                if (this.m_samples.TryGetValue(originalSample, out var sample))
+                if(!this.m_samples.TryGetValue(DataFlowDiagnosticSampleType.LoggedData, out var logSample))
                 {
-                    sample.Value = value;
+                    this.m_samples.Add(DataFlowDiagnosticSampleType.LoggedData, new DataFlowDiagnosticSample(DataFlowDiagnosticSampleType.LoggedData, new List<T>() { value }));
+                }
+                else if(logSample.Value is List<T> list)
+                {
+                    list.Add(value);
                 }
                 else
                 {
-                    this.m_samples.Add(originalSample, new DataFlowDiagnosticSample(originalSample, value));
+                    throw new InvalidOperationException("Cannot log sample of different types");
                 }
             }
             else if(this.m_samples.TryGetValue(sampleType, out var sample))

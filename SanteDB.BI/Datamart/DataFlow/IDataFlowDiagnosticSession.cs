@@ -57,9 +57,9 @@ namespace SanteDB.BI.Datamart.DataFlow
     public enum DataFlowDiagnosticSampleType
     {
         /// <summary>
-        /// The sample is a point in time sample - so don't persist
+        /// The sample is a log of raw data
         /// </summary>
-        PointInTime = 0x1,
+        LoggedData = 0x1,
         /// <summary>
         /// The sample represents throughput
         /// </summary>
@@ -71,7 +71,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <summary>
         /// The sample represents a serialization of the current record
         /// </summary>
-        CurrentRecord = 0x8 
+        CurrentRecord = 0x8
     }
 
     /// <summary>

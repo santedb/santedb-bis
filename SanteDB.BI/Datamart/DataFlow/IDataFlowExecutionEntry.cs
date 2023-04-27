@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace SanteDB.BI.Datamart.DataFlow
 {
@@ -9,50 +10,62 @@ namespace SanteDB.BI.Datamart.DataFlow
     /// <summary>
     /// The log entry type
     /// </summary>
+    [XmlType(nameof(DataFlowExecutionPurposeType), Namespace = BiConstants.XmlNamespace)]
+    [Flags]
     public enum DataFlowExecutionPurposeType
     {
         /// <summary>
         /// The purpose of this session is to run diagnostics
         /// </summary>
+        [XmlEnum("dx")]
         Diagnostics = 0x1,
         /// <summary>
         /// The execution is being started to refresh the data in the data mart
         /// </summary>
+        [XmlEnum("refresh")]
         Refresh = 0x2,
         /// <summary>
         /// The execution is for migrating schema
         /// </summary>
+        [XmlEnum("service-manage")]
         SchemaManagement = 0x4,
         /// <summary>
         /// Execution purpose is for database management
         /// </summary>
+        [XmlEnum("data-manage")]
         DatabaseManagement = 0x8,
         /// <summary>
         /// Execution is for read only operations
         /// </summary>
+        [XmlEnum("disc")]
         Discovery = 0x10
     }
 
     /// <summary>
     /// The outcome of the entry
     /// </summary>
+    [XmlType(nameof(DataFlowExecutionOutcomeType), Namespace = BiConstants.XmlNamespace)]
     public enum DataFlowExecutionOutcomeType
     {
         /// <summary>
         /// Status is unknown
         /// </summary>
+        [XmlEnum("unknown")]
         Unknown,
         /// <summary>
         /// The log entry indicates success
         /// </summary>
+        [XmlEnum("success")]
         Success,
         /// <summary>
         /// The log entry indicates partial success
         /// </summary>
+        [XmlEnum("partial")]
         PartialSuccess,
         /// <summary>
         /// The log entry indicates a failure
         /// </summary>
+        [XmlEnum("fail")]
         Fail
     }
 

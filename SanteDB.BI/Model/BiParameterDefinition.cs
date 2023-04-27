@@ -72,7 +72,12 @@ namespace SanteDB.BI.Model
         /// Decimal type
         /// </summary>
         [XmlEnum("decimal")]
-        Decimal
+        Decimal,
+        /// <summary>
+        /// Floating point number
+        /// </summary>
+        [XmlEnum("float")]
+        Float
     }
 
     /// <summary>

@@ -36,8 +36,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 {
                     if (filterFn(itm))
                     {
-                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                         diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                         yield return itm;
                     }

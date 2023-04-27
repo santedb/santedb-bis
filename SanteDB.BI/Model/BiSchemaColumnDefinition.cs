@@ -112,6 +112,9 @@ namespace SanteDB.BI.Model
                     return expectedType == BiDataType.DateTime || expectedType == BiDataType.Date;
                 case String c:
                     return expectedType == BiDataType.String;
+                case double dd:
+                case float ff:
+                    return expectedType == BiDataType.Float;
                 case int d:
                 case uint e:
                 case long f:

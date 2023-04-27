@@ -41,7 +41,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bts.FormatExecutionPlan());
                         // Now we process the terminal objects and execute them
                         var processedRecords = executeRoot.SelectMany(o => o.Execute(scope)).Count();
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, processedRecords);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , processedRecords);
                         dataSource.CommitTransaction();
                     }
                 }

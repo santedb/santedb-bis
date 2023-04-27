@@ -165,9 +165,9 @@ namespace SanteDB.BI.Diagnostics
         /// </summary>
         internal DataFlowDiagnosticSampleReport(DataFlowDiagnosticSample sample)
         {
-            this.Type = sample.Type.HasFlag(DataFlowDiagnosticSampleType.PointInTime) ? sample.Type ^ DataFlowDiagnosticSampleType.PointInTime : sample.Type;
+            this.Type = sample.Type;
             this.Timestamp = sample.Timestamp.DateTime;
-            this.Value = sample.Value.ToString();
+            this.Value = sample.Value;
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace SanteDB.BI.Diagnostics
         /// <summary>
         /// Gets or sets the value
         /// </summary>
-        [XmlText, JsonProperty("value")]
-        public String Value { get; set; }
+        [XmlElement("int", typeof(int)), XmlElement("long", typeof(long)), XmlElement("single", typeof(Single)), XmlElement("double", typeof(double)), XmlElement("string", typeof(String)), XmlElement("list", typeof(List<String>)), JsonProperty("value")]
+        public object Value { get; set; }
     }
 }

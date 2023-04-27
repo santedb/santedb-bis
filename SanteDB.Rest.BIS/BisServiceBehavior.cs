@@ -18,10 +18,12 @@
  * User: fyfej
  * Date: 2023-3-10
  */
+using DocumentFormat.OpenXml.Wordprocessing;
 using RestSrvr;
 using RestSrvr.Attributes;
 using RestSrvr.Exceptions;
 using SanteDB.BI;
+using SanteDB.BI.Datamart;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
@@ -29,6 +31,7 @@ using SanteDB.Core;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Interop;
 using SanteDB.Core.Model.Audit;
+using SanteDB.Core.Model.Parameters;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Audit;
@@ -73,29 +76,40 @@ namespace SanteDB.Rest.BIS
         // Metadata repository
         private readonly IBiMetadataRepository m_metadataRepository;
 
+        // Datamart repository
+        private readonly IBiDatamartRepository m_datamartRepository;
+
         // Service manager
         private readonly IServiceManager m_serviceManager;
 
-        readonly IAuditService _AuditService;
+        // Audit Service
+        private readonly IAuditService _AuditService;
 
+        // Operations registered
+        private readonly IEnumerable<IApiChildOperation> m_registeredOperations;
 
         /// <summary>
         /// BI Service behavior
         /// </summary>
-        public BisServiceBehavior() : 
-            this(ApplicationServiceContext.Current.GetService<IServiceManager>(), 
-                ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(), 
+        public BisServiceBehavior() :
+            this(ApplicationServiceContext.Current.GetService<IServiceManager>(),
+                ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(),
+                ApplicationServiceContext.Current.GetService<IBiDatamartRepository>(),
                 ApplicationServiceContext.Current.GetAuditService())
         {
-
         }
+
         /// <summary>
         /// DI constructor
         /// </summary>
-        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService)
+        public BisServiceBehavior(IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IBiDatamartRepository datamartRepository, IAuditService auditService)
         {
             this.m_serviceManager = serviceManager;
+            this.m_datamartRepository = datamartRepository;
             this.m_metadataRepository = metadataRepository;
+            this.m_registeredOperations = serviceManager.CreateInjectedOfAll<IApiChildOperation>()
+                .Where(o => o.ScopeBinding == ChildObjectScopeBinding.Instance && o.ParentTypes.Any(t => typeof(IBisServiceContract).GetCustomAttributes<ServiceKnownResourceAttribute>().Any(k => k.Type == t)))
+                .ToList();
             _AuditService = auditService;
         }
 
@@ -113,6 +127,7 @@ namespace SanteDB.Rest.BIS
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
         public virtual BiDefinition Create(string resourceType, BiDefinition body)
         {
+            
             try
             {
                 // Ensure that endpoint agrees with the body definition
@@ -122,7 +137,14 @@ namespace SanteDB.Rest.BIS
                     throw new FaultException(System.Net.HttpStatusCode.BadRequest, "Invalid resource type");
                 }
 
-                return this.m_metadataRepository.Insert(body);
+                if (rt == typeof(DatamartInfo) && body is BiDatamartDefinition definition)
+                {
+                    return new DatamartInfo(this.m_datamartRepository.Register(definition));
+                }
+                else
+                {
+                    return this.m_metadataRepository.Insert(body);
+                }
             }
             catch (Exception e)
             {
@@ -140,9 +162,22 @@ namespace SanteDB.Rest.BIS
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                return this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Remove),
+                if (rt == typeof(DatamartInfo))
+                {
+                    var reg = this.m_datamartRepository.Find(o => o.Id == id).FirstOrDefault();
+                    if(reg == null)
+                    {
+                        throw new KeyNotFoundException();
+                    }
+                    this.m_datamartRepository.Unregister(reg);
+                    return new DatamartInfo(reg);
+                }
+                else
+                {
+                    return this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Remove),
                     new Type[] { rt },
                     new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BiDefinition;
+                }
             }
             catch (Exception e)
             {
@@ -160,19 +195,34 @@ namespace SanteDB.Rest.BIS
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                var retVal = this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
-                    new Type[] { rt },
-                    new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BiDefinition;
 
-                // Resolve any refs in the object
-                if (retVal == null)
+
+                if (rt == typeof(DatamartInfo))
                 {
-                    throw new KeyNotFoundException(id);
+                    var reg = this.m_datamartRepository.Find(o => o.Id == id).FirstOrDefault();
+                    if (reg == null)
+                    {
+                        throw new KeyNotFoundException(id);
+                    }
+                    return new DatamartInfo(reg);
                 }
                 else
                 {
-                    retVal = BiUtils.ResolveRefs(retVal);
-                    return retVal;
+                    var retVal = this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get),
+                        new Type[] { rt },
+                        new Type[] { typeof(String) }).Invoke(this.m_metadataRepository, new object[] { id }) as BiDefinition;
+
+
+                    // Resolve any refs in the object
+                    if (retVal == null)
+                    {
+                        throw new KeyNotFoundException(id);
+                    }
+                    else
+                    {
+                        retVal = BiUtils.ResolveRefs(retVal);
+                        return retVal;
+                    }
                 }
             }
             catch (Exception e)
@@ -376,15 +426,34 @@ namespace SanteDB.Rest.BIS
             try
             {
                 var rt = this.GetResourceType(resourceType);
-                var expression = QueryExpressionParser.BuildLinqExpression(rt, RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
-
                 int offset = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_offset"] ?? "0"),
                     count = Int32.Parse(RestOperationContext.Current.IncomingRequest.QueryString["_count"] ?? "100");
-                // Execute the query
-                return new BiDefinitionCollection((this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
-                    new Type[] { rt },
-                    new Type[] { expression.GetType(), typeof(int), typeof(int?) })
-                .Invoke(this.m_metadataRepository, new object[] { expression, offset, count }) as IEnumerable).OfType<BiDefinition>().Select(o=>o.AsSummarized()));
+
+                if (rt == typeof(DatamartInfo))
+                {
+                    var expression = QueryExpressionParser.BuildLinqExpression<IDatamart>(RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
+                    var results = this.m_datamartRepository.Find(expression);
+                    return new BiDefinitionCollection(results.Skip(offset).Take(count).ToArray().Select(o=>new DatamartInfo(o)))
+                    {
+                        TotalResults = results.Count(),
+                        Offset = offset
+                    };
+                }
+                else
+                {
+                    var expression = QueryExpressionParser.BuildLinqExpression(rt, RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
+                    // Execute the query
+                    var retVal = (this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
+                        new Type[] { rt },
+                        new Type[] { expression.GetType() })
+                    .Invoke(this.m_metadataRepository, new object[] { expression }) as IEnumerable).OfType<BiDefinition>().Select(o => o.AsSummarized());
+
+                    return new BiDefinitionCollection(retVal.Skip(offset).Take(count))
+                    {
+                        TotalResults = retVal.Count(),
+                        Offset = offset
+                    };
+                }
             }
             catch (Exception e)
             {
@@ -432,6 +501,26 @@ namespace SanteDB.Rest.BIS
             {
                 this.m_tracer.TraceError("Error rendering BIS report: {0} : {1}", id, e);
                 throw new Exception($"Error rendering BIS report: {id}", e);
+            }
+        }
+
+        /// <inheritdoc/>
+        public virtual object Invoke(string resourceType, string id, string operationName, ParameterCollection parameters)
+        {
+            try
+            {
+                var rt = this.GetResourceType(resourceType);
+                var candService = this.m_registeredOperations.FirstOrDefault(o => o.Name == operationName && o.ParentTypes.Contains(rt));
+                if (candService == null)
+                {
+                    throw new KeyNotFoundException(operationName);
+                }
+                return candService.Invoke(rt, id, parameters);
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceError("Error executing BIS Operation: {0}", e);
+                throw;
             }
         }
     }

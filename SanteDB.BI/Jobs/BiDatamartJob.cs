@@ -1,10 +1,12 @@
 ﻿using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Presentation;
+using SanteDB.BI.Datamart;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Jobs;
+using SanteDB.Core.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,8 +20,9 @@ namespace SanteDB.BI.Jobs
     public class BiDatamartJob : IJob
     {
 
+
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BiDatamartJob));
-        private readonly Guid m_jobId = Guid.Parse("751B0333-952B-4250-B117-D2E6A70C4ECD");
+        public static readonly Guid JOBID = Guid.Parse("751B0333-952B-4250-B117-D2E6A70C4ECD");
         private readonly IBiMetadataRepository m_biMetaRepository;
         private readonly IBiDatamartRepository m_biRepository;
         private readonly IBiDatamartManager m_biManager;
@@ -56,7 +59,7 @@ namespace SanteDB.BI.Jobs
         }
 
         /// <inheritdoc/>
-        public Guid Id => this.m_jobId;
+        public Guid Id => JOBID;
 
         /// <inheritdoc/>
         public string Name => "Refresh Datamarts";
@@ -70,7 +73,8 @@ namespace SanteDB.BI.Jobs
         /// <inheritdoc/>
         public IDictionary<string, Type> Parameters => new Dictionary<String, Type>
         {
-            { "diagnostic", typeof(bool) }
+            { "diagnostic", typeof(bool) },
+            { "mart", typeof(string) }
         };
 
         /// <inheritdoc/>
@@ -88,21 +92,37 @@ namespace SanteDB.BI.Jobs
 
                 if(parameters.Length == 0)
                 {
-                    parameters =new object[]{ false };
+                    parameters =new object[]{ false, null };
                 }
 
-                // All active and registered repository metadata stuff
-                var registeredMarts = this.m_biRepository.Find(o => true).ToArray();
-                var martCount = 0;
-                foreach (var itm in registeredMarts)
+                if(!(parameters[0] is bool diagnostic))
                 {
-                    var dataMartDefinition = this.m_biMetaRepository.Get<BiDatamartDefinition>(itm.Id);
-                    this.m_stateManager.SetProgress(this, $"Refresh {itm.Name}", (float)martCount / registeredMarts.Length);
-                    this.m_biManager.Refresh(dataMartDefinition, (bool)parameters[0]);
-
+                    diagnostic = false;
                 }
 
-                this.m_stateManager.SetState(this, JobStateType.Completed);
+                using (AuthenticationContext.EnterSystemContext())
+                {
+                    // All active and registered repository metadata stuff
+                    IDatamart[] registeredMarts = null;
+                    if (parameters.Length == 2 && parameters[1] is String martName)
+                    {
+                        registeredMarts = this.m_biRepository.Find(o => o.Id == martName).ToArray();
+                    }
+                    else
+                    {
+                        registeredMarts = this.m_biRepository.Find(o => true).ToArray();
+                    }
+
+                    var martCount = 0;
+                    foreach (var itm in registeredMarts)
+                    {
+                        var dataMartDefinition = this.m_biMetaRepository.Get<BiDatamartDefinition>(itm.Id);
+                        this.m_stateManager.SetProgress(this, $"Refresh {itm.Name}", (float)martCount / registeredMarts.Length);
+                        this.m_biManager.Refresh(dataMartDefinition, diagnostic);
+                    }
+
+                    this.m_stateManager.SetState(this, JobStateType.Completed);
+                }
             }
             catch(Exception ex)
             {

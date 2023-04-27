@@ -63,8 +63,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                     var nRecs = 0;
                     foreach(var itm in retStep.Execute(scope))
                     {
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                         myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                         yield return itm;
                     }
@@ -78,7 +78,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bfd.FormatExecutionPlan());
                         // Now we process the terminal objects and execute them
                         var processedRecords = executeRoot.SelectMany(o => o.Execute(scope)).Count();
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, processedRecords);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , processedRecords);
                     }
                     catch (Exception e)
                     {

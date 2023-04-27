@@ -19,8 +19,10 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
+using SanteDB.BI.Datamart;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -36,8 +38,11 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiParameterDefinition))]
     [XmlInclude(typeof(BiReportDefinition))]
     [XmlInclude(typeof(BiRenderFormatDefinition))]
+    [XmlInclude(typeof(BiDataFlowDefinition))]
+    [XmlInclude(typeof(BiDatamartDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiPackage))]
+    [XmlInclude(typeof(DatamartInfo))]
     [ExcludeFromCodeCoverage] // Serialization class
     public class BiDefinitionCollection
     {
@@ -55,13 +60,32 @@ namespace SanteDB.BI.Model
         /// </summary>
         public BiDefinitionCollection(IEnumerable<BiDefinition> items)
         {
-            this.Items = new List<BiDefinition>(items);
+            this.Resources = new List<BiDefinition>(items);
+            this.Count = this.Resources.Count();
         }
 
         /// <summary>
         /// Gets or sets the items part of this collection
         /// </summary>
-        [XmlElement("item"), JsonProperty("item")]
-        public List<BiDefinition> Items { get; set; }
+        [XmlElement("resource"), JsonProperty("resource")]
+        public List<BiDefinition> Resources { get; set; }
+
+        /// <summary>
+        /// Gets or sets the count in this bundle
+        /// </summary>
+        [XmlElement("offset"), JsonProperty("offset")]
+        public int Offset { get; set; }
+
+        /// <summary>
+        /// Gets or sets the count in this bundle
+        /// </summary>
+        [XmlElement("count"), JsonProperty("count")]
+        public int Count { get; set; }
+
+        /// <summary>
+        /// Gets or sets the total results
+        /// </summary>
+        [XmlElement("totalResults"), JsonProperty("totalResults")]
+        public int? TotalResults { get; set; }
     }
 }

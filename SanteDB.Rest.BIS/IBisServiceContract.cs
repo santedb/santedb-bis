@@ -19,8 +19,10 @@
  * Date: 2023-3-10
  */
 using RestSrvr.Attributes;
+using SanteDB.BI.Datamart;
 using SanteDB.BI.Model;
 using SanteDB.Core.Interop;
+using SanteDB.Core.Model.Parameters;
 using SanteDB.Rest.Common;
 using System;
 using System.Collections.Generic;
@@ -39,6 +41,9 @@ namespace SanteDB.Rest.BIS
     [ServiceKnownResource(typeof(BiReportDefinition))]
     [ServiceKnownResource(typeof(BiViewDefinition))]
     [ServiceKnownResource(typeof(BiRenderFormatDefinition))]
+    [ServiceKnownResource(typeof(BiDataFlowDefinition))]
+    [ServiceKnownResource(typeof(BiDatamartDefinition))]
+    [ServiceKnownResource(typeof(DatamartInfo))]
     [ServiceProduces("application/json")]
     [ServiceProduces("application/xml")]
     public interface IBisServiceContract : IRestApiContractImplementation
@@ -102,6 +107,12 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         [Put("/{resourceType}/{id}")]
         BiDefinition Update(String resourceType, String id, BiDefinition body);
+
+        /// <summary>
+        /// Invoke the specified operation
+        /// </summary>
+        [Post("/{resourceType}/{id}/${operationName}")]
+        object Invoke(String resourceType, String id, String operationName, ParameterCollection parameters);
 
     }
 }

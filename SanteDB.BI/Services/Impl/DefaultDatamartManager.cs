@@ -44,43 +44,6 @@ namespace SanteDB.BI.Services.Impl
             this.m_metadataRepository = metadataRepository;
             this.m_pepService = pepService;
             this.m_auditService = auditService;
-            this.RegisterActiveDatamarts();
-        }
-
-        /// <summary>
-        /// Expose all created data sources that exist to the BI host context
-        /// </summary>
-        private void RegisterActiveDatamarts()
-        {
-            try
-            {
-                foreach (var itm in this.m_metadataRepository.Query<BiDatamartDefinition>(o => true))
-                {
-                    var registeredData = this.m_datamartRegistry.Find(o => o.Id == itm.Id).FirstOrDefault();
-                    if (registeredData != null)
-                    {
-                        // Un-register de-activated marts
-                        if (itm.Status == BiDefinitionStatus.Obsolete)
-                        {
-                            this.m_tracer.TraceInfo("Un-Registering obsolete datamart {0}...", itm.Id);
-                            this.m_datamartRegistry.Unregister(registeredData);
-                        }
-                        else
-                        {
-                            // HACK: If the data source exists - then expose it 
-                            var context = this.m_datamartRegistry.GetExecutionContext(registeredData, DataFlowExecutionPurposeType.Discovery).GetIntegrator(itm.Produces);
-                            if (context.DatabaseExists())
-                            {
-                                this.m_metadataRepository.Insert(itm.Produces);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                this.m_tracer.TraceWarning("Could not initialize data marts - {0}", e);
-            }
         }
 
         /// <inheritdoc/>

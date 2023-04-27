@@ -26,6 +26,7 @@ using SanteDB.BI.Services;
 using SanteDB.Core;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Http;
+using SanteDB.Core.Model.Parameters;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
@@ -62,7 +63,8 @@ namespace SanteDB.Rest.BIS
                   ApplicationServiceContext.Current.GetService<IUpstreamIntegrationService>(),
                   ApplicationServiceContext.Current.GetService<IUpstreamAvailabilityProvider>(),
                   ApplicationServiceContext.Current.GetService<IRestClientFactory>(),
-                  ApplicationServiceContext.Current.GetService<IBiMetadataRepository>()
+                  ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(),
+                  ApplicationServiceContext.Current.GetService<IBiDatamartRepository>()
 
                 )
         {
@@ -85,7 +87,7 @@ namespace SanteDB.Rest.BIS
                     }
                     else if (data is BiDefinitionCollection bundle)
                     {
-                        this.TagUpstream(bundle.Items.ToArray());
+                        this.TagUpstream(bundle.Resources.ToArray());
                     }
                 }
             }
@@ -94,7 +96,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// DI constructor
         /// </summary>
-        public UpstreamBisServiceBehavior(IConfigurationManager configurationManager, IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService, IUpstreamIntegrationService upstreamIntegrationService, IUpstreamAvailabilityProvider upstreamAvailabilityProvider, IRestClientFactory restClientFactory, IBiMetadataRepository biMetadataRepository) : base(serviceManager, metadataRepository, auditService)
+        public UpstreamBisServiceBehavior(IConfigurationManager configurationManager, IServiceManager serviceManager, IBiMetadataRepository metadataRepository, IAuditService auditService, IUpstreamIntegrationService upstreamIntegrationService, IUpstreamAvailabilityProvider upstreamAvailabilityProvider, IRestClientFactory restClientFactory, IBiMetadataRepository biMetadataRepository, IBiDatamartRepository datamartRepository) : base(serviceManager, metadataRepository, datamartRepository, auditService)
         {
             this.m_upstreamIntegrationService = upstreamIntegrationService;
             this.m_upstreamAvailabilityProvider = upstreamAvailabilityProvider;
@@ -374,6 +376,39 @@ namespace SanteDB.Rest.BIS
             else
             {
                 return base.Update(resourceType, id, body);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override object Invoke(string resourceType, string id, string operationName, ParameterCollection parameters)
+        {
+            // Perform only on the external server
+            if (this.ShouldForwardRequest())
+            {
+                if (this.m_upstreamAvailabilityProvider.IsAvailable(Core.Interop.ServiceEndpointType.BusinessIntelligenceService))
+                {
+                    try
+                    {
+                        using (var restClient = this.CreateUpstreamRestClient())
+                        {
+                            restClient.Responded += (o, e) => RestOperationContext.Current.OutgoingResponse.SetETag(e.ETag);
+                            return restClient.Post<ParameterCollection, Object>($"{resourceType}/{id}/${operationName}", parameters);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        this.m_tracer.TraceError("Error performing online operation: {0}", e.InnerException);
+                        throw;
+                    }
+                }
+                else
+                {
+                    throw new FaultException(System.Net.HttpStatusCode.BadGateway);
+                }
+            }
+            else
+            {
+                return base.Invoke(resourceType, id, operationName, parameters);
             }
         }
     }

@@ -57,10 +57,10 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                     var nRecs = 0;
                     foreach (var itm in inputStream)
                     {
-                        this.Emit(bls.Destination, scope, bls.Priority, bls.Format((object)itm));
+                        this.Emit(bls.Destination, scope, bls.Priority, bls.Format((object)itm), myAction);
                         myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                         yield return itm;
                     }
                     sw.Stop();
@@ -68,7 +68,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 }
                 else
                 {
-                    this.Emit(bls.Destination, scope, bls.Priority, bls.Format(scope));
+                    this.Emit(bls.Destination, scope, bls.Priority, bls.Format(scope), myAction);
                 }
             }
             finally
@@ -80,7 +80,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         /// <summary>
         /// Emit to the intended source
         /// </summary>
-        private void Emit(BiLogDestinationType logDestination, DataFlowScope scope, EventLevel priority, string message)
+        private void Emit(BiLogDestinationType logDestination, DataFlowScope scope, EventLevel priority, string message, IDataFlowDiagnosticAction diagnosticAction)
         {
             if(logDestination.HasFlag(BiLogDestinationType.ExecutionLog))
             {
@@ -99,6 +99,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 Debug.WriteLine("DataFlow: {0} -> {1} {2}", scope.Context.Datamart.Id, priority, message);
                 this.m_tracer.TraceEvent(priority, message);
             }
+
+            diagnosticAction?.LogSample(DataFlowDiagnosticSampleType.LoggedData, message);
         }
     }
 }

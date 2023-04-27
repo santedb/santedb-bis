@@ -73,8 +73,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 var nRecs = 0; 
                 foreach (var itm in targetFlow.Execute(newScope))
                 {
-                    myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                    myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
+                    myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                     yield return itm;
                 }
