@@ -1,4 +1,5 @@
-﻿using SanteDB.BI.Model;
+﻿using SanteDB.BI.Diagnostics;
+using SanteDB.BI.Model;
 using System;
 
 namespace SanteDB.BI.Datamart.DataFlow
@@ -70,7 +71,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <summary>
         /// The sample represents a serialization of the current record
         /// </summary>
-        CurrentRecord = 0x8 | PointInTime
+        CurrentRecord = 0x8 
     }
 
     /// <summary>
@@ -143,7 +144,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <summary>
         /// Get the session data
         /// </summary>
-        object GetSessionData();
+        DataFlowDiagnosticReport GetSessionData();
     }
 
 }

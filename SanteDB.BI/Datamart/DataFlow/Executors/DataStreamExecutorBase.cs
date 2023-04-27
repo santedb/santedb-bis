@@ -27,20 +27,15 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 throw new ArgumentOutOfRangeException(nameof(flowStep), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, this.Handles.FullName, flowStep.GetType().FullName));
             }
 
-            var myAction = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
             try
             {
                 scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, flowStep.FormatExecutionPlan());
                 var inputStream = bss.InputObject.ResolveReferenceTo<BiDataFlowStep>(scope).Execute(scope);
-                return this.ProcessStream(bss, scope, inputStream, myAction);
+                return this.ProcessStream(bss, scope, inputStream);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new DataFlowException(flowStep, e);
-            }
-            finally
-            {
-                scope.Context.DiagnosticSession?.LogEndAction(myAction);
             }
         }
 
@@ -49,7 +44,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         /// </summary>
         protected DataFlowStreamTuple CreateStreamTuple(object tuple)
         {
-            switch(tuple)
+            switch (tuple)
             {
                 case DataFlowStreamTuple tup:
                     return tup;
@@ -65,6 +60,6 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         /// Perform the <paramref name="flowStep"/> for the <paramref name="inputStream"/>
         /// </summary>
         /// <returns></returns>
-        protected abstract IEnumerable<dynamic> ProcessStream(TStreamStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream, IDataFlowDiagnosticAction diagnosticLog);
+        protected abstract IEnumerable<dynamic> ProcessStream(TStreamStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream);
     }
 }

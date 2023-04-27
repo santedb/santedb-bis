@@ -17,7 +17,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
     {
 
         /// <inheritdoc/>
-        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowFilterStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream, IDataFlowDiagnosticAction diagnosticLog)
+        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowFilterStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
             var filterFnVarName = $"filterFn.{flowStep.Name}";
             if(!scope.TryGetSysVar(filterFnVarName, out Func<DataFlowStreamTuple, bool> filterFn))
@@ -29,16 +29,24 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             var sw = new Stopwatch();
             sw.Start();
             int nRecs = 0;
-            foreach (var itm in inputStream.Select(o=>CreateStreamTuple(o)))
+            var diagnosticLog = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
+            try
             {
-                if (filterFn(itm))
+                foreach (var itm in inputStream.Select(o => CreateStreamTuple(o)))
                 {
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
-                    yield return itm;
-                }
+                    if (filterFn(itm))
+                    {
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
+                        yield return itm;
+                    }
 
+                }
+            }
+            finally
+            {
+                scope.Context.DiagnosticSession?.LogEndAction(diagnosticLog);
             }
             sw.Stop();
         }

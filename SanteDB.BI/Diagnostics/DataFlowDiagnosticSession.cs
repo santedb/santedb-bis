@@ -68,12 +68,17 @@ namespace SanteDB.BI.Diagnostics
             this.m_children = new List<DataFlowDiagnosticActionInfo>();
             this.Parent = parentAction;
             this.Uuid = Guid.NewGuid();
+            this.DebugInfo = flowStep.ToString();
         }
 
         /// <summary>
         /// Get the UUID of the action
         /// </summary>
         internal Guid Uuid { get; }
+        /// <summary>
+        /// Gets the debug information
+        /// </summary>
+        public string DebugInfo { get; }
 
         /// <summary>
         /// The flow step type
@@ -134,7 +139,7 @@ namespace SanteDB.BI.Diagnostics
                 }
                 else
                 {
-                    this.m_samples.Add(originalSample, new DataFlowDiagnosticSample(sampleType, value));
+                    this.m_samples.Add(originalSample, new DataFlowDiagnosticSample(originalSample, value));
                 }
             }
             else if(this.m_samples.TryGetValue(sampleType, out var sample))
@@ -179,7 +184,7 @@ namespace SanteDB.BI.Diagnostics
         public event EventHandler<DiagnosticActionEventArgs> ActionEnded;
 
         /// <inheritdoc/>
-        public object GetSessionData()
+        public DataFlowDiagnosticReport GetSessionData()
         {
             return new DataFlowDiagnosticReport(this.m_createdTime.DateTime, this.m_completedActions);
         }

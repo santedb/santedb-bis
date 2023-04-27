@@ -206,14 +206,25 @@ namespace SanteDB.BI.Test
                 
                 // RUN the flow
                 var sessionInfo = manager.Refresh(coreMart, true);
-                var sessionData = sessionInfo.GetSessionData();
-                Assert.IsNotNull(sessionData);
                 var qdef = BiUtils.ResolveRefs(queryDefinition); // this should work now
                 var dataSourceProvider = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(qdef.DataSources.First().ProviderType) as IBiDataSource;
                 Assert.AreEqual(coreMart.Produces.Id, qdef.DataSources.First().Id);
                 var queryResult = dataSourceProvider.ExecuteQuery(qdef, new Dictionary<String, Object>(), null);
                 Assert.GreaterOrEqual(0, queryResult.Records.Count());
 
+                // Now we want to make sure that we have an execution
+                var mart = repository.Find(o => o.Id == CORE_MART_ID).First();
+                Assert.Greater(mart.FlowExecutions.Count(), 0);
+                Assert.IsNotNull(mart.FlowExecutions.Last().DiagnosticSessionKey);
+
+                var dstrs = ApplicationServiceContext.Current.GetService<IDataStreamManager>();
+                using (var fs = File.Create("report.xml"))
+                {
+                    using (var srcStr = dstrs.Get(mart.FlowExecutions.Last().DiagnosticSessionKey.Value))
+                    {
+                        srcStr.CopyTo(fs);
+                    }
+                }
             }
         }
     }

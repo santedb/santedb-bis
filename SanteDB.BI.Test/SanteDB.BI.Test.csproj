@@ -13,6 +13,7 @@
 	  <None Remove="Bi\entities.xml" />
 	  <None Remove="Bi\identifiers.xml" />
 	  <None Remove="Bi\names.xml" />
+	  <None Remove="Bi\places.xml" />
 	  <None Remove="Bi\users.xml" />
 	</ItemGroup>
 	
@@ -23,6 +24,7 @@
 	  <EmbeddedResource Include="Bi\identifiers.xml" />
 	  <EmbeddedResource Include="Bi\mart.xml" />
 	  <EmbeddedResource Include="Bi\names.xml" />
+	  <EmbeddedResource Include="Bi\places.xml" />
 	  <EmbeddedResource Include="Bi\users.xml" />
 	  <EmbeddedResource Include="TestConfig.xml" />
 	</ItemGroup>

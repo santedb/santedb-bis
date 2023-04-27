@@ -91,5 +91,10 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// Get the log entries
         /// </summary>
         IEnumerable<IDataFlowLogEntry> LogEntries { get; }
+
+        /// <summary>
+        /// Gets the diagnostic session if the execution was run in diagnostic mode
+        /// </summary>
+        Guid? DiagnosticSessionKey { get; }
     }
 }

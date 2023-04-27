@@ -13,20 +13,28 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
     internal class UnionExecutor : DataStreamExecutorBase<BiDataFlowUnionStreamStep>
     {
         /// <inheritdoc/>
-        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowUnionStreamStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream, IDataFlowDiagnosticAction diagnosticLog)
+        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowUnionStreamStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
             var masterList = flowStep.UnionWith?.SelectMany(o => o.ResolveReferenceTo<BiDataFlowStep>(scope).Execute(scope)) ?? new dynamic[0];
             var sw = new Stopwatch();
             sw.Start();
             int nRecs = 0;
-            foreach (var itm in inputStream.Union(masterList))
+            var diagnosticLog = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
+            try
             {
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
-                yield return itm;
+                foreach (var itm in inputStream.Union(masterList))
+                {
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
+                    yield return itm;
+                }
+                sw.Stop();
             }
-            sw.Stop();
+            finally
+            {
+                scope.Context.DiagnosticSession?.LogEndAction(diagnosticLog);
+            }
         }
     }
 }

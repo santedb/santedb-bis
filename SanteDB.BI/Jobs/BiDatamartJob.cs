@@ -99,6 +99,7 @@ namespace SanteDB.BI.Jobs
                     var dataMartDefinition = this.m_biMetaRepository.Get<BiDatamartDefinition>(itm.Id);
                     this.m_stateManager.SetProgress(this, $"Refresh {itm.Name}", (float)martCount / registeredMarts.Length);
                     this.m_biManager.Refresh(dataMartDefinition, (bool)parameters[0]);
+
                 }
 
                 this.m_stateManager.SetState(this, JobStateType.Completed);

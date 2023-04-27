@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using SanteDB.BI.Datamart.DataFlow;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -16,6 +18,8 @@ namespace SanteDB.BI.Diagnostics
     [XmlRoot(nameof(DataFlowDiagnosticReport), Namespace = BiConstants.XmlNamespace)]
     public class DataFlowDiagnosticReport
     {
+
+        private static XmlSerializer s_xsz = new XmlSerializer(typeof(DataFlowDiagnosticReport));
 
         /// <summary>
         /// Data flow diagnostics
@@ -50,9 +54,17 @@ namespace SanteDB.BI.Diagnostics
         /// <summary>
         /// Gets the list of actions in this report
         /// </summary>
-        [XmlArray("actions"), XmlArrayItem("action"), JsonProperty("actions")]
+        [XmlElement("action"), JsonProperty("actions")]
         public List<DataFlowDiagnosticActionReport> Actions { get; set; }
 
+        /// <summary>
+        /// Save
+        /// </summary>
+        /// <param name="str"></param>
+        public void Save(Stream str)
+        {
+            s_xsz.Serialize(str, this);
+        }
     }
     
     /// <summary>
@@ -77,10 +89,12 @@ namespace SanteDB.BI.Diagnostics
         {
             this.Uuid = sourceData.Uuid;
             this.Name = sourceData.Name;
+            this.DebugInfo = sourceData.DebugInfo;
             this.StartOfAction = sourceData.StartOfAction.DateTime;
             this.EndOfAction = sourceData.EndOfAction?.DateTime;
             this.StepType = sourceData.StepType;
-            this.Children = sourceData.Children.Select(o => new DataFlowDiagnosticActionReport(o)).ToList();
+            this.Actions = sourceData.Children.Select(o => new DataFlowDiagnosticActionReport(o)).ToList();
+            this.Samples = sourceData.Samples.Where(o=>o.Type != DataFlowDiagnosticSampleType.CurrentRecord).Select(o => new DataFlowDiagnosticSampleReport(o)).ToList();
         }
 
         /// <summary>
@@ -102,6 +116,12 @@ namespace SanteDB.BI.Diagnostics
         public String Name { get; set; }
 
         /// <summary>
+        /// Gets the debug information
+        /// </summary>
+        [XmlElement("debug"), JsonProperty("debug")]
+        public String DebugInfo { get; set; }
+
+        /// <summary>
         /// Gets the start of the action
         /// </summary>
         [XmlElement("started"), JsonProperty("started")]
@@ -116,8 +136,57 @@ namespace SanteDB.BI.Diagnostics
         /// <summary>
         /// Children 
         /// </summary>
-        [XmlArray("children"), XmlArrayItem("child"), JsonProperty("children")]
-        public List<DataFlowDiagnosticActionReport> Children { get; set; }
+        [XmlElement("action"), JsonProperty("actions")]
+        public List<DataFlowDiagnosticActionReport> Actions { get; set; }
 
+        /// <summary>
+        /// Gets or sets the samples collected
+        /// </summary>
+        [XmlElement("sample"), JsonProperty("samples")]
+        public List<DataFlowDiagnosticSampleReport> Samples { get; set; }
+    }
+
+    /// <summary>
+    /// Data flow diagnostic sample report
+    /// </summary>
+    [XmlType(nameof(DataFlowDiagnosticSampleReport), Namespace = BiConstants.XmlNamespace)]
+    public class DataFlowDiagnosticSampleReport
+    {
+
+        /// <summary>
+        /// Default ctor
+        /// </summary>
+        public DataFlowDiagnosticSampleReport()
+        {
+            
+        }
+        /// <summary>
+        /// New sample ctor
+        /// </summary>
+        internal DataFlowDiagnosticSampleReport(DataFlowDiagnosticSample sample)
+        {
+            this.Type = sample.Type.HasFlag(DataFlowDiagnosticSampleType.PointInTime) ? sample.Type ^ DataFlowDiagnosticSampleType.PointInTime : sample.Type;
+            this.Timestamp = sample.Timestamp.DateTime;
+            this.Value = sample.Value.ToString();
+        }
+
+        /// <summary>
+        /// Gets the type of the sample
+        /// </summary>
+        [XmlAttribute("type"), JsonProperty("type")]
+        public DataFlowDiagnosticSampleType Type { get; set; }
+
+
+        /// <summary>
+        /// Gets the timestamp of the sample
+        /// </summary>
+        [XmlAttribute("timestamp"), JsonProperty("timestamp")]
+        public DateTime Timestamp { get; set; }
+
+        /// <summary>
+        /// Gets or sets the value
+        /// </summary>
+        [XmlText, JsonProperty("value")]
+        public String Value { get; set; }
     }
 }

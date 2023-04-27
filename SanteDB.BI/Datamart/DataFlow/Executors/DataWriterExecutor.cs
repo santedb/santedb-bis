@@ -27,7 +27,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         private Tracer m_tracer = Tracer.GetTracer(typeof(DataWriterExecutor));
 
         /// <inheritdoc/>
-        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowDataWriterStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream, IDataFlowDiagnosticAction diagnosticLog)
+        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowDataWriterStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
 
             // Get the output connection
@@ -55,55 +55,62 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 outputConnection.TruncateObject(flowStep.Target);
             }
 
-            var sw = new Stopwatch();
-            sw.Start();
-            var nRecs = 0;
-            foreach (IDictionary<String, Object> itm in inputStream)
+            var diagnosticLog = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
+            try
             {
-                var record = itm;
-
-                if (!this.ValidateRecord(record, flowStep.Target, out DetectedIssue issue))
+                var sw = new Stopwatch();
+                sw.Start();
+                var nRecs = 0;
+                foreach (IDictionary<String, Object> itm in inputStream)
                 {
-                    this.m_tracer.TraceWarning("Data Flow Data {0} failed pre-validation", record);
-                    record.Add("$reject", true);
-                    record.Add("$reject.reason", issue.Text);
-                    yield return record;
-                    continue;
-                }
+                    var record = itm;
 
-                try
-                {
-                    switch (flowStep.Mode)
+                    if (!this.ValidateRecord(record, flowStep.Target, out DetectedIssue issue))
                     {
-                        case DataWriterModeType.Insert:
-                            record = outputConnection.Insert(flowStep.Target, record);
-                            break;
-                        case DataWriterModeType.InsertOrUpdate:
-                            record = outputConnection.InsertOrUpdate(flowStep.Target, record);
-                            break;
-                        case DataWriterModeType.Update:
-                            record = outputConnection.Update(flowStep.Target, record);
-                            break;
-                        case DataWriterModeType.Delete:
-                            record = outputConnection.Delete(flowStep.Target, record);
-                            break;
+                        this.m_tracer.TraceWarning("Data Flow Data {0} failed pre-validation", record);
+                        record.Add("$reject", true);
+                        record.Add("$reject.reason", issue.Text);
+                        yield return record;
+                        continue;
                     }
 
-                }
-                catch (Exception e)
-                {
-                    record.Add("$reject", true);
-                    record.Add("$reject.reason", e.ToHumanReadableString());
-                }
+                    try
+                    {
+                        switch (flowStep.Mode)
+                        {
+                            case DataWriterModeType.Insert:
+                                record = outputConnection.Insert(flowStep.Target, record);
+                                break;
+                            case DataWriterModeType.InsertOrUpdate:
+                                record = outputConnection.InsertOrUpdate(flowStep.Target, record);
+                                break;
+                            case DataWriterModeType.Update:
+                                record = outputConnection.Update(flowStep.Target, record);
+                                break;
+                            case DataWriterModeType.Delete:
+                                record = outputConnection.Delete(flowStep.Target, record);
+                                break;
+                        }
 
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
+                    }
+                    catch (Exception e)
+                    {
+                        record.Add("$reject", true);
+                        record.Add("$reject.reason", e.ToHumanReadableString());
+                    }
 
-                yield return record;
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
+
+                    yield return record;
+                }
+                sw.Stop();
             }
-            sw.Stop();
-
+            finally
+            {
+                scope.Context.DiagnosticSession?.LogEndAction(diagnosticLog);
+            }
         }
 
         /// <summary>

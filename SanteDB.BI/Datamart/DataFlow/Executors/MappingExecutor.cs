@@ -19,7 +19,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
     {
 
         /// <inheritdoc />
-        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowMappingStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream, IDataFlowDiagnosticAction diagnosticLog)
+        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowMappingStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
 
             // Get or open all reference columns for lookup
@@ -31,19 +31,27 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             }
 
             // Process results
-            var sw = new Stopwatch();
-            sw.Start();
-            int nRecs = 0;
-            foreach(var itm in inputStream)
+            var diagnosticLog = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
+            try
             {
-                var record = mappingFunc(CreateStreamTuple(itm));
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
-                yield return record;
+                var sw = new Stopwatch();
+                sw.Start();
+                int nRecs = 0;
+                foreach (var itm in inputStream)
+                {
+                    var record = mappingFunc(CreateStreamTuple(itm));
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
+                    yield return record;
 
+                }
+                sw.Stop();
             }
-            sw.Stop();
+            finally
+            {
+                scope.Context.DiagnosticSession?.LogEndAction(diagnosticLog);
+            }
         }
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         }
 
         /// <inheritdoc/>
-        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowCrosstabStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream, IDataFlowDiagnosticAction diagnosticLog)
+        protected override IEnumerable<dynamic> ProcessStream(BiDataFlowCrosstabStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
 
             if(flowStep.Pivot == null)
@@ -37,14 +37,22 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             var sw = new Stopwatch();
             sw.Start();
             var nRecs = 0;
-            foreach(var itm in this.m_pivotProvider.Pivot(inputStream, flowStep.Pivot))
+            var diagnosticLog = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
+            try
             {
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
-                diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
-                yield return itm;
-            }
 
+                foreach (var itm in this.m_pivotProvider.Pivot(inputStream, flowStep.Pivot))
+                {
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed | DataFlowDiagnosticSampleType.PointInTime, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput | DataFlowDiagnosticSampleType.PointInTime, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
+                    yield return itm;
+                }
+            }
+            finally
+            {
+                scope.Context.DiagnosticSession?.LogEndAction(diagnosticLog);
+            }
             sw.Stop();
         }
     }

@@ -33,12 +33,14 @@
 
   <schema>
 
+    <!-- The REJECT_TBL stores all records that were rejected during the run of the ETL -->
     <table name="REJECT_TBL">
       <column type="uuid" key="true" notNull="true" unique="true" name="RECORD_ID"/>
       <column type="string" name="TYPE" />
       <column type="string" name="REASON" />
     </table>
 
+    <!-- Security User Reporting Table -->
     <table name="SEC_USR_TBL">
       <column type="uuid" key="true" notNull="true" unique="true" name="USR_ID"/>
       <column type="string" notNull="true" name="USERNAME" />
@@ -55,6 +57,7 @@
       </column>
     </table>
 
+    <!-- All entities will have an entry in the ENT_TBL - this is the base of the ENT hierarchy -->
     <table name="ENT_TBL">
       <column type="uuid" notNull="true" unique="true" key="true" name="ENT_ID" />
       <column type="uuid" notNull="true" unique="true" name="VERSION" />
@@ -74,6 +77,7 @@
       </column>
     </table>
 
+    <!-- Entity Identifiers Table storing ID value and issuer -->
     <table name="ENT_ID_TBL">
       <column type="uuid" key="true" name="ID_ID" />
       <column type="ref" index="true" name="ENT_ID">
@@ -86,6 +90,7 @@
       <column type="date" name="EXPIRY" />
     </table>
 
+    <!-- Entity Addresses that have been Pivoted -->
     <table name="ENT_ADDR_TBL">
       <column type="uuid" key="true" name="ADDR_ID" />
       <column type="ref" index="true" name="ENT_ID">
@@ -103,6 +108,7 @@
       <column type="string" name="ADDR_CENSUS" />
     </table>
 
+    <!-- Entity Names that have been pivoted -->
     <table name="ENT_NAME_TBL">
       <column type="uuid" key="true" name="NAME_ID" />
       <column type="ref" index="true" name="ENT_ID">
@@ -116,7 +122,7 @@
       <column type="string" name="NAME_FAMILY" />
     </table>
 
-
+    <!-- Organization Registration Table -->
     <table name="ORG_TBL">
       <column type="ref" name="NAME">
         <otherTable ref="ENT_NAME_TBL" />
@@ -128,11 +134,13 @@
       <parent ref="ENT_TBL" />
     </table>
 
+    <!-- Materials Table storing all generic and manufactured material attributes -->
     <table name="MAT_TBL">
       <column type="string" name="NAME" />
       <parent ref="ENT_TBL" />
     </table>
-
+    
+    <!-- Manufactured materials table storing only those materials which are manufactured by an organization -->
     <table name="MMAT_TBL">
       <column type="string" name="LOT" />
       <column type="string" name="GTIN" />
@@ -142,6 +150,7 @@
       <parent ref="MAT_TBL" />
     </table>
 
+    <!-- All Places (Facilities, Buildings, Provinces, States, Cities, etc. -->
     <table name="PLC_TBL">
       <column type="ref" name="NAME">
         <otherTable ref="ENT_NAME_TBL" />
@@ -150,9 +159,25 @@
         <otherTable ref="ENT_ADDR_TBL" />
       </column>
       <column type="string" name="TEL" />
+      <column type="ref" name="PARENT" >
+        <otherTable ref="PLC_TBL" />
+      </column>
+      <column type="bool" name="IS_MOBILE" />
       <parent ref="ENT_TBL" />
     </table>
 
+    <!-- Association between the facilities in the PLC_TBL with those places that the facility serves (catchment) -->
+    <table name="PLC_SRV_AREA_TBL">
+      <column type="uuid" key="true" notNull="true" name="REL_ID" />
+      <column type="ref" name="FAC_ID" notNull="true">
+        <otherTable ref="PLC_TBL" />
+      </column> 
+      <column type="ref" name="PLC_ID" notNull="true">
+        <otherTable ref="PLC_TBL" />
+      </column>
+    </table>
+    
+    <!-- Persons table storing all persons (user entities, patients, relatives, providers, etc.) -->
     <table name="PSN_TBL">
       <column type="ref" name="NAME">
         <otherTable ref="ENT_NAME_TBL" />
@@ -176,6 +201,7 @@
       <parent ref="ENT_TBL" />
     </table>
 
+    <!-- Patient attributes are stored in the patient table -->
     <table name="PAT_TBL">
       <column type="int" name="MB_ORD" />
       <column type="string" name="LIVING_ARR" />
@@ -206,18 +232,22 @@
       <parent ref="PSN_TBL" />
     </table>
 
+    <!-- User Entity Table -->
     <table name="USR_TBL">
       <column type="string" name="USERNAME" />
       <parent ref="PSN_TBL" />
     </table>
 
+    <!-- Provider Entity table -->
     <table name="PVD_TBL">
       <column type="ref" name="USER">
         <otherTable ref="USR_TBL" />
       </column>
+      <column type="string" name="SPECIALTY" />
       <parent ref="PSN_TBL" />
     </table>
 
+    <!-- All acts base table -->
     <table name="ACT_TBL">
       <column type="uuid" key="true" unique="true" notNull="true" name="ACT_ID" />
       <column type="uuid" notNull="true" unique="true" name="VERSION" />
@@ -251,6 +281,7 @@
       </column>
     </table>
 
+    <!-- Act External Identifier table with issuer and identifier value -->
     <table name="ACT_ID_TBL">
       <column type="uuid" key="true" name="ID_ID" />
       <column type="ref" index="true" name="ACT_ID">
@@ -262,7 +293,8 @@
       <column type="date" name="ISSUED" />
       <column type="date" name="EXPIRY" />
     </table>
-
+    
+    <!-- Observations made in the CDR -->
     <table name="OBS_TBL">
       <column type="string" name="INTERPRETATION"/>
       <column type="string" name="VALUE_STR" />
@@ -271,12 +303,26 @@
       <parent ref="ACT_TBL" />
     </table>
 
+    <!-- Encounters in the CDR -->
     <table name="PAT_ENC_TBL">
       <column type="string" name="DISPOSITION" />
       <column type="string" name="ADM_SOURCE" />
       <parent ref="ACT_TBL" />
     </table>
 
+    <!-- Patient Encounter to the acts which they contain -->
+    <table name="ACT_COMP_TBL">
+      <column type="uuid" key="true" notNull="true" name="REL_ID" />
+      <column type="string" name="RELATION" notNull="true" />
+      <column type="ref" name="ACT_ID" notNull="true">
+        <otherTable ref="ACT_TBL" />
+      </column>
+      <column type="ref" name="COMPONENT" notNull="true">
+        <otherTable ref="ACT_TBL" />
+      </column>
+    </table>
+    
+    <!-- Patient encounter arrangement table -->
     <table name="PAT_ENC_ARG_TBL">
       <column type="uuid" key="true" unique="true" name="ARG_ID" />
       <column type="string" name="TYPE" />
@@ -299,10 +345,10 @@
       <parent ref="ACT_TBL" />
     </table>
 
-    <table name="SUB_ADM_CONS_TBL">
+    <table name="ACT_CONS_TBL">
       <column type="uuid" key="true" unique="true" notNull="true" name="REL_ID"/>
       <column type="ref" name="ACT_ID">
-        <otherTable ref="SUB_ADM_TBL" />
+        <otherTable ref="ACT_TBL" />
       </column>
       <column type="ref" name="CONSUMED">
         <otherTable ref="MMAT_TBL" />
@@ -319,6 +365,7 @@
     <flow name="identifiers" ref="#org.santedb.bi.datamart.core.identifiers" />
     <flow name="entities" ref="#org.santedb.bi.datamart.core.entities" />
     <flow name="acts" ref="#org.santedb.bi.datamart.core.acts" />
+    <flow name="places" ref="#org.santedb.bi.datamart.core.places" />
 
     <flow name="main">
       <pipeline>
@@ -391,6 +438,17 @@
             </call>
             <call>
               <dataFlow ref="names" />
+              <args>
+                <ref name="input">
+                  <value ref="mainDatabase" />
+                </ref>
+                <ref name="output">
+                  <value ref="warehouseDatabase" />
+                </ref>
+              </args>
+            </call>
+          <call>
+              <dataFlow ref="places" />
               <args>
                 <ref name="input">
                   <value ref="mainDatabase" />

@@ -80,15 +80,15 @@
 				        PRF.ENT_ID AS PERFORMER
             FROM
                 ACT_VRSN_TBL
-                INNER JOIN CD_VRSN_TBL CLS ON (ACT_VRSN_TBL.CLS_CD_ID = CLS.CD_ID AND CLS.OBSLT_UTC IS NULL)
-                INNER JOIN CD_VRSN_TBL MOOD ON (MOD_CD_ID = MOOD.CD_ID AND MOOD.OBSLT_UTC IS NULL)
-                INNER JOIN CD_VRSN_TBL STS ON (ACT_VRSN_TBL.STS_CD_ID = STS.CD_ID AND STS.OBSLT_UTC IS NULL)
+                INNER JOIN CD_VRSN_TBL CLS ON (ACT_VRSN_TBL.CLS_CD_ID = CLS.CD_ID AND CLS.HEAD = TRUE)
+                INNER JOIN CD_VRSN_TBL MOOD ON (MOD_CD_ID = MOOD.CD_ID AND MOOD.HEAD = TRUE)
+                INNER JOIN CD_VRSN_TBL STS ON (ACT_VRSN_TBL.STS_CD_ID = STS.CD_ID AND STS.HEAD = TRUE)
                 INNER JOIN SEC_PROV_TBL CRT_PROV_TBL ON (ACT_VRSN_TBL.CRT_PROV_ID = CRT_PROV_TBL.PROV_ID)
                 INNER JOIN ACT_PTCPT_TBL RCT ON (ACT_VRSN_TBL.ACT_ID = RCT.ACT_ID AND RCT.ROL_CD_ID = X'EEDB923F5EA64F4398CE841FEEB02E3F' AND RCT.OBSLT_VRSN_SEQ_ID IS NULL)
                 LEFT JOIN ACT_PTCPT_TBL AUT ON (ACT_VRSN_TBL.ACT_ID = AUT.ACT_ID AND AUT.ROL_CD_ID = X'AF3FCBF05D4304479217B884F757BC14' AND AUT.OBSLT_VRSN_SEQ_ID IS NULL)
                 LEFT JOIN ACT_PTCPT_TBL PRF ON (ACT_VRSN_TBL.ACT_ID = PRF.ACT_ID AND PRF.ROL_CD_ID = X'A4705EFA6EA465468A2094D4D7B86FC8' AND PRF.OBSLT_VRSN_SEQ_ID IS NULL)
                 LEFT JOIN SEC_PROV_TBL OBS_PROV_TBL ON (ACT_VRSN_TBL.OBSLT_PROV_ID = OBS_PROV_TBL.PROV_ID)
-                LEFT JOIN CD_VRSN_TBL TYP ON (TYP_CD_ID = TYP.CD_ID AND TYP.OBSLT_UTC IS NULL)
+                LEFT JOIN CD_VRSN_TBL TYP ON (TYP_CD_ID = TYP.CD_ID AND TYP.HEAD = TRUE)
                 LEFT JOIN GEO_TBL ON (GEO_TBL.GEO_ID = ACT_VRSN_TBL.GEO_ID)
                 LEFT JOIN TPL_DEF_TBL ON (TPL_DEF_TBL.TPL_ID = ACT_VRSN_TBL.TPL_ID)
             WHERE
@@ -97,13 +97,45 @@
         </add>
       </sql>
     </reader>
+    <reader name="source_comps">
+      <connection ref="input" />
+      <sql>
+        <add>
+          <providers>
+            <invariant>npgsql</invariant>
+            <invariant>sqlite</invariant>
+            <invariant>FirebirdSQL</invariant>
+          </providers>
+          <![CDATA[
+            SELECT REL_ID,
+              CD_VRSN_TBL.MNEMONIC AS RELATION,
+              SRC_ACT_ID AS ACT_ID,
+              TRG_ACT_ID AS COMPONENT
+            FROM 
+              ACT_REL_TBL
+              INNER JOIN CD_VRSN_TBL ON (REL_TYP_CD_ID = CD_ID AND HEAD = TRUE)
+            WHERE 
+              ACT_REL_TBL.OBSLT_VRSN_SEQ_ID IS NULL
+          ]]>
+        </add>
+      </sql>
+    </reader>
     <writer truncate="true" mode="insert" name="write_acts">
       <input ref="source_acts" />
       <connection ref="output" />
       <target ref="ACT_TBL" />
     </writer>
-    <filter name="filter_rejects">
+    <writer truncate="true" mode="insert" name="write_components">
+      <input ref="source_comps" />
+      <connection ref="output" />
+      <target ref="ACT_COMP_TBL" />
+    </writer>
+    <union name="union_rejects">
       <input ref="write_acts" />
+      <with ref="write_components" />
+    </union>
+    <filter name="filter_rejects">
+      <input ref="union_rejects" />
       <all>
         <when field="$reject" op="eq">
           <bool>true</bool>
