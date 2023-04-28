@@ -65,8 +65,8 @@
       <column type="string" notNull="true" name="DETERMINER" />
       <column type="string" name="TYPE" />
       <column type="string" name="TEMPLATE" />
-      <column type="decimal" name="LAT"/>
-      <column type="decimal" name="LNG"/>
+      <column type="float" name="LAT"/>
+      <column type="float" name="LNG"/>
       <column type="date-time" notNull="true" name="CREATED_TIME"/>
       <column type="ref" notNull="true" name="CREATED_BY">
         <otherTable ref="SEC_USR_TBL" />
@@ -260,8 +260,8 @@
       <column type="date-time" name="ACT_TIME" />
       <column type="date-time" name="START_TIME" />
       <column type="date-time" name="STOP_TIME" />
-      <column type="decimal" name="LAT"/>
-      <column type="decimal" name="LNG"/>
+      <column type="float" name="LAT"/>
+      <column type="float" name="LNG"/>
       <column type="date-time" notNull="true" name="CREATED_TIME"/>
       <column type="ref" notNull="true" name="CREATED_BY">
         <otherTable ref="SEC_USR_TBL" />

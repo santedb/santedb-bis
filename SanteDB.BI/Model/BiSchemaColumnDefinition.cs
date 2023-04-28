@@ -114,7 +114,7 @@ namespace SanteDB.BI.Model
                     return expectedType == BiDataType.String;
                 case double dd:
                 case float ff:
-                    return expectedType == BiDataType.Float;
+                    return expectedType == BiDataType.Float || expectedType == BiDataType.Decimal;
                 case int d:
                 case uint e:
                 case long f:
