@@ -90,8 +90,6 @@ namespace SanteDB.BI.Test
                 var queried = manager.Find(o => o.Id == coreMart.Id).First();
                 Assert.AreEqual(registered.Key, queried.Key);
 
-                Thread.Sleep(1000); // mimic some time to pass between updates
-
                 // Update
                 coreMart.MetaData.Version = "1.0";
                 var updated = manager.Register(coreMart);
