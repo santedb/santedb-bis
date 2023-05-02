@@ -33,8 +33,8 @@
                 ACT_VRSN_TBL.OBSLT_UTC AS OBSOLETE_TIME,
                 OBS_PROV_TBL.USR_ID AS OBSOLETE_BY,
                 AUT.ENT_ID AS AUTHOR,
-                PRF.ENT_ID AS PERFORMER
-				RCT.ENT_ID AS RECORD_TARGET                
+                PRF.ENT_ID AS PERFORMER,
+				        RCT.ENT_ID AS RECORD_TARGET 
             FROM
                 ACT_VRSN_TBL
                 INNER JOIN CD_VRSN_TBL CLS ON (ACT_VRSN_TBL.CLS_CD_ID = CLS.CD_ID AND CLS.OBSLT_UTC IS NULL)
