@@ -347,10 +347,11 @@
   </xs:complexType>
   <xs:complexType name="BiDataFlowDefinition">
     <xs:complexContent mixed="false">
-      <xs:extension base="tns:BiFlowStepCollectionBase">
+      <xs:extension base="tns:BiDataFlowStep">
         <xs:sequence>
           <xs:element minOccurs="0" maxOccurs="1" name="parameters" type="tns:ArrayOfChoice4" />
           <xs:element minOccurs="0" maxOccurs="1" name="return" type="tns:BiObjectReference" />
+          <xs:element minOccurs="0" maxOccurs="1" name="pipeline" type="tns:ArrayOfChoice3" />
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>

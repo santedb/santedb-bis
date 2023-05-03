@@ -16,6 +16,7 @@
 	  <None Remove="Bi\materials.xml" />
 	  <None Remove="Bi\names.xml" />
 	  <None Remove="Bi\orgs.xml" />
+	  <None Remove="Bi\persons.xml" />
 	  <None Remove="Bi\places.xml" />
 	  <None Remove="Bi\users.xml" />
 	</ItemGroup>
@@ -26,9 +27,10 @@
 	  <EmbeddedResource Include="Bi\core.xml" />
 	  <EmbeddedResource Include="Bi\entities.xml" />
 	  <EmbeddedResource Include="Bi\identifiers.xml" />
-	  <EmbeddedResource Include="Bi\names.xml" />
 	  <EmbeddedResource Include="Bi\materials.xml" />
+	  <EmbeddedResource Include="Bi\names.xml" />
 	  <EmbeddedResource Include="Bi\orgs.xml" />
+	  <EmbeddedResource Include="Bi\persons.xml" />
 	  <EmbeddedResource Include="Bi\places.xml" />
 	  <EmbeddedResource Include="Bi\users.xml" />
 	  <EmbeddedResource Include="TestConfig.xml" />
