@@ -273,7 +273,6 @@ namespace SanteDB.BI.Services.Impl
                     {
                         try
                         {
-                            this.m_metadataRepository.Remove<BiDataSourceDefinition>(datamartDefinition.Produces.Id);
 
                             datamartDefinition = BiUtils.ResolveRefs(datamartDefinition);
 
