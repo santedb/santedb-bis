@@ -53,25 +53,39 @@ namespace SanteDB.BI.Services.Impl
         public LocalBiRenderService(IServiceManager serviceManager, IJobManagerService jobManager, IBiMetadataRepository metadataRepository, IBiDataSource defaultDataSource = null)
         {
             this.m_serviceManager = serviceManager;
-            var job = (IJob)serviceManager.CreateInjected<BiMaterializeJob>();
-            jobManager.AddJob(job, JobStartType.TimerOnly);  // Set default job
-            if (jobManager.GetJobSchedules(job)?.Any() != true)
+
+            try
             {
-                jobManager.SetJobSchedule(job, new DayOfWeek[]
+                var job = (IJob)serviceManager.CreateInjected<BiMaterializeJob>();
+                jobManager.AddJob(job, JobStartType.TimerOnly);  // Set default job
+                if (jobManager.GetJobSchedules(job)?.Any() != true)
                 {
+                    jobManager.SetJobSchedule(job, new DayOfWeek[]
+                    {
                     DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday
-                }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 4, 0, 0)); // First run for tomorrow
+                    }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 4, 0, 0)); // First run for tomorrow
+                }
             }
-            job = serviceManager.CreateInjected<BiDatamartJob>();
-            jobManager.AddJob(job, JobStartType.TimerOnly);  // Set default job
-            if (jobManager.GetJobSchedules(job)?.Any() != true)
-            {
-                jobManager.SetJobSchedule(job, new DayOfWeek[]
-                {
-                    DayOfWeek.Saturday
-                }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0)); // First run for tomorrow
+            catch(Exception e) {
+                this.m_tracer.TraceWarning("Could not register BiMaterializeJob - {0}", e.ToHumanReadableString());
             }
 
+            try
+            {
+                var job = serviceManager.CreateInjected<BiDatamartJob>();
+                jobManager.AddJob(job, JobStartType.TimerOnly);  // Set default job
+                if (jobManager.GetJobSchedules(job)?.Any() != true)
+                {
+                    jobManager.SetJobSchedule(job, new DayOfWeek[]
+                    {
+                    DayOfWeek.Saturday
+                    }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0)); // First run for tomorrow
+                }
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceWarning("Could not register BiDatamartJob - {0}", e.ToHumanReadableString());
+            }
             // Scan and initialize all BI materialized views
             ApplicationServiceContext.Current.Started += (o, e) =>
             {
