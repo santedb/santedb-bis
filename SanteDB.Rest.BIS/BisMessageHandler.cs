@@ -24,6 +24,7 @@ using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Interop;
 using SanteDB.Core.Services;
 using SanteDB.Rest.BIS.Configuration;
+using SanteDB.Rest.Common.Behavior;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -120,6 +121,8 @@ namespace SanteDB.Rest.BIS
                 {
                     this.m_tracer.TraceInfo("Starting BIS on {0}...", endpoint.Description.ListenUri);
                 }
+
+                this.m_webHost.AddServiceBehavior(new ErrorServiceBehavior());
 
                 // Start the webhost
                 this.m_webHost.Start();

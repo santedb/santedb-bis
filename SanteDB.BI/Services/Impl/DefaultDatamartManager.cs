@@ -66,10 +66,13 @@ namespace SanteDB.BI.Services.Impl
                 throw new ArgumentNullException(nameof(datamartDefinition));
             }
 
-            var validateIssues = datamartDefinition.Validate();
-            if (validateIssues.Any(i => i.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error))
+            using (AuthenticationContext.EnterSystemContext())
             {
-                throw new DetectedIssueException(validateIssues);
+                var validateIssues = datamartDefinition.Validate();
+                if (validateIssues.Any(i => i.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error))
+                {
+                    throw new DetectedIssueException(validateIssues);
+                }
             }
 
             // Get the registration entry

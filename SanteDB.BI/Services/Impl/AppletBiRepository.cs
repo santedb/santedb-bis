@@ -23,6 +23,8 @@ using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Exceptions;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;
 using SanteDB.Core.Security.Services;
@@ -34,6 +36,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -123,9 +126,13 @@ namespace SanteDB.BI.Services.Impl
 
                 var definition = asset as BiDefinition;
                 if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
-                definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
+                    definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
                 {
                     return (TBisDefinition)definition;
+                }
+                else
+                {
+                    throw new SecurityException(ErrorMessages.PRIVACY_VIOLATION_DETECTED);
                 }
             }
             return null;
@@ -209,6 +216,9 @@ namespace SanteDB.BI.Services.Impl
                 this.m_definitionCache.TryRemove(typeof(BiReportDefinition), out _);
                 this.m_definitionCache.TryRemove(typeof(BiQueryDefinition), out _);
                 this.m_definitionCache.TryRemove(typeof(BiParameterDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiRenderFormatDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiDataFlowDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiDatamartDefinition), out _);
                 var solutions = this.m_solutionManagerService?.Solutions.ToList();
 
                 // Doesn't have a solution manager
