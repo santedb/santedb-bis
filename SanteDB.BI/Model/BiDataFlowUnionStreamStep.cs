@@ -21,8 +21,6 @@
 using Newtonsoft.Json;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.Core.BusinessRules;
-using SanteDB.Core.i18n;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -43,7 +41,7 @@ namespace SanteDB.BI.Model
         public List<BiObjectReference> UnionWith { get; set; }
 
         /// <inheritdoc/>
-        IEnumerable<BiDataFlowStep> IDataFlowMultiStreamStepDefinition.InputSteps => this.UnionWith?.Select(o=>o.Resolved as BiDataFlowStep) ?? new BiDataFlowStep[0];
+        IEnumerable<BiDataFlowStep> IDataFlowMultiStreamStepDefinition.InputSteps => this.UnionWith?.Select(o => o.Resolved as BiDataFlowStep) ?? new BiDataFlowStep[0];
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
@@ -55,7 +53,7 @@ namespace SanteDB.BI.Model
 
             if (this.UnionWith != null)
             {
-                foreach (var itm in this.UnionWith.SelectMany(u=>u.Validate(false)))
+                foreach (var itm in this.UnionWith.SelectMany(u => u.Validate(false)))
                 {
                     yield return itm;
                 }

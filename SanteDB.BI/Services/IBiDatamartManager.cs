@@ -2,8 +2,6 @@
 using SanteDB.BI.Model;
 using SanteDB.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.BI.Services
 {

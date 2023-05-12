@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Text;
 using System.Linq;
-using System.Collections;
 
 namespace SanteDB.BI.Datamart.DataFlow
 {

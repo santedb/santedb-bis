@@ -1,13 +1,9 @@
 ﻿using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
-using SharpCompress;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 
 namespace SanteDB.BI.Diagnostics
 {
@@ -130,13 +126,13 @@ namespace SanteDB.BI.Diagnostics
         /// </summary>
         public void LogSample<T>(DataFlowDiagnosticSampleType sampleType, T value)
         {
-            if(sampleType == DataFlowDiagnosticSampleType.LoggedData)
+            if (sampleType == DataFlowDiagnosticSampleType.LoggedData)
             {
-                if(!this.m_samples.TryGetValue(DataFlowDiagnosticSampleType.LoggedData, out var logSample))
+                if (!this.m_samples.TryGetValue(DataFlowDiagnosticSampleType.LoggedData, out var logSample))
                 {
                     this.m_samples.Add(DataFlowDiagnosticSampleType.LoggedData, new DataFlowDiagnosticSample(DataFlowDiagnosticSampleType.LoggedData, new List<T>() { value }));
                 }
-                else if(logSample.Value is List<T> list)
+                else if (logSample.Value is List<T> list)
                 {
                     list.Add(value);
                 }
@@ -145,7 +141,7 @@ namespace SanteDB.BI.Diagnostics
                     throw new InvalidOperationException("Cannot log sample of different types");
                 }
             }
-            else if(this.m_samples.TryGetValue(sampleType, out var sample))
+            else if (this.m_samples.TryGetValue(sampleType, out var sample))
             {
                 sample.Value = value;
             }
@@ -195,7 +191,7 @@ namespace SanteDB.BI.Diagnostics
         /// <inheritdoc/>
         public void LogEndAction(IDataFlowDiagnosticAction expectedAction)
         {
-            if(!(this.m_currentAction is DataFlowDiagnosticActionInfo actionInfo) || 
+            if (!(this.m_currentAction is DataFlowDiagnosticActionInfo actionInfo) ||
                 actionInfo.Uuid != this.m_currentAction.Uuid)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, nameof(LogEndAction)));
@@ -204,7 +200,7 @@ namespace SanteDB.BI.Diagnostics
             this.m_currentAction.End();
 
             // Ended?
-            if(this.m_currentAction.Parent == null)
+            if (this.m_currentAction.Parent == null)
             {
                 this.m_completedActions.AddLast(this.m_currentAction);
             }

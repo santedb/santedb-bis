@@ -1,20 +1,12 @@
-﻿using SanteDB.BI.Exceptions;
-using SanteDB.BI.Model;
+﻿using SanteDB.BI.Model;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Exceptions;
-using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Audit;
 using SanteDB.Core.Security.Audit;
 using System;
-using System.CodeDom;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -99,8 +91,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         record.Add("$reject.reason", e.ToHumanReadableString());
                     }
 
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
 
                     yield return record;

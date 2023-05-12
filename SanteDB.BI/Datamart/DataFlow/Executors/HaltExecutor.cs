@@ -1,11 +1,7 @@
 ﻿using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.Core;
-using SanteDB.Core.i18n;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {

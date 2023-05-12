@@ -22,9 +22,7 @@ using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core.Model.Query;
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace SanteDB.Rest.BIS
 {

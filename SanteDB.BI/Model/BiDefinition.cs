@@ -18,16 +18,13 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using ClosedXML;
 using Newtonsoft.Json;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
-using SanteDB.Core.Configuration;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Serialization;
-using SharpCompress;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -282,14 +279,14 @@ namespace SanteDB.BI.Model
         /// <summary>
         /// Validate this BI definition
         /// </summary>
-        public IEnumerable<DetectedIssue> Validate() 
+        public IEnumerable<DetectedIssue> Validate()
         {
             try
             {
                 var copy = BiUtils.ResolveRefs(this);
                 return copy.Validate(true);
             }
-            catch(BiException e)
+            catch (BiException e)
             {
                 return new DetectedIssue[] { new DetectedIssue(DetectedIssuePriorityType.Error, "bi.resolve", e.Message, Guid.Empty) };
             }
@@ -341,7 +338,7 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if(obj is BiDefinition bid)
+            if (obj is BiDefinition bid)
             {
                 return bid.Id == this.Id &&
                     bid.Name == this.Name &&
@@ -366,7 +363,7 @@ namespace SanteDB.BI.Model
             {
                 hash += this.Ref.GetHashCode() * 17;
             }
-            if(hash == 0)
+            if (hash == 0)
             {
                 return base.GetHashCode();
             }

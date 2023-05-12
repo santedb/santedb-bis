@@ -57,11 +57,11 @@ namespace SanteDB.BI.Model
         [XmlArrayItem("log", typeof(BiDataFlowLogStep))]
         [JsonProperty("step")]
         public List<BiDataFlowStep> Steps { get; set; }
-        
+
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in  base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }

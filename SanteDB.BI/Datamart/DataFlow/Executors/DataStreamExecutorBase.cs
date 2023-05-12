@@ -2,10 +2,7 @@
 using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {

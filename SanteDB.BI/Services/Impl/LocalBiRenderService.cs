@@ -66,7 +66,8 @@ namespace SanteDB.BI.Services.Impl
                     }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 4, 0, 0)); // First run for tomorrow
                 }
             }
-            catch(Exception e) {
+            catch (Exception e)
+            {
                 this.m_tracer.TraceWarning("Could not register BiMaterializeJob - {0}", e.ToHumanReadableString());
             }
 

@@ -1,17 +1,10 @@
-﻿using DocumentFormat.OpenXml.Office2019.Presentation;
-using DocumentFormat.OpenXml.Spreadsheet;
-using SanteDB.BI.Model;
+﻿using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core.Model.Query;
-using SanteDB.Core.Security.Services;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SanteDB.BI.Test
 {
@@ -36,12 +29,12 @@ namespace SanteDB.BI.Test
         public TestBiRepository()
         {
             var asm = typeof(TestBiRepository).Assembly;
-            foreach(var erName in asm.GetManifestResourceNames().Where(o=>o.Contains("SanteDB.BI.Test.Bi"))) 
-            { 
-                using(var str = asm.GetManifestResourceStream(erName))
+            foreach (var erName in asm.GetManifestResourceNames().Where(o => o.Contains("SanteDB.BI.Test.Bi")))
+            {
+                using (var str = asm.GetManifestResourceStream(erName))
                 {
                     var defCache = BiDefinition.Load(str);
-                    if(!m_definitionCache.TryGetValue(defCache.GetType(), out var localCache))
+                    if (!m_definitionCache.TryGetValue(defCache.GetType(), out var localCache))
                     {
                         localCache = new Dictionary<string, object>();
                         m_definitionCache.Add(defCache.GetType(), localCache);
@@ -54,13 +47,13 @@ namespace SanteDB.BI.Test
         /// <inheritdoc/>
         public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition
         {
-            if(this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var itms))
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var itms))
             {
-                if(itms.TryGetValue(id, out var retVal))
+                if (itms.TryGetValue(id, out var retVal))
                 {
                     return retVal as TBisDefinition;
                 }
-                
+
             }
             return default(TBisDefinition);
         }
@@ -68,7 +61,7 @@ namespace SanteDB.BI.Test
         /// <inheritdoc/>
         public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition
         {
-            if(!this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var items))
+            if (!this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var items))
             {
                 items = new Dictionary<string, object>();
                 this.m_definitionCache.Add(typeof(TBisDefinition), items);
@@ -85,7 +78,7 @@ namespace SanteDB.BI.Test
         /// <inheritdoc/>
         public IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter) where TBisDefinition : BiDefinition
         {
-            if(this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var defs))
+            if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var defs))
             {
                 return new MemoryQueryResultSet<TBisDefinition>(defs.Values.OfType<TBisDefinition>().Where(filter.Compile()));
             }
@@ -100,7 +93,7 @@ namespace SanteDB.BI.Test
                 items = new Dictionary<string, object>();
                 this.m_definitionCache.Add(typeof(TBisDefinition), items);
             }
-            if(items.ContainsKey(id))
+            if (items.ContainsKey(id))
             {
                 items.Remove(id);
             }

@@ -23,7 +23,6 @@ using SanteDB.Core.Applets;
 using SanteDB.Core.Applets.Model;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Diagnostics;
-using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Query;
 using SanteDB.Core.Security;

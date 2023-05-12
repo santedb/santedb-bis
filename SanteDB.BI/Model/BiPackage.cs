@@ -19,9 +19,7 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
-using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -108,12 +106,12 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
-            foreach(var itm in this.DataSources.OfType<BiDefinition>().Union(this.Formats)
-                .Union(this.Parameters).Union(this.Queries).Union(this.Views).Union(this.Reports).SelectMany(o=>o.Validate(true)))
+            foreach (var itm in this.DataSources.OfType<BiDefinition>().Union(this.Formats)
+                .Union(this.Parameters).Union(this.Queries).Union(this.Views).Union(this.Reports).SelectMany(o => o.Validate(true)))
             {
                 yield return itm;
             }

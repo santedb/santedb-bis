@@ -65,7 +65,8 @@ namespace SanteDB.BI.Components.Chart
             {
                 throw new InvalidOperationException("Invalid root context");
             }
-            using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value)) {
+            using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
+            {
                 if (!dataSource.Records.Any())
                 {
                     writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");

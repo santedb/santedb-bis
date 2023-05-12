@@ -1,21 +1,17 @@
 ﻿using NUnit.Framework;
-using SanteDB.Core.Configuration;
+using SanteDB.BI.Datamart.DataFlow;
+using SanteDB.BI.Exceptions;
+using SanteDB.BI.Model;
+using SanteDB.BI.Services;
+using SanteDB.BI.Util;
+using SanteDB.Core;
 using SanteDB.Core.Security;
 using SanteDB.Core.Services;
 using SanteDB.Core.TestFramework;
-using SanteDB.Core;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SanteDB.BI.Services;
-using SanteDB.BI.Model;
-using System.CodeDom;
-using SanteDB.BI.Datamart;
 using System.IO;
-using SanteDB.BI.Util;
-using SanteDB.BI.Exceptions;
-using SanteDB.BI.Datamart.DataFlow;
+using System.Linq;
 
 namespace SanteDB.BI.Test
 {
@@ -198,7 +194,7 @@ namespace SanteDB.BI.Test
                 //  manager.Migrate(coreMart);
 
                 // Test we can actually run the query
-                
+
                 // RUN the flow
                 var sessionInfo = manager.Refresh(coreMart, true);
                 var qdef = BiUtils.ResolveRefs(queryDefinition); // this should work now

@@ -18,7 +18,6 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Wordprocessing;
 using RestSrvr;
 using RestSrvr.Attributes;
 using RestSrvr.Exceptions;
@@ -127,7 +126,7 @@ namespace SanteDB.Rest.BIS
         [Demand(PermissionPolicyIdentifiers.UnrestrictedMetadata)]
         public virtual BiDefinition Create(string resourceType, BiDefinition body)
         {
-            
+
             try
             {
                 // Ensure that endpoint agrees with the body definition
@@ -165,7 +164,7 @@ namespace SanteDB.Rest.BIS
                 if (rt == typeof(DatamartInfo))
                 {
                     var reg = this.m_datamartRepository.Find(o => o.Id == id).FirstOrDefault();
-                    if(reg == null)
+                    if (reg == null)
                     {
                         throw new KeyNotFoundException();
                     }
@@ -433,7 +432,7 @@ namespace SanteDB.Rest.BIS
                 {
                     var expression = QueryExpressionParser.BuildLinqExpression<IDatamart>(RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
                     var results = this.m_datamartRepository.Find(expression);
-                    return new BiDefinitionCollection(results.Skip(offset).Take(count).ToArray().Select(o=>new DatamartInfo(o)))
+                    return new BiDefinitionCollection(results.Skip(offset).Take(count).ToArray().Select(o => new DatamartInfo(o)))
                     {
                         TotalResults = results.Count(),
                         Offset = offset

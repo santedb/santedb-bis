@@ -52,7 +52,7 @@ namespace SanteDB.BI.Model
     [XmlType(nameof(BiQueryParameterValueCollection), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
-    public class BiQueryParameterValueCollection 
+    public class BiQueryParameterValueCollection
     {
         /// <summary>
         /// Add parameter value

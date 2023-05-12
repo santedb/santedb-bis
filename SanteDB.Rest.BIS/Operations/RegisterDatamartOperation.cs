@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using SanteDB.BI.Datamart;
+﻿using SanteDB.BI.Datamart;
 using SanteDB.BI.Jobs;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -10,7 +9,6 @@ using SanteDB.Core.Model.Parameters;
 using SanteDB.Rest.Common;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.Rest.BIS.Operations
 {
@@ -45,17 +43,17 @@ namespace SanteDB.Rest.BIS.Operations
         /// <inheritdoc/>
         public object Invoke(Type scopingType, object scopingKey, ParameterCollection parameters)
         {
-            if(scopingType == typeof(BiDatamartDefinition) && scopingKey is String martId)
+            if (scopingType == typeof(BiDatamartDefinition) && scopingKey is String martId)
             {
                 var definition = this.m_metadataRepository.Get<BiDatamartDefinition>(martId);
-                if(definition == null)
+                if (definition == null)
                 {
                     throw new KeyNotFoundException(martId);
                 }
                 var registry = this.m_datamartRepository.Register(definition);
 
                 var job = this.m_jobManager.GetJobInstance(BiDatamartJob.JOBID);
-                if(job != null)
+                if (job != null)
                 {
                     this.m_jobManager.StartJob(job, new object[]
                     {

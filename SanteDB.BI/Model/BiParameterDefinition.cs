@@ -20,7 +20,6 @@
  */
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
-using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
@@ -158,14 +157,14 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate())
+            foreach (var itm in base.Validate())
             {
                 yield return itm;
             }
 
-            if(this.ValueDefinition is BiQueryDefinition qd)
+            if (this.ValueDefinition is BiQueryDefinition qd)
             {
-                foreach(var itm in qd.Validate(false))
+                foreach (var itm in qd.Validate(false))
                 {
                     yield return itm;
                 }

@@ -18,8 +18,6 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
-using DocumentFormat.OpenXml.Office2013.Excel;
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
@@ -47,14 +45,14 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate()
         {
-           
+
             if (this.Call == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.choose.when[{this.Value}].call.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Call)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.Call.Validate(false))
+                foreach (var itm in this.Call.Validate(false))
                 {
                     yield return itm;
                 }
@@ -79,18 +77,18 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.When?.Any() != true)
+            if (this.When?.Any() != true)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.choice[{this.Name}].when.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(When)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.When.SelectMany(o=>o.Validate()))
+                foreach (var itm in this.When.SelectMany(o => o.Validate()))
                 {
                     yield return itm;
                 }

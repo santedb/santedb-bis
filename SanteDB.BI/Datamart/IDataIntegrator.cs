@@ -20,7 +20,6 @@
  */
 using SanteDB.BI.Model;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace SanteDB.BI.Datamart

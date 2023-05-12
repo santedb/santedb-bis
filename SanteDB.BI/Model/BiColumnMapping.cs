@@ -18,14 +18,10 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Bibliography;
-using DocumentFormat.OpenXml.Drawing.Charts;
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
-using SixLabors.Fonts.Unicode;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
@@ -63,7 +59,7 @@ namespace SanteDB.BI.Model
             }
             else
             {
-                foreach(var itm in this.Target.Validate())
+                foreach (var itm in this.Target.Validate())
                 {
                     yield return itm;
                 }
@@ -74,7 +70,7 @@ namespace SanteDB.BI.Model
             }
             else
             {
-                foreach(var itm in this.Source.Validate())
+                foreach (var itm in this.Source.Validate())
                 {
                     yield return itm;
                 }
@@ -99,14 +95,14 @@ namespace SanteDB.BI.Model
 
         internal override IEnumerable<DetectedIssue> Validate()
         {
-           
+
             if (this.TransformExpression == null && String.IsNullOrEmpty(this.Name))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name ?? this.TransformExpression}].map.source.name.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
             }
             else if (this.TransformExpression is BiColumnMappingTransformJoin bcmtj)
             {
-                foreach(var itm in bcmtj.Validate(false))
+                foreach (var itm in bcmtj.Validate(false))
                 {
                     yield return itm;
                 }
@@ -129,11 +125,11 @@ namespace SanteDB.BI.Model
 
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
-            if(String.IsNullOrEmpty(this.Column))
+            if (String.IsNullOrEmpty(this.Column))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[$].map.target.lookup.join.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Column)), Guid.Empty);
             }

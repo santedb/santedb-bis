@@ -46,18 +46,18 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.Pivot == null)
+            if (this.Pivot == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].pivot.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Pivot)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.Pivot.Validate())
+                foreach (var itm in this.Pivot.Validate())
                 {
                     yield return itm;
                 }

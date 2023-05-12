@@ -18,12 +18,10 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -32,7 +30,7 @@ using System.Xml.Serialization;
 namespace SanteDB.BI.Model
 {
 
-    
+
 
     /// <summary>
     /// Represents a definition for a column
@@ -94,7 +92,7 @@ namespace SanteDB.BI.Model
         internal bool ValidateValue(object value)
         {
             var expectedType = this.Type;
-            if(expectedType == BiDataType.Ref && this.References.Resolved is BiSchemaTableDefinition otherTable)
+            if (expectedType == BiDataType.Ref && this.References.Resolved is BiSchemaTableDefinition otherTable)
             {
                 BiSchemaColumnDefinition keyCol = null;
                 do
@@ -104,7 +102,7 @@ namespace SanteDB.BI.Model
                 } while (keyCol == null && otherTable != null);
                 expectedType = keyCol?.Type ?? throw new MissingPrimaryKeyException();
             }
-            switch(value)
+            switch (value)
             {
 
                 case DateTime a:
@@ -123,7 +121,7 @@ namespace SanteDB.BI.Model
                 case ulong i:
                     return expectedType == BiDataType.Integer ||
                         expectedType == BiDataType.DateTime || expectedType == BiDataType.Date ||
-                        (expectedType == BiDataType.Boolean && (long)value <= 1 && (long)value>=0); // HACK: SQLITE dates are represented as integers as well and the BI layer doesnt differentiate between them sometimes
+                        (expectedType == BiDataType.Boolean && (long)value <= 1 && (long)value >= 0); // HACK: SQLITE dates are represented as integers as well and the BI layer doesnt differentiate between them sometimes
                 case Guid j:
                     return expectedType == BiDataType.Uuid;
                 case bool k:

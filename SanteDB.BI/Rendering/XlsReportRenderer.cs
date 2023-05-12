@@ -24,7 +24,6 @@ using SanteDB.BI.Configuration;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
-using SanteDB.Core;
 using SanteDB.Core.Data;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Security.Services;
@@ -33,7 +32,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace SanteDB.BI.Rendering
@@ -156,7 +154,7 @@ namespace SanteDB.BI.Rendering
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this.m_tracer.TraceError("Could not export report {0} view {1} - {2}", reportDefinition.Id, viewName, e);
                 throw new BiException($"Could not export report view to XLS {view}", reportDefinition, e);

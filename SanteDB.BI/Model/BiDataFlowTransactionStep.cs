@@ -46,7 +46,7 @@ namespace SanteDB.BI.Model
 
         /// <inheritdoc/>
         BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputConnection?.Resolved as BiDataFlowConnectionStep;
-        
+
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {

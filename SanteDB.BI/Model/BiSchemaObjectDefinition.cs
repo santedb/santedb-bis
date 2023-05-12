@@ -49,12 +49,12 @@ namespace SanteDB.BI.Model
         /// </summary>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(string.IsNullOrEmpty(this.Name) && String.IsNullOrEmpty(this.Ref))
+            if (string.IsNullOrEmpty(this.Name) && String.IsNullOrEmpty(this.Ref))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.table.name.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
             }

@@ -19,7 +19,6 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
-using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System.Collections.Generic;
@@ -57,23 +56,23 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.Query == null)
+            if (this.Query == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.query.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Query)), DetectedIssueKeys.InvalidDataIssue);
             }
             else
             {
-                foreach(var de in this.Query.Validate(false))
+                foreach (var de in this.Query.Validate(false))
                 {
                     yield return de;
                 }
             }
-            
+
 
         }
 

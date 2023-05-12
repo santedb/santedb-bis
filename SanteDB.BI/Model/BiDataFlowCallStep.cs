@@ -60,14 +60,14 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-           
-            if(this.TargetMethod == null)
+
+            if (this.TargetMethod == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.mart.flow.call.dataFlow.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(TargetMethod)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.TargetMethod.Validate(false))
+                foreach (var itm in this.TargetMethod.Validate(false))
                 {
                     yield return itm;
                 }
@@ -77,7 +77,7 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override BiDefinition FindObjectByName(string name)
         {
-            return this.Arguments.Find(o=>o.Name == name)?.SimpleValue as BiDefinition ??
+            return this.Arguments.Find(o => o.Name == name)?.SimpleValue as BiDefinition ??
                 base.FindObjectByName(name);
         }
 

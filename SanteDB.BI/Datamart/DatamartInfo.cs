@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
-using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Datamart
@@ -38,7 +36,7 @@ namespace SanteDB.BI.Datamart
             this.ObsoletionTime = datamart.ObsoletionTime?.DateTime;
             this.UpdatedByKey = datamart.UpdatedByKey;
             this.UpdatedTime = datamart.UpdatedTime?.DateTime;
-            this.Executions = datamart.FlowExecutions.Select(o=>new DataMartExecutionInfo(o)).ToList();
+            this.Executions = datamart.FlowExecutions.Select(o => new DataMartExecutionInfo(o)).ToList();
             this.MetaData = new BiMetadata()
             {
                 Annotation = new BiAnnotation()
@@ -49,7 +47,7 @@ namespace SanteDB.BI.Datamart
             };
         }
 
-       
+
         /// <summary>
         /// Gets or sets the creation time
         /// </summary>
@@ -105,7 +103,7 @@ namespace SanteDB.BI.Datamart
         /// </summary>
         public DataMartExecutionInfo()
         {
-            
+
         }
 
         /// <summary>

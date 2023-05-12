@@ -47,15 +47,15 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
-            if(this.Body == null)
+            if (this.Body == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.div.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Body)), Guid.Empty);
             }
-            if(String.IsNullOrEmpty(this.Name))
+            if (String.IsNullOrEmpty(this.Name))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.name.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Name)), Guid.Empty);
             }

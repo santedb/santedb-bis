@@ -18,14 +18,11 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Wordprocessing;
 using Newtonsoft.Json;
-using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -128,7 +125,7 @@ namespace SanteDB.BI.Model
                 }
             }
 
-            if (this.EntryFlow != null && !(this.EntryFlow.Resolved is BiDataFlowDefinition) && !this.DataFlows.Any(f=>f.Name == "main"))
+            if (this.EntryFlow != null && !(this.EntryFlow.Resolved is BiDataFlowDefinition) && !this.DataFlows.Any(f => f.Name == "main"))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.mart.flows.startFlow.missing", String.Format(ErrorMessages.MISSING_ENTRY_POINT, this.EntryFlow.Ref), Guid.Empty);
             }

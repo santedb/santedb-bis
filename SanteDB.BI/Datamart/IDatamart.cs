@@ -1,11 +1,8 @@
 ﻿using SanteDB.BI.Datamart.DataFlow;
-using SanteDB.BI.Model;
-using SanteDB.Core.Configuration.Data;
 using SanteDB.Core.Model.Attributes;
 using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.BI.Datamart
 {

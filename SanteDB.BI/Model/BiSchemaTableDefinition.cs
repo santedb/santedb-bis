@@ -18,8 +18,6 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Math;
-using Irony.Parsing;
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
@@ -61,41 +59,42 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.Temporary && !String.IsNullOrEmpty(this.Tablespace))
+            if (this.Temporary && !String.IsNullOrEmpty(this.Tablespace))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table[{this.Name}].temp", $"{nameof(Temporary)} and {nameof(Tablespace)} are exclusive", Guid.Empty);
             }
-            if (this.Parent == null && String.IsNullOrEmpty(this.Ref)) {
+            if (this.Parent == null && String.IsNullOrEmpty(this.Ref))
+            {
                 if (this.Columns == null || this.Columns.Count == 0)
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table[{this.Name}].columns.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Columns)), Guid.Empty);
                 }
-                else if (!this.Columns.Any(c=>c.IsKey) && !this.Temporary)
+                else if (!this.Columns.Any(c => c.IsKey) && !this.Temporary)
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table[{this.Name}].noPrimaryKey", String.Format(ErrorMessages.FIELD_NOT_FOUND, "Primary Key"), Guid.Empty);
                 }
-                else if(this.Columns.Count(c=>c.IsKey) > 1)
+                else if (this.Columns.Count(c => c.IsKey) > 1)
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table[{this.Name}].noCompositeKeys", String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, "Composite Primary Key"), Guid.Empty);
                 }
             }
 
             // Ensure we don't have infinite circular parents
-            if(this.Parent != null)
+            if (this.Parent != null)
             {
                 var parentSet = new HashSet<String>();
                 parentSet.Add(this.Name);
                 var parent = this.Parent;
-                while(parent != null)
+                while (parent != null)
                 {
-                    if(parentSet.Contains(parent.Ref))
+                    if (parentSet.Contains(parent.Ref))
                     {
-                        yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table[{this.Name}].circular_dep", String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, $"Circular Parent Reference : {String.Join(">", parentSet) }"), Guid.Empty);
+                        yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.schema.table[{this.Name}].circular_dep", String.Format(ErrorMessages.WOULD_RESULT_INVALID_STATE, $"Circular Parent Reference : {String.Join(">", parentSet)}"), Guid.Empty);
                         break;
                     }
                     else

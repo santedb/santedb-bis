@@ -66,7 +66,7 @@ namespace SanteDB.BI.Model
     [ExcludeFromCodeCoverage] // Serialization class
     public class BiDataFlowDataWriterStep : BiDataFlowStreamStep
     {
-               
+
         /// <summary>
         /// Truncate the table
         /// </summary>
@@ -94,29 +94,29 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.OutputConnection == null)
+            if (this.OutputConnection == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].output.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(OutputConnection)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.OutputConnection.Validate(false))
+                foreach (var itm in this.OutputConnection.Validate(false))
                 {
                     yield return itm;
                 }
             }
-            if(this.Target == null)
+            if (this.Target == null)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].target.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Target)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.Target.Validate(false))
+                foreach (var itm in this.Target.Validate(false))
                 {
                     yield return itm;
                 }

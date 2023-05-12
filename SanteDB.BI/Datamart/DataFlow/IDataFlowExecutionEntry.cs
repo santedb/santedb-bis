@@ -1,7 +1,6 @@
 ﻿using SanteDB.Core.Model.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Datamart.DataFlow

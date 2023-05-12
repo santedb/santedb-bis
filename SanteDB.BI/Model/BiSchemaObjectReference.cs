@@ -3,7 +3,6 @@ using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model

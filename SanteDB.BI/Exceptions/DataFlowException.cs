@@ -1,8 +1,5 @@
 ﻿using SanteDB.BI.Model;
-using SanteDB.Core.i18n;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.BI.Exceptions
 {
@@ -17,7 +14,7 @@ namespace SanteDB.BI.Exceptions
         /// </summary>
         /// <param name="stepAtException">The current step when the exception occurred</param>
         /// <param name="innerException">The exception that caused this exception</param>
-        public DataFlowException(BiDataFlowStep stepAtException, Exception innerException) : base($"BI Error @{stepAtException.Name??stepAtException.Id}", innerException)
+        public DataFlowException(BiDataFlowStep stepAtException, Exception innerException) : base($"BI Error @{stepAtException.Name ?? stepAtException.Id}", innerException)
         {
             this.FlowObject = stepAtException;
         }

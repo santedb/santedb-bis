@@ -72,18 +72,18 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.DataSource == null && String.IsNullOrEmpty(this.Ref))
+            if (this.DataSource == null && String.IsNullOrEmpty(this.Ref))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].dataSource.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(DataSource)), Guid.Empty);
             }
-            else if(this.DataSource != null)
+            else if (this.DataSource != null)
             {
-                foreach(var itm in this.DataSource.Validate(false))
+                foreach (var itm in this.DataSource.Validate(false))
                 {
                     yield return itm;
                 }

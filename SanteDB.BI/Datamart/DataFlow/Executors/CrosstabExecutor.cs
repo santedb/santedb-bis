@@ -5,8 +5,6 @@ using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -29,7 +27,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         protected override IEnumerable<dynamic> ProcessStream(BiDataFlowCrosstabStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
 
-            if(flowStep.Pivot == null)
+            if (flowStep.Pivot == null)
             {
                 throw new InvalidOperationException(String.Format(ErrorMessages.MISSING_VALUE, nameof(BiDataFlowCrosstabStep.Pivot)));
             }
@@ -43,8 +41,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
                 foreach (var itm in this.m_pivotProvider.Pivot(inputStream, flowStep.Pivot))
                 {
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                     yield return itm;
                 }

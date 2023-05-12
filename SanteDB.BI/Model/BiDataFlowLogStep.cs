@@ -18,19 +18,14 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DynamicExpresso;
 using Newtonsoft.Json;
-using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.Core;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
-using System.Dynamic;
-using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -47,7 +42,7 @@ namespace SanteDB.BI.Model
         ///  Log to any
         /// </summary>
         [XmlEnum("any")]
-        Any = 0, 
+        Any = 0,
         /// <summary>
         /// log to the execution log
         /// </summary>
@@ -102,12 +97,12 @@ namespace SanteDB.BI.Model
         {
             if (this.InputObject != null) // Input is not null - so we need to validate like regular stream step!
             {
-                foreach(var itm in base.Validate(isRoot))
+                foreach (var itm in base.Validate(isRoot))
                 {
                     yield return itm;
                 }
             }
-            else if(string.IsNullOrEmpty(this.Message))
+            else if (string.IsNullOrEmpty(this.Message))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[${this.Name}].message.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Message)), Guid.Empty);
             }

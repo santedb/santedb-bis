@@ -18,7 +18,6 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using SanteDB.BI.Datamart;
 using SanteDB.BI.Model;
 using System;
 using System.Collections.Generic;
@@ -31,7 +30,7 @@ namespace SanteDB.BI.Services
     public interface IBiDataSource
     {
 
-   
+
         /// <summary>
         /// Executes the specified <paramref name="queryDefinition"/> using the specified <paramref name="parameters"/>
         /// </summary>

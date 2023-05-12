@@ -19,7 +19,6 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
-using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System.Collections.Generic;

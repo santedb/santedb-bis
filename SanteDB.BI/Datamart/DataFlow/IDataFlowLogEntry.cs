@@ -1,7 +1,5 @@
 ﻿using SanteDB.Core.Model.Interfaces;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 
 namespace SanteDB.BI.Datamart.DataFlow

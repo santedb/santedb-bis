@@ -41,11 +41,11 @@ namespace SanteDB.BI.Model
         [XmlIgnore, JsonIgnore]
         internal String Filter { get; set; }
 
-       
+
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }

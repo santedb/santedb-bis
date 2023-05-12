@@ -28,7 +28,6 @@ using SanteDB.Rest.Common.Behavior;
 using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 
 namespace SanteDB.Rest.BIS
 {

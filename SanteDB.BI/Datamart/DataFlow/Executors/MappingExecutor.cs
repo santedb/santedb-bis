@@ -1,14 +1,10 @@
-﻿using Newtonsoft.Json.Serialization;
-using SanteDB.BI.Model;
+﻿using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -40,8 +36,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 foreach (var itm in inputStream)
                 {
                     var record = mappingFunc(CreateStreamTuple(itm));
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
                     yield return record;
 
@@ -61,7 +57,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         {
             var getDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.GetData));
             var setDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.SetData));
-            
+
 
             var inputParm = Expression.Parameter(typeof(DataFlowStreamTuple), "input");
             var resultVar = Expression.Variable(typeof(DataFlowStreamTuple), "result");
@@ -71,17 +67,17 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
             // Loop and create the mapping code
             var body = Expression.Block(
-                new [] { resultVar },
+                new[] { resultVar },
                 new Expression[] { initializeResult }.Union(
                     flowStep.Mapping.Select(column =>
                     {
-                
+
                         // TODO: Implement lookup and simple expressions
                         if (column.Source.TransformExpression is string str)
                         {
                             return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), Expression.Constant(str));
                         }
-                        else if(column.Source.TransformExpression is BiColumnMappingTransformJoin tj)
+                        else if (column.Source.TransformExpression is BiColumnMappingTransformJoin tj)
                         {
                             throw new NotSupportedException(ErrorMessages.NOT_SUPPORTED); // not supported yet
                         }

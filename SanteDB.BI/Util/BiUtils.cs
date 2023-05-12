@@ -18,8 +18,6 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.Drawing;
-using DocumentFormat.OpenXml.Vml;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -29,7 +27,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Util
@@ -102,9 +99,9 @@ namespace SanteDB.BI.Util
 
                     }
 
-                    if(resolvedTarget == null)
+                    if (resolvedTarget == null)
                     {
-                        throw new BiException($"{clonedDefinition.Ref} @ {String.Join("/", parentScope.Reverse().Select(o=>o.Name ?? o.Id ?? o.GetType().Name))} not found", definition, null);
+                        throw new BiException($"{clonedDefinition.Ref} @ {String.Join("/", parentScope.Reverse().Select(o => o.Name ?? o.Id ?? o.GetType().Name))} not found", definition, null);
                     }
 
 

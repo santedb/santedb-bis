@@ -61,17 +61,17 @@ namespace SanteDB.BI.Model
                 yield return itm;
             }
 
-            if(string.IsNullOrEmpty(this.Sql))
+            if (string.IsNullOrEmpty(this.Sql))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Sql)), DetectedIssueKeys.InvalidDataIssue);
             }
-            if(this.Materialize != null)
+            if (this.Materialize != null)
             {
-                if(string.IsNullOrEmpty(this.Materialize.Name))
+                if (string.IsNullOrEmpty(this.Materialize.Name))
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.qry.materialize.name.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(BiMaterializeDefinition.Name)), Guid.Empty);
                 }
-                else if(String.IsNullOrEmpty(this.Materialize.Sql))
+                else if (String.IsNullOrEmpty(this.Materialize.Sql))
                 {
                     yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.qry.materialize.sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(BiMaterializeDefinition.Sql)), Guid.Empty);
                 }

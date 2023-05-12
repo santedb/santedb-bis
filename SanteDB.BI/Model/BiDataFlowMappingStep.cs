@@ -46,18 +46,18 @@ namespace SanteDB.BI.Model
 
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            if(this.Mapping == null || this.Mapping.Count == 0)
+            if (this.Mapping == null || this.Mapping.Count == 0)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].mapping.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Mapping)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.Mapping.SelectMany(o=>o.Validate()))
+                foreach (var itm in this.Mapping.SelectMany(o => o.Validate()))
                 {
                     yield return itm;
                 }

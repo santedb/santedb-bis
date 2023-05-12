@@ -19,8 +19,6 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
@@ -31,9 +29,9 @@ namespace SanteDB.BI.Model
     /// </summary>
     [XmlType(nameof(BiDataFlowParallelStep), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
-    [ExcludeFromCodeCoverage] 
+    [ExcludeFromCodeCoverage]
     public class BiDataFlowParallelStep : BiFlowStepCollectionBase
     {
-       
+
     }
 }

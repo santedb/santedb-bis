@@ -1,12 +1,9 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using SanteDB.BI.Model;
+﻿using SanteDB.BI.Model;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -20,7 +17,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         protected override IEnumerable<dynamic> ProcessStream(BiDataFlowFilterStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
         {
             var filterFnVarName = $"filterFn.{flowStep.Name}";
-            if(!scope.TryGetSysVar(filterFnVarName, out Func<DataFlowStreamTuple, bool> filterFn))
+            if (!scope.TryGetSysVar(filterFnVarName, out Func<DataFlowStreamTuple, bool> filterFn))
             {
                 filterFn = this.CreateFilterFunction(flowStep);
                 scope.SetSysVar(filterFnVarName, filterFn);
@@ -36,8 +33,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 {
                     if (filterFn(itm))
                     {
-                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                        diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                         diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                         yield return itm;
                     }
@@ -59,7 +56,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
             var getDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.GetData));
             var setDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.SetData));
-            
+
             var inputParm = Expression.Parameter(typeof(DataFlowStreamTuple));
             Expression bodyExpression = null;
 
@@ -73,7 +70,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
                 var dType = itm.Value != null ? typeof(Nullable<>).MakeGenericType(itm.Value.GetType()) : typeof(Object);
                 var whenExpr = Expression.MakeBinary(comparisonType, Expression.Convert(sourceValue, dType), Expression.Convert(Expression.Constant(itm.Value), dType));
-                if(bodyExpression != null)
+                if (bodyExpression != null)
                 {
                     bodyExpression = Expression.MakeBinary(ExpressionType.AndAlso, bodyExpression, whenExpr);
                 }
@@ -86,7 +83,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             return Expression.Lambda<Func<DataFlowStreamTuple, bool>>(
                 bodyExpression,
                 inputParm
-                
+
             ).Compile();
         }
     }

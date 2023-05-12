@@ -31,7 +31,6 @@ using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Xml;
@@ -69,7 +68,7 @@ namespace SanteDB.BI.Rendering
         /// Rendering base
         /// </summary>
         public XsltReportRendererBase(Stream xslStream, bool emitPlainText)
-            : this(ApplicationServiceContext.Current.GetService<IConfigurationManager>(), 
+            : this(ApplicationServiceContext.Current.GetService<IConfigurationManager>(),
                   ApplicationServiceContext.Current.GetService<IPolicyEnforcementService>())
         {
             this.m_xsl = new XslCompiledTransform(false);

@@ -1,17 +1,11 @@
-﻿using DocumentFormat.OpenXml.Drawing;
-using SanteDB.BI.Exceptions;
-using SanteDB.BI.Model;
-using SanteDB.Core;
+﻿using SanteDB.BI.Model;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Services;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -23,7 +17,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
         public LogExecutor(IThreadPoolService thp)
         {
-            this.m_threadPool = thp;            
+            this.m_threadPool = thp;
         }
         // TRacer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(LogExecutor));
@@ -59,8 +53,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                     {
                         this.Emit(bls.Destination, scope, bls.Priority, bls.Format((object)itm), myAction);
                         myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                         yield return itm;
                     }
                     sw.Stop();
@@ -82,7 +76,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         /// </summary>
         private void Emit(BiLogDestinationType logDestination, DataFlowScope scope, EventLevel priority, string message, IDataFlowDiagnosticAction diagnosticAction)
         {
-            if(logDestination.HasFlag(BiLogDestinationType.ExecutionLog))
+            if (logDestination.HasFlag(BiLogDestinationType.ExecutionLog))
             {
                 scope.Context.Log(priority, message);
             }
@@ -90,11 +84,11 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             {
                 Console.WriteLine("DataFlow: {0} -> {1} {2}", scope.Context.Datamart.Id, priority, message);
             }
-            if(logDestination.HasFlag(BiLogDestinationType.Trace))
+            if (logDestination.HasFlag(BiLogDestinationType.Trace))
             {
                 this.m_tracer.TraceEvent(priority, message);
             }
-            if(logDestination == BiLogDestinationType.Any)
+            if (logDestination == BiLogDestinationType.Any)
             {
                 Debug.WriteLine("DataFlow: {0} -> {1} {2}", scope.Context.Datamart.Id, priority, message);
                 this.m_tracer.TraceEvent(priority, message);

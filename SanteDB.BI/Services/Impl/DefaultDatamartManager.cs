@@ -1,24 +1,20 @@
 ﻿using RestSrvr;
-using SanteDB.Core.Security.Audit;
 using SanteDB.BI.Datamart;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
+using SanteDB.BI.Util;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model.Audit;
 using SanteDB.Core.Security;
+using SanteDB.Core.Security.Audit;
 using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using DocumentFormat.OpenXml.Wordprocessing;
-using SanteDB.Core.Model.Audit;
-using DocumentFormat.OpenXml.InkML;
-using SanteDB.Core.Exceptions;
-using SanteDB.BI.Util;
-using DocumentFormat.OpenXml.Presentation;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -123,7 +119,7 @@ namespace SanteDB.BI.Services.Impl
                         }
                         context.SetOutcome(DataFlowExecutionOutcomeType.Success);
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         context.Log(System.Diagnostics.Tracing.EventLevel.Error, $"Destroy {datamartDefinition} failed with {e.ToHumanReadableString()}");
                         context.SetOutcome(DataFlowExecutionOutcomeType.Fail);
@@ -315,7 +311,7 @@ namespace SanteDB.BI.Services.Impl
                             audit.WithOutcome(OutcomeIndicator.Success).Send();
                             context.SetOutcome(DataFlowExecutionOutcomeType.Success);
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             context.Log(System.Diagnostics.Tracing.EventLevel.Error, $"Refresh {datamartDefinition} failed with {e.ToHumanReadableString()}");
                             context.SetOutcome(DataFlowExecutionOutcomeType.Fail);

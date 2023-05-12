@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Presentation;
-using SanteDB.BI.Exceptions;
+﻿using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Audit;
@@ -8,8 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -61,10 +58,10 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                     var sw = new Stopwatch();
                     sw.Start();
                     var nRecs = 0;
-                    foreach(var itm in retStep.Execute(scope))
+                    foreach (var itm in retStep.Execute(scope))
                     {
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                         myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                         yield return itm;
                     }
@@ -78,7 +75,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bfd.FormatExecutionPlan());
                         // Now we process the terminal objects and execute them
                         var processedRecords = executeRoot.SelectMany(o => o.Execute(scope)).Count();
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , processedRecords);
+                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, processedRecords);
                     }
                     catch (Exception e)
                     {

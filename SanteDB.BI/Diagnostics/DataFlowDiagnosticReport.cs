@@ -1,11 +1,9 @@
 ﻿using Newtonsoft.Json;
 using SanteDB.BI.Datamart.DataFlow;
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -26,7 +24,7 @@ namespace SanteDB.BI.Diagnostics
         /// </summary>
         public DataFlowDiagnosticReport()
         {
-            
+
         }
 
         /// <summary>
@@ -66,7 +64,7 @@ namespace SanteDB.BI.Diagnostics
             s_xsz.Serialize(str, this);
         }
     }
-    
+
     /// <summary>
     /// Action reports
     /// </summary>
@@ -79,7 +77,7 @@ namespace SanteDB.BI.Diagnostics
         /// </summary>
         public DataFlowDiagnosticActionReport()
         {
-            
+
         }
 
         /// <summary>
@@ -94,7 +92,7 @@ namespace SanteDB.BI.Diagnostics
             this.EndOfAction = sourceData.EndOfAction?.DateTime;
             this.StepType = sourceData.StepType;
             this.Actions = sourceData.Children.Select(o => new DataFlowDiagnosticActionReport(o)).ToList();
-            this.Samples = sourceData.Samples.Where(o=>o.Type != DataFlowDiagnosticSampleType.CurrentRecord).Select(o => new DataFlowDiagnosticSampleReport(o)).ToList();
+            this.Samples = sourceData.Samples.Where(o => o.Type != DataFlowDiagnosticSampleType.CurrentRecord).Select(o => new DataFlowDiagnosticSampleReport(o)).ToList();
         }
 
         /// <summary>
@@ -158,7 +156,7 @@ namespace SanteDB.BI.Diagnostics
         /// </summary>
         public DataFlowDiagnosticSampleReport()
         {
-            
+
         }
         /// <summary>
         /// New sample ctor

@@ -1,15 +1,11 @@
-﻿using SanteDB.BI.Model;
+﻿using SanteDB;
+using SanteDB.BI.Model;
 using SanteDB.Core;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Services;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using SanteDB;
-using SanteDB.BI.Util;
 using static SanteDB.BI.Model.BiDataFlowDefinition;
 
 namespace SanteDB.BI.Datamart.DataFlow
@@ -66,7 +62,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// </summary>
         /// <param name="me">The step collection to evaulate</param>
         /// <returns>The step roots</returns>
-        public static IEnumerable<BiDataFlowStep> GetExecutionTreeRoot(this BiFlowStepCollectionBase me) => me.Steps.Where(step => String.IsNullOrEmpty(step.Name) || !me.Steps.OfType<IDataFlowStreamStepDefinition>().Any(q => q.InputStep?.Name == step.Name) && !me.Steps.OfType<IDataFlowMultiStreamStepDefinition>().Any(m=>m.InputSteps.Any(s=>s?.Name == step.Name)));
+        public static IEnumerable<BiDataFlowStep> GetExecutionTreeRoot(this BiFlowStepCollectionBase me) => me.Steps.Where(step => String.IsNullOrEmpty(step.Name) || !me.Steps.OfType<IDataFlowStreamStepDefinition>().Any(q => q.InputStep?.Name == step.Name) && !me.Steps.OfType<IDataFlowMultiStreamStepDefinition>().Any(m => m.InputSteps.Any(s => s?.Name == step.Name)));
 
         /// <summary>
         /// Get the full execution plan
@@ -89,7 +85,7 @@ namespace SanteDB.BI.Datamart.DataFlow
 
                 if (me is IDataFlowMultiStreamStepDefinition mstrDef)
                 {
-                    foreach (var itm in mstrDef.InputSteps.SelectMany(m=>m.GetExecutionPlan()))
+                    foreach (var itm in mstrDef.InputSteps.SelectMany(m => m.GetExecutionPlan()))
                     {
                         yield return itm;
                     }
@@ -157,17 +153,17 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// </summary>
         internal static TValue ResolveReferenceTo<TValue>(this BiObjectReference bir, DataFlowScope scope)
         {
-            if(bir.Resolved is TValue tv)
+            if (bir.Resolved is TValue tv)
             {
-                return tv;  
+                return tv;
             }
-            else if(bir.Resolved is BiDataFlowParameterBindingRef bpf)
+            else if (bir.Resolved is BiDataFlowParameterBindingRef bpf)
             {
                 if (typeof(BiDefinition).IsAssignableFrom(typeof(TValue))) // caller wants the original
                 {
                     return scope.GetVariable<TValue>(bpf.Name);
                 }
-                else if(scope.TryGetSysVar(bpf.Name, out tv))
+                else if (scope.TryGetSysVar(bpf.Name, out tv))
                 {
                     return tv;
                 }

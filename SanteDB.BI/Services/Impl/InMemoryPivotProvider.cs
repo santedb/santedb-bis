@@ -18,20 +18,16 @@
  * User: fyfej
  * Date: 2023-3-10
  */
-using DocumentFormat.OpenXml.InkML;
-using DocumentFormat.OpenXml.Office2013.Excel;
+using Microsoft.CSharp.RuntimeBinder;
 using SanteDB.BI.Model;
 using SanteDB.Core.Model.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.CSharp.RuntimeBinder;
-using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using Microsoft.CSharp;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -127,9 +123,9 @@ namespace SanteDB.BI.Services.Impl
                 }
 
                 // Add extra columns that are in the result set but not the column selector, key, or value
-                foreach(var col in tuple.Where(o=>o.Key != pivot.Key && o.Key != pivot.Value && o.Key != pivot.ColumnSelector && !pivot.Columns.Contains(o.Key)))
+                foreach (var col in tuple.Where(o => o.Key != pivot.Key && o.Key != pivot.Value && o.Key != pivot.ColumnSelector && !pivot.Columns.Contains(o.Key)))
                 {
-                    if(currentTuple.ContainsKey(col.Key))
+                    if (currentTuple.ContainsKey(col.Key))
                     {
                         currentTuple[col.Key] = col.Value;
                     }
@@ -155,7 +151,7 @@ namespace SanteDB.BI.Services.Impl
                     currentTuple[columnName] = tuple[pivot.Value];
                 }
 
-                
+
 
             }
 
@@ -170,7 +166,7 @@ namespace SanteDB.BI.Services.Impl
         private dynamic AggregateTuple(IDictionary<string, object> tupleToAggregate, BiViewPivotDefinition pivot)
         {
             // Fill in declared categories
-            if(pivot.Columns?.Any() == true)
+            if (pivot.Columns?.Any() == true)
             {
                 pivot.Columns.ForEach(c =>
                 {

@@ -58,7 +58,7 @@ namespace SanteDB.BI.Model
         public BiSchemaTableDefinition Schema { get; set; }
 
         /// <inheritdoc/>
-        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep  => this.InputConnection?.Resolved as BiDataFlowConnectionStep;
+        BiDataFlowStep IDataFlowStreamStepDefinition.InputStep => this.InputConnection?.Resolved as BiDataFlowConnectionStep;
 
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
@@ -68,13 +68,13 @@ namespace SanteDB.BI.Model
                 yield return itm;
             }
 
-            if(this.Definition == null || this.Definition.Count == 0)
+            if (this.Definition == null || this.Definition.Count == 0)
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, $"bi.mart.flow.step[{this.Name}].sql.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Definition)), Guid.Empty);
             }
             else
             {
-                foreach(var itm in this.Definition.SelectMany(o=>o.Validate(false)))
+                foreach (var itm in this.Definition.SelectMany(o => o.Validate(false)))
                 {
                     yield return itm;
                 }

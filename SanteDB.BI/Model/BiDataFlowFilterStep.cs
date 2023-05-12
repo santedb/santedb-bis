@@ -20,8 +20,6 @@
  */
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
-using SanteDB.Core.i18n;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
@@ -44,12 +42,12 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach(var itm in base.Validate(isRoot))
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }
 
-            foreach(var itm in this.When.SelectMany(o=>o.Validate()))
+            foreach (var itm in this.When.SelectMany(o => o.Validate()))
             {
                 yield return itm;
             }

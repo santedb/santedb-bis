@@ -3,7 +3,6 @@ using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -18,7 +17,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         /// <inheritdoc/>
         IEnumerable<dynamic> IDataFlowStepExecutor.Execute(BiDataFlowStep flowStep, DataFlowScope scope)
         {
-            if(!(flowStep is BiDataFlowConnectionStep bcs))
+            if (!(flowStep is BiDataFlowConnectionStep bcs))
             {
                 throw new ArgumentOutOfRangeException(nameof(flowStep), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, this.Handles.FullName, flowStep.GetType().FullName));
             }

@@ -1,9 +1,7 @@
 ﻿using SanteDB.BI.Model;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -24,8 +22,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             {
                 foreach (var itm in inputStream.Union(masterList))
                 {
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                    diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                     yield return itm;
                 }

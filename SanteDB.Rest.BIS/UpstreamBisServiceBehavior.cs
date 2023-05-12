@@ -35,7 +35,6 @@ using SanteDB.Rest.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace SanteDB.Rest.BIS
 {

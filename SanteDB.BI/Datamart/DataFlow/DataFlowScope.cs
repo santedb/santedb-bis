@@ -1,8 +1,6 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using SanteDB.Core.i18n;
+﻿using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow
 {
@@ -38,16 +36,17 @@ namespace SanteDB.BI.Datamart.DataFlow
             /// <summary>
             /// The value of the variable
             /// </summary>
-            public dynamic Value {
+            public dynamic Value
+            {
                 get => this.m_value;
                 set
                 {
-                    if(this.Readonly)
+                    if (this.Readonly)
                     {
                         throw new InvalidOperationException(ErrorMessages.OBJECT_READONLY);
                     }
                     this.m_value = value;
-                } 
+                }
             }
 
         }
@@ -95,7 +94,7 @@ namespace SanteDB.BI.Datamart.DataFlow
             get
             {
                 var rt = this;
-                while(rt.m_parent != null)
+                while (rt.m_parent != null)
                 {
                     rt = rt.m_parent;
                 }
@@ -125,11 +124,11 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <exception cref="ArgumentException">If the variable cannot be found</exception>
         internal dynamic GetVariable(String name)
         {
-            if(!this.IsVisible(name))
+            if (!this.IsVisible(name))
             {
                 throw new ArgumentException(name);
             }
-            if(!this.m_variables.TryGetValue(name, out var retVal))
+            if (!this.m_variables.TryGetValue(name, out var retVal))
             {
                 return this.m_parent?.GetVariable(name);
             }
@@ -159,7 +158,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <param name="name">The name of the scope variable</param>
         internal void DeclareVariable(String name, dynamic initialValue)
         {
-            if(this.IsVisible(name))
+            if (this.IsVisible(name))
             {
                 throw new ArgumentException(name);
             }
@@ -195,11 +194,11 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <exception cref="ArgumentException">If the variable is not declared</exception>
         internal void SetVariable(String name, dynamic value)
         {
-            if(this.m_variables.TryGetValue(name, out var valStruct))
+            if (this.m_variables.TryGetValue(name, out var valStruct))
             {
                 valStruct.Value = value;
             }
-            else if(this.m_parent != null)
+            else if (this.m_parent != null)
             {
                 this.m_parent.SetVariable(name, value);
             }

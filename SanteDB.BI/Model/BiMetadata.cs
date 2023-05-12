@@ -27,7 +27,7 @@ using System.Xml.Serialization;
 namespace SanteDB.BI.Model
 {
 
-    
+
     /// <summary>
     /// BI metadata
     /// </summary>

@@ -84,7 +84,7 @@ namespace SanteDB.BI
         /// </summary>
         public void Dispose()
         {
-            if(this.Records is IDisposable disp)
+            if (this.Records is IDisposable disp)
             {
                 disp.Dispose();
             }

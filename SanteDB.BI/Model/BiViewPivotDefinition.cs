@@ -22,10 +22,8 @@ using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -72,7 +70,7 @@ namespace SanteDB.BI.Model
         /// </summary>
         internal IEnumerable<DetectedIssue> Validate()
         {
-            if(string.IsNullOrEmpty(this.Key))
+            if (string.IsNullOrEmpty(this.Key))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.pivot.key.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(Key)), Guid.Empty);
             }

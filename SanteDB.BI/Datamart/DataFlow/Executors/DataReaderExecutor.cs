@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Datamart.DataFlow.Executors
 {
@@ -44,10 +43,10 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 var sw = new Stopwatch();
                 sw.Start();
                 int nRecs = 0;
-                foreach(var itm in recordSource)
+                foreach (var itm in recordSource)
                 {
-                    myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed , ++nRecs);
-                    myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput , (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                    myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                    myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
                     yield return itm;
                 }

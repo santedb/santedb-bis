@@ -19,10 +19,7 @@
  * Date: 2023-3-10
  */
 using Newtonsoft.Json;
-using SanteDB.Core.Model.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
@@ -31,7 +28,7 @@ namespace SanteDB.BI.Model
     /// Represents a tag on Bi metadata
     /// </summary>
     [XmlType(nameof(BiMetadataTag), Namespace = BiConstants.XmlNamespace), JsonObject]
-    public class BiMetadataTag 
+    public class BiMetadataTag
     {
         /// <summary>
         /// Serialization constructor

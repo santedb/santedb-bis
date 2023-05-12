@@ -27,7 +27,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -156,7 +155,7 @@ namespace SanteDB.BI.Components
         /// </summary>
         internal static void Write(Stream writerStream, XNode formatNode, IRenderContext context)
         {
-            using(var xw = XmlWriter.Create(writerStream, new XmlWriterSettings()
+            using (var xw = XmlWriter.Create(writerStream, new XmlWriterSettings()
             {
                 CloseOutput = false,
                 Indent = true,

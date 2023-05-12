@@ -1,6 +1,4 @@
-﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Presentation;
-using SanteDB.BI.Datamart;
+﻿using SanteDB.BI.Datamart;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -10,7 +8,6 @@ using SanteDB.Core.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SanteDB.BI.Jobs
 {
@@ -90,12 +87,12 @@ namespace SanteDB.BI.Jobs
             {
                 this.m_stateManager.SetState(this, JobStateType.Running);
 
-                if(parameters.Length == 0)
+                if (parameters.Length == 0)
                 {
-                    parameters =new object[]{ false, null };
+                    parameters = new object[] { false, null };
                 }
 
-                if(!(parameters[0] is bool diagnostic))
+                if (!(parameters[0] is bool diagnostic))
                 {
                     diagnostic = false;
                 }
@@ -124,7 +121,7 @@ namespace SanteDB.BI.Jobs
                     this.m_stateManager.SetState(this, JobStateType.Completed);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.m_tracer.TraceError("Error refreshing datamarts: {0}", e);
                 this.m_stateManager.SetState(this, JobStateType.Aborted);
