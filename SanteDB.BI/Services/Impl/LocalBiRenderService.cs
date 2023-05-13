@@ -90,12 +90,12 @@ namespace SanteDB.BI.Services.Impl
             // Scan and initialize all BI materialized views
             ApplicationServiceContext.Current.Started += (o, e) =>
             {
-                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.Status == BiDefinitionStatus.Active))
+                foreach (var itm in metadataRepository.Query<BiQueryDefinition>(x => x.Status != BiDefinitionStatus.Obsolete))
                 {
                     try
                     {
                         IBiDataSource dataSource = null;
-                        var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
+                        var queryDefinition = BiUtils.ResolveRefs(itm);
                         var providerType = queryDefinition.DataSources.FirstOrDefault()?.ProviderType;
                         if (providerType != null)
                         {
