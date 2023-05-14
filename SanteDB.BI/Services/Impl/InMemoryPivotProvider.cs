@@ -155,8 +155,10 @@ namespace SanteDB.BI.Services.Impl
 
             }
 
-            yield return this.AggregateTuple(currentTuple, pivot);
-
+            if (currentTuple != null)
+            {
+                yield return this.AggregateTuple(currentTuple, pivot);
+            }
 
         }
 
