@@ -123,7 +123,7 @@ namespace SanteDB.BI.Jobs
             }
             catch (Exception ex)
             {
-                this.m_tracer.TraceError("Error refreshing datamarts: {0}", e);
+                this.m_tracer.TraceError("Error refreshing datamarts: {0}", ex.ToHumanReadableString());
                 this.m_stateManager.SetState(this, JobStateType.Aborted);
             }
         }
