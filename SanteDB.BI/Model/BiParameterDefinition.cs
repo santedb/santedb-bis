@@ -76,7 +76,12 @@ namespace SanteDB.BI.Model
         /// Floating point number
         /// </summary>
         [XmlEnum("float")]
-        Float
+        Float,
+        /// <summary>
+        /// A binary object
+        /// </summary>
+        [XmlEnum("blob")]
+        Binary
     }
 
     /// <summary>

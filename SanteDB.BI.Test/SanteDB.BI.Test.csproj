@@ -12,6 +12,7 @@
 	  <None Remove="Bi\addresses.xml" />
 	  <None Remove="Bi\core.xml" />
 	  <None Remove="Bi\entities.xml" />
+	  <None Remove="Bi\extended_ent.xml" />
 	  <None Remove="Bi\identifiers.xml" />
 	  <None Remove="Bi\materials.xml" />
 	  <None Remove="Bi\names.xml" />
@@ -25,6 +26,7 @@
 	  <EmbeddedResource Include="Bi\addresses.xml" />
 	  <EmbeddedResource Include="Bi\acts.xml" />
 	  <EmbeddedResource Include="Bi\core.xml" />
+	  <EmbeddedResource Include="Bi\extended_ent.xml" />
 	  <EmbeddedResource Include="Bi\entities.xml" />
 	  <EmbeddedResource Include="Bi\identifiers.xml" />
 	  <EmbeddedResource Include="Bi\materials.xml" />
