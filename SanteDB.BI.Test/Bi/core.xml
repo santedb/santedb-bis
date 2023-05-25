@@ -377,6 +377,28 @@
       <column type="int" name="QTY" />
     </table>
 
+
+    <!-- Tags for entities -->
+    <table name="ACT_TAG_TBL">
+      <column type="uuid" notNull="true" key="true" name="ACT_TAG_ID"/>
+      <column type="string" notNull="true" index="true" name="KEY"/>
+      <column type="string" notNull="true" name="VALUE" />
+      <column type="ref" name="ACT_ID">
+        <otherTable ref="ACT_TBL" />
+      </column>
+    </table>
+
+    <table name="ACT_EXT_TBL">
+      <column type="uuid" notNull="true" key="true" name="ACT_EXT_ID"/>
+      <column type="string" notNull="true" index="true" name="URI" />
+      <column type="string" notNull="true" name="TYP" />
+      <column type="blob" name="VALUE" />
+      <column type="ref" name="ACT_ID">
+        <otherTable ref="ACT_TBL"/>
+      </column>
+    </table>
+
+
   </schema>
 
   <dataFlows>
@@ -391,6 +413,7 @@
     <flow name="mats" ref="#org.santedb.bi.datamart.core.mats" />
     <flow name="persons" ref="#org.santedb.bi.datamart.core.persons" />
     <flow name="entity_ext" ref="#org.santedb.bi.datamart.core.entities.ext" />
+    <flow name="act_ext" ref="#org.santedb.bi.datamart.core.acts.ext" />
     <flow name="main">
       <pipeline>
         <log name="log_hello" priority="Informational">
@@ -440,6 +463,17 @@
             </call>
             <call>
               <dataFlow ref="entity_ext"/>
+              <args>
+                <ref name="input">
+                  <value ref="mainDatabase" />
+                </ref>
+                <ref name="output">
+                  <value ref="warehouseDatabase" />
+                </ref>
+              </args>
+            </call>
+            <call>
+              <dataFlow ref="act_ext"/>
               <args>
                 <ref name="input">
                   <value ref="mainDatabase" />
