@@ -162,7 +162,7 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach (var itm in base.Validate())
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }

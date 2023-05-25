@@ -10,6 +10,7 @@ using SanteDB.Core.Services;
 using SanteDB.Core.TestFramework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -140,6 +141,7 @@ namespace SanteDB.BI.Test
         [Test]
         public void TestBiIntegrationManagement()
         {
+            Debug.WriteLine("Start Test : {0}", DateTimeOffset.Now);
             var metaRepository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
             var coreMart = metaRepository.Query<BiDatamartDefinition>(o => o.Id == CORE_MART_ID).FirstOrDefault();
             Assert.IsNotNull(coreMart);
@@ -179,6 +181,8 @@ namespace SanteDB.BI.Test
                 // Resolve the query definition and try to run should throw
                 try
                 {
+                    Debug.WriteLine("Start ResolveRefs : {0}", DateTimeOffset.Now);
+
                     BiUtils.ResolveRefs(queryDefinition);
                     Assert.Fail();
                 }
@@ -186,22 +190,26 @@ namespace SanteDB.BI.Test
                 {
                 }
 
+                Debug.WriteLine("Start Migrate Throw: {0}", DateTimeOffset.Now);
                 // Manager should not allow us to create or refresh until the mart is registered
                 Assert.Throws<BiException>(() => manager.Migrate(coreMart));
 
                 // We should be able to register and then resolve refs
+                Debug.WriteLine("Start Register: {0}", DateTimeOffset.Now);
                 repository.Register(coreMart);
                 //  manager.Migrate(coreMart);
 
                 // Test we can actually run the query
 
                 // RUN the flow
+                Debug.WriteLine("Start Refresh: {0}", DateTimeOffset.Now);
                 var sessionInfo = manager.Refresh(coreMart, true);
                 var qdef = BiUtils.ResolveRefs(queryDefinition); // this should work now
+                Debug.WriteLine("Start Validation Query: {0}", DateTimeOffset.Now);
                 var dataSourceProvider = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(qdef.DataSources.First().ProviderType) as IBiDataSource;
                 Assert.AreEqual(coreMart.Produces.Id, qdef.DataSources.First().Id);
                 var queryResult = dataSourceProvider.ExecuteQuery(qdef, new Dictionary<String, Object>(), null);
-                Assert.GreaterOrEqual(0, queryResult.Records.Count());
+                Assert.GreaterOrEqual(queryResult.Records.Count(), 0);
 
                 // Now we want to make sure that we have an execution
                 var mart = repository.Find(o => o.Id == CORE_MART_ID).First();

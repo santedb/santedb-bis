@@ -32,8 +32,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 IEnumerable<dynamic> recordSource = null;
                 try
                 {
-                    var expectedSchema = brs.Schema?.Columns?.ToDictionary(o => o.Name.ToLowerInvariant(), o => o.Type);
-                    recordSource = dataSource.Query(brs.Definition, expectedSchema);
+                    recordSource = dataSource.Query(brs.Definition, brs.Schema);
                 }
                 catch (Exception e)
                 {
