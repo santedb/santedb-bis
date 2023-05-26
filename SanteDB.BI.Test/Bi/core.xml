@@ -334,8 +334,8 @@
 
     <!-- Encounters in the CDR -->
     <table name="PAT_ENC_TBL">
-      <column type="string" name="DISPOSITION" />
-      <column type="string" name="ADM_SOURCE" />
+      <column type="string" name="DISCHARGE_DISP" />
+      <column type="string" name="ADMISSION_SRC" />
       <parent ref="ACT_TBL" />
     </table>
 
@@ -423,6 +423,8 @@
     <flow name="entity_ext" ref="#org.santedb.bi.datamart.core.entities.ext" />
     <flow name="act_ext" ref="#org.santedb.bi.datamart.core.acts.ext" />
     <flow name="patients" ref="#org.santedb.bi.datamart.core.patients" />
+    <flow name="obs" ref="#org.santedb.bi.datamart.core.obs" />
+    <flow name="encs" ref="#org.santedb.bi.datamart.core.encs" />
     <flow name="main">
       <pipeline>
         <log name="log_hello" priority="Informational">
@@ -559,7 +561,6 @@
                 </ref>
               </args>
             </call>
-
             <call>
               <dataFlow ref="persons" />
               <args>
@@ -571,9 +572,30 @@
                 </ref>
               </args>
             </call>
-
             <call>
               <dataFlow ref="patients" />
+              <args>
+                <ref name="input">
+                  <value ref="mainDatabase" />
+                </ref>
+                <ref name="output">
+                  <value ref="warehouseDatabase" />
+                </ref>
+              </args>
+            </call>
+            <call>
+              <dataFlow ref="obs" />
+              <args>
+                <ref name="input">
+                  <value ref="mainDatabase" />
+                </ref>
+                <ref name="output">
+                  <value ref="warehouseDatabase" />
+                </ref>
+              </args>
+            </call>
+            <call>
+              <dataFlow ref="encs" />
               <args>
                 <ref name="input">
                   <value ref="mainDatabase" />
