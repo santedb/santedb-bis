@@ -9,22 +9,31 @@
   </PropertyGroup>
 	<ItemGroup>
 	  <None Remove="Bi\acts.xml" />
+	  <None Remove="Bi\act_extended.xml" />
 	  <None Remove="Bi\addresses.xml" />
 	  <None Remove="Bi\core.xml" />
+	  <None Remove="Bi\encounters.xml" />
 	  <None Remove="Bi\entities.xml" />
+	  <None Remove="Bi\ent_extended.xml" />
 	  <None Remove="Bi\identifiers.xml" />
 	  <None Remove="Bi\materials.xml" />
 	  <None Remove="Bi\names.xml" />
+	  <None Remove="Bi\observations.xml" />
 	  <None Remove="Bi\orgs.xml" />
+	  <None Remove="Bi\patients.xml" />
 	  <None Remove="Bi\persons.xml" />
 	  <None Remove="Bi\places.xml" />
 	  <None Remove="Bi\users.xml" />
 	</ItemGroup>
 	
   <ItemGroup>
+	  <EmbeddedResource Include="Bi\encounters.xml" />
+	  <EmbeddedResource Include="Bi\observations.xml" />
 	  <EmbeddedResource Include="Bi\addresses.xml" />
 	  <EmbeddedResource Include="Bi\acts.xml" />
 	  <EmbeddedResource Include="Bi\core.xml" />
+	  <EmbeddedResource Include="Bi\act_extended.xml" />
+	  <EmbeddedResource Include="Bi\ent_extended.xml" />
 	  <EmbeddedResource Include="Bi\entities.xml" />
 	  <EmbeddedResource Include="Bi\identifiers.xml" />
 	  <EmbeddedResource Include="Bi\materials.xml" />
@@ -32,6 +41,7 @@
 	  <EmbeddedResource Include="Bi\orgs.xml" />
 	  <EmbeddedResource Include="Bi\persons.xml" />
 	  <EmbeddedResource Include="Bi\places.xml" />
+	  <EmbeddedResource Include="Bi\patients.xml" />
 	  <EmbeddedResource Include="Bi\users.xml" />
 	  <EmbeddedResource Include="TestConfig.xml" />
 	</ItemGroup>

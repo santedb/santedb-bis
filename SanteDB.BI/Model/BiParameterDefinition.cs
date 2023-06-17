@@ -76,7 +76,12 @@ namespace SanteDB.BI.Model
         /// Floating point number
         /// </summary>
         [XmlEnum("float")]
-        Float
+        Float,
+        /// <summary>
+        /// A binary object
+        /// </summary>
+        [XmlEnum("blob")]
+        Binary
     }
 
     /// <summary>
@@ -157,7 +162,7 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            foreach (var itm in base.Validate())
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }

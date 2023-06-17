@@ -97,6 +97,8 @@ namespace SanteDB.BI.Model
     {
         // Serializers
         private static List<XmlSerializer> s_serializers = new List<XmlSerializer>(10);
+        // True if the definition has already been validated
+        private IEnumerable<DetectedIssue> m_validationResult = null;
 
         /// <summary>
         /// BI Definition
@@ -283,8 +285,12 @@ namespace SanteDB.BI.Model
         {
             try
             {
-                var copy = BiUtils.ResolveRefs(this);
-                return copy.Validate(true);
+                if (this.m_validationResult == null)
+                {
+                    var copy = BiUtils.ResolveRefs(this);
+                    this.m_validationResult = copy.Validate(true);
+                }
+                return this.m_validationResult;
             }
             catch (BiException e)
             {
