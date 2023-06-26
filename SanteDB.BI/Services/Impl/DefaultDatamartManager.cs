@@ -34,7 +34,9 @@ using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -82,21 +84,33 @@ namespace SanteDB.BI.Services.Impl
                 throw new ArgumentNullException(nameof(datamartDefinition));
             }
 
-            using (AuthenticationContext.EnterSystemContext())
-            {
-                var validateIssues = datamartDefinition.Validate();
-                if (validateIssues.Any(i => i.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error))
-                {
-                    throw new DetectedIssueException(validateIssues);
-                }
-            }
-
             // Get the registration entry
             var datamart = this.m_datamartRegistry.Find(o => o.Id == datamartDefinition.Id).FirstOrDefault();
             if (datamart == null)
             {
                 throw new KeyNotFoundException(String.Format(ErrorMessages.DEPENDENT_CONFIGURATION_MISSING, datamartDefinition.Id));
             }
+
+            // If the definition has changed since the last validation then re-validate
+            byte[] defHash = null;
+            using(var ms = new MemoryStream())
+            {
+                datamartDefinition.Save(ms);
+                defHash = SHA256.Create().ComputeHash(ms.ToArray());
+            }
+
+            if (!datamart.DefinitionHash.SequenceEqual(defHash))
+            {
+                using (AuthenticationContext.EnterSystemContext())
+                {
+                    var validateIssues = datamartDefinition.Validate();
+                    if (validateIssues.Any(i => i.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error))
+                    {
+                        throw new DetectedIssueException(validateIssues);
+                    }
+                }
+            }
+
             return this.m_datamartRegistry.GetExecutionContext(datamart, purpose);
 
         }
