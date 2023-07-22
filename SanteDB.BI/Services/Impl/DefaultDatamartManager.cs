@@ -50,18 +50,59 @@ namespace SanteDB.BI.Services.Impl
         private readonly IBiMetadataRepository m_metadataRepository;
         private readonly IPolicyEnforcementService m_pepService;
         private readonly IAuditService m_auditService;
+        private readonly IConfigurationManager m_configurationManager;
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(DefaultDatamartManager));
 
         /// <summary>
         /// DI constructor
         /// </summary>
-        public DefaultDatamartManager(IBiDatamartRepository datamartRegistry, ILocalizationService localizationService, IBiMetadataRepository metadataRepository, IPolicyEnforcementService pepService, IAuditService auditService)
+        public DefaultDatamartManager(IBiDatamartRepository datamartRegistry, 
+            ILocalizationService localizationService, 
+            IBiMetadataRepository metadataRepository, 
+            IPolicyEnforcementService pepService, 
+            IAuditService auditService,
+            IConfigurationManager configurationManager)
         {
             this.m_datamartRegistry = datamartRegistry;
             this.m_localization = localizationService;
             this.m_metadataRepository = metadataRepository;
             this.m_pepService = pepService;
             this.m_auditService = auditService;
+            this.m_configurationManager = configurationManager;
+            this.InitializeDataSources();
+        }
+
+        /// <summary>
+        /// Initialize the data sources and set their connection strings
+        /// </summary>
+        private void InitializeDataSources()
+        {
+            foreach(var registeredDatamart in this.m_datamartRegistry.Find(o=>o.ObsoletionTime == null))
+            {
+                // Get the produces context
+                var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == registeredDatamart.Id).FirstOrDefault();
+                // Produce the connection string
+                if(definition == null) // not available
+                {
+                    this.m_tracer.TraceWarning("Removing registration for {0} as its definition is not available", registeredDatamart.Id);
+                    this.m_datamartRegistry.Unregister(registeredDatamart);
+                }
+                else 
+                {
+                    using (AuthenticationContext.EnterSystemContext())
+                    {
+                        this.m_tracer.TraceInfo("Registering transient connection string for datamart {0}", definition.Id);
+                        using (var context = this.m_datamartRegistry.GetExecutionContext(registeredDatamart, DataFlowExecutionPurposeType.Discovery))
+                        {
+                            // Getting the integrator should create the 
+                            using (var integrator = context.GetIntegrator(definition.Produces))
+                            {
+                                this.m_metadataRepository.Insert(integrator.DataSource); // register the data source
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <inheritdoc/>
