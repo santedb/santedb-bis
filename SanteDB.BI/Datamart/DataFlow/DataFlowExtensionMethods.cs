@@ -64,7 +64,6 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// Execute the specified flow step
         /// </summary>
         /// <param name="me">The flow step to execute</param>
-        /// <param name="context">The context in which the flow step is executing (the ETL job)</param>
         /// <param name="scope">The scope of the current DataFlow, Paralell, Transaction, etc.</param>
         /// <returns>The result of the execution</returns>
         public static IEnumerable<dynamic> Execute(this BiDataFlowStep me, DataFlowScope scope)

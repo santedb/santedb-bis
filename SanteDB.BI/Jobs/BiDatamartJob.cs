@@ -39,6 +39,9 @@ namespace SanteDB.BI.Jobs
 
 
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BiDatamartJob));
+        /// <summary>
+        /// Unique identifier used to identify the job type for a <see cref="BiDatamartJob"/>.
+        /// </summary>
         public static readonly Guid JOBID = Guid.Parse("751B0333-952B-4250-B117-D2E6A70C4ECD");
         private readonly IBiMetadataRepository m_biMetaRepository;
         private readonly IBiDatamartRepository m_biRepository;
