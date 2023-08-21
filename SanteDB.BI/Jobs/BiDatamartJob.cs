@@ -39,6 +39,9 @@ namespace SanteDB.BI.Jobs
 
 
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BiDatamartJob));
+        /// <summary>
+        /// Unique identifier used to identify the job type for a <see cref="BiDatamartJob"/>.
+        /// </summary>
         public static readonly Guid JOBID = Guid.Parse("751B0333-952B-4250-B117-D2E6A70C4ECD");
         private readonly IBiMetadataRepository m_biMetaRepository;
         private readonly IBiDatamartRepository m_biRepository;
@@ -143,7 +146,8 @@ namespace SanteDB.BI.Jobs
             }
             catch (Exception ex)
             {
-                this.m_tracer.TraceError("Error refreshing datamarts: {0}", ex.ToHumanReadableString());
+                this.m_tracer.TraceError("Error refreshing datamarts: {0}", ex);
+                this.m_stateManager.SetProgress(this, ex.ToHumanReadableString(), 0.0f);
                 this.m_stateManager.SetState(this, JobStateType.Aborted);
             }
         }

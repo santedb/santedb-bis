@@ -34,7 +34,9 @@ using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace SanteDB.BI.Services.Impl
 {
@@ -48,18 +50,59 @@ namespace SanteDB.BI.Services.Impl
         private readonly IBiMetadataRepository m_metadataRepository;
         private readonly IPolicyEnforcementService m_pepService;
         private readonly IAuditService m_auditService;
+        private readonly IConfigurationManager m_configurationManager;
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(DefaultDatamartManager));
 
         /// <summary>
         /// DI constructor
         /// </summary>
-        public DefaultDatamartManager(IBiDatamartRepository datamartRegistry, ILocalizationService localizationService, IBiMetadataRepository metadataRepository, IPolicyEnforcementService pepService, IAuditService auditService)
+        public DefaultDatamartManager(IBiDatamartRepository datamartRegistry, 
+            ILocalizationService localizationService, 
+            IBiMetadataRepository metadataRepository, 
+            IPolicyEnforcementService pepService, 
+            IAuditService auditService,
+            IConfigurationManager configurationManager)
         {
             this.m_datamartRegistry = datamartRegistry;
             this.m_localization = localizationService;
             this.m_metadataRepository = metadataRepository;
             this.m_pepService = pepService;
             this.m_auditService = auditService;
+            this.m_configurationManager = configurationManager;
+            this.InitializeDataSources();
+        }
+
+        /// <summary>
+        /// Initialize the data sources and set their connection strings
+        /// </summary>
+        private void InitializeDataSources()
+        {
+            foreach(var registeredDatamart in this.m_datamartRegistry.Find(o=>o.ObsoletionTime == null))
+            {
+                // Get the produces context
+                var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == registeredDatamart.Id).FirstOrDefault();
+                // Produce the connection string
+                if(definition == null) // not available
+                {
+                    this.m_tracer.TraceWarning("Removing registration for {0} as its definition is not available", registeredDatamart.Id);
+                    this.m_datamartRegistry.Unregister(registeredDatamart);
+                }
+                else 
+                {
+                    using (AuthenticationContext.EnterSystemContext())
+                    {
+                        this.m_tracer.TraceInfo("Registering transient connection string for datamart {0}", definition.Id);
+                        using (var context = this.m_datamartRegistry.GetExecutionContext(registeredDatamart, DataFlowExecutionPurposeType.Discovery))
+                        {
+                            // Getting the integrator should create the 
+                            using (var integrator = context.GetIntegrator(definition.Produces))
+                            {
+                                this.m_metadataRepository.Insert(integrator.DataSource); // register the data source
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <inheritdoc/>
@@ -82,21 +125,33 @@ namespace SanteDB.BI.Services.Impl
                 throw new ArgumentNullException(nameof(datamartDefinition));
             }
 
-            using (AuthenticationContext.EnterSystemContext())
-            {
-                var validateIssues = datamartDefinition.Validate();
-                if (validateIssues.Any(i => i.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error))
-                {
-                    throw new DetectedIssueException(validateIssues);
-                }
-            }
-
             // Get the registration entry
             var datamart = this.m_datamartRegistry.Find(o => o.Id == datamartDefinition.Id).FirstOrDefault();
             if (datamart == null)
             {
                 throw new KeyNotFoundException(String.Format(ErrorMessages.DEPENDENT_CONFIGURATION_MISSING, datamartDefinition.Id));
             }
+
+            // If the definition has changed since the last validation then re-validate
+            byte[] defHash = null;
+            using(var ms = new MemoryStream())
+            {
+                datamartDefinition.Save(ms);
+                defHash = SHA256.Create().ComputeHash(ms.ToArray());
+            }
+
+            if (!datamart.DefinitionHash.SequenceEqual(defHash))
+            {
+                using (AuthenticationContext.EnterSystemContext())
+                {
+                    var validateIssues = datamartDefinition.Validate();
+                    if (validateIssues.Any(i => i.Priority == Core.BusinessRules.DetectedIssuePriorityType.Error))
+                    {
+                        throw new DetectedIssueException(validateIssues);
+                    }
+                }
+            }
+
             return this.m_datamartRegistry.GetExecutionContext(datamart, purpose);
 
         }

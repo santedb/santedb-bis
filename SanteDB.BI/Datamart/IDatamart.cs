@@ -60,5 +60,9 @@ namespace SanteDB.BI.Datamart
         /// </summary>
         IEnumerable<IDataFlowExecutionEntry> FlowExecutions { get; }
 
+        /// <summary>
+        /// Gets the hash of the definition
+        /// </summary>
+        byte[] DefinitionHash { get; }
     }
 }
