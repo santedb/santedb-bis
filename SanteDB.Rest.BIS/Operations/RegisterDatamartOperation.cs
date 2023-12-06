@@ -44,7 +44,7 @@ namespace SanteDB.Rest.BIS.Operations
         /// <summary>
         /// Datamart repository
         /// </summary>
-        public RegisterDatamartOperation(IBiMetadataRepository biMetadataRepository, IBiDatamartRepository datamartRepository, IBiDatamartManager datamartManager, IJobManagerService jobManagerService)
+        public RegisterDatamartOperation(IBiMetadataRepository biMetadataRepository, IBiDatamartRepository datamartRepository, IJobManagerService jobManagerService)
         {
             this.m_metadataRepository = biMetadataRepository;
             this.m_datamartRepository = datamartRepository;
