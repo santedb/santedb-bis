@@ -43,6 +43,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiPackage))]
     [XmlInclude(typeof(DatamartInfo))]
+    [XmlInclude(typeof(DatamartLogEntry))]
     [ExcludeFromCodeCoverage] // Serialization class
     public class BiDefinitionCollection
     {

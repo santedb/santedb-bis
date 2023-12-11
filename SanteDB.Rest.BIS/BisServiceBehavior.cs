@@ -61,11 +61,21 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Default context parameters to be sent to all reports
         /// </summary>
-        protected Dictionary<String, Func<Object>> m_contextParams = new Dictionary<string, Func<object>>()
+        protected readonly Dictionary<String, Func<Object>> m_contextParams = new Dictionary<string, Func<object>>()
         {
             { "Context.UserName", () => AuthenticationContext.Current.Principal.Identity.Name },
-            { "Context.UserId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUser(AuthenticationContext.Current.Principal.Identity)?.Key },
-            { "Context.UserEntityId", () => ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUserEntity(AuthenticationContext.Current.Principal.Identity)?.Key },
+            { "Context.UserId", () => {
+                using(AuthenticationContext.EnterSystemContext()){
+                    return ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUser(AuthenticationContext.Current.Principal.Identity)?.Key;
+                }
+            }
+            },
+            { "Context.UserEntityId", () => {
+                using(AuthenticationContext.EnterSystemContext()){
+                    return ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUserEntity(AuthenticationContext.Current.Principal.Identity)?.Key;
+                }
+                }
+            },
             { "Context.Language", () => AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
         };
 

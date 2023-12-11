@@ -21,8 +21,10 @@
 using Newtonsoft.Json;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
+using SanteDB.Core.BusinessRules;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -56,7 +58,7 @@ namespace SanteDB.BI.Datamart
             this.ObsoletionTime = datamart.ObsoletionTime?.DateTime;
             this.UpdatedByKey = datamart.UpdatedByKey;
             this.UpdatedTime = datamart.UpdatedTime?.DateTime;
-            this.Executions = datamart.FlowExecutions.Select(o => new DataMartExecutionInfo(o)).ToList();
+            this.Executions = datamart.FlowExecutions.Take(25).Select(o => new DataMartExecutionInfo(o)).ToList();
             this.MetaData = new BiMetadata()
             {
                 Annotation = new BiAnnotation()
@@ -115,6 +117,7 @@ namespace SanteDB.BI.Datamart
     /// Get the execution informations
     /// </summary>
     [XmlType(nameof(DataMartExecutionInfo), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(DataMartExecutionInfo), Namespace = BiConstants.XmlNamespace)]
     public class DataMartExecutionInfo
     {
 
@@ -182,5 +185,54 @@ namespace SanteDB.BI.Datamart
         [XmlElement("purpose"), JsonProperty("purpose")]
         public DataFlowExecutionPurposeType Purpose { get; set; }
 
+        /// <summary>
+        /// Gets or sets the log entries
+        /// </summary>
+        [XmlArray("log"), XmlArrayItem("entry"), JsonProperty("log")]
+        public List<DatamartLogEntry> LogEntry { get; set; }
+    }
+
+    /// <summary>
+    /// Datamart log entry
+    /// </summary>
+    [XmlType(nameof(DatamartLogEntry), Namespace = BiConstants.XmlNamespace)]
+    public class DatamartLogEntry
+    {
+
+        /// <summary>
+        /// Serialization ctor
+        /// </summary>
+        public DatamartLogEntry()
+        {
+        }
+
+        /// <summary>
+        /// Create a log entry from a BI log entry
+        /// </summary>
+        /// <param name="logEntry">The log entry from which to populate this object</param>
+        public DatamartLogEntry(IDataFlowLogEntry logEntry)
+        {
+            this.Priority = logEntry.Priority;
+            this.Text = logEntry.Text;
+            this.Timestamp = logEntry.Timestamp.DateTime;
+        }
+
+        /// <summary>
+        /// Gets or sets the priority level
+        /// </summary>
+        [XmlAttribute("priority"), JsonProperty("priority")]
+        public EventLevel Priority { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text
+        /// </summary>
+        [XmlText, JsonProperty("text")]
+        public string Text { get;  set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp
+        /// </summary>
+        [XmlAttribute("timestamp"), JsonProperty("timestamp")]
+        public DateTime Timestamp { get; set; }
     }
 }
