@@ -144,7 +144,7 @@ namespace SanteDB.BI.Jobs
             }
             catch (Exception ex)
             {
-                this.m_stateManager.SetState(this, JobStateType.Aborted);
+                this.m_stateManager.SetState(this, JobStateType.Aborted, ex.ToHumanReadableString());
                 this.m_stateManager.SetProgress(this, ex.Message, 0.0f);
                 this.m_cancel = false;
                 this.m_tracer.TraceError("Error processing BI materialized views: {0}", ex.Message);
