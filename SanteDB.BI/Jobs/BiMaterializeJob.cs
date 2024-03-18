@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -144,7 +144,7 @@ namespace SanteDB.BI.Jobs
             }
             catch (Exception ex)
             {
-                this.m_stateManager.SetState(this, JobStateType.Aborted);
+                this.m_stateManager.SetState(this, JobStateType.Aborted, ex.ToHumanReadableString());
                 this.m_stateManager.SetProgress(this, ex.Message, 0.0f);
                 this.m_cancel = false;
                 this.m_tracer.TraceError("Error processing BI materialized views: {0}", ex.Message);
