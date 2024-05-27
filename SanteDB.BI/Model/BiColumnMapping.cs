@@ -90,6 +90,7 @@ namespace SanteDB.BI.Model
         /// The column transformation expression
         /// </summary>
         [XmlElement("fixed", typeof(String))]
+        [XmlElement("cast", typeof(BiDataType))]
         [XmlElement("lookup", typeof(BiColumnMappingTransformJoin))]
         public Object TransformExpression { get; set; }
 
