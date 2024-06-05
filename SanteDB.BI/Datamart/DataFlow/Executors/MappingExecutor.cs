@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,9 +16,10 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
+using SanteDB.BI.Util;
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
@@ -93,18 +94,19 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                     {
 
                         // TODO: Implement lookup and simple expressions
-                        if (column.Source.TransformExpression is string str)
+                        Expression readSourceDataExpression = null;
+                        switch(column.Source.TransformExpression)
                         {
-                            return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), Expression.Constant(str));
-                        }
-                        else if (column.Source.TransformExpression is BiColumnMappingTransformJoin tj)
-                        {
-                            throw new NotSupportedException(ErrorMessages.NOT_SUPPORTED); // not supported yet
-                        }
-                        else
-                        {
-                            var readSourceDataExpression = Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name));
-                            return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), readSourceDataExpression);
+                            case string str:
+                                return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), Expression.Constant(str));
+                            case BiColumnMappingTransformJoin tj:
+                                throw new NotSupportedException(ErrorMessages.NOT_SUPPORTED); // not supported yet
+                            case BiDataType dt:
+                                readSourceDataExpression = Expression.Call(null, typeof(BiUtils).GetMethod(nameof(BiUtils.ChangeType)), Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)), Expression.Constant(dt));
+                                goto default;
+                            default:
+                                readSourceDataExpression = readSourceDataExpression ?? Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name));
+                                return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), readSourceDataExpression);
                         }
                     })).Union(
                         new Expression[] { returnResult, Expression.Label(labelTarget, resultVar) }

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,7 +16,7 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-6-21
  */
 using RestSrvr;
 using SanteDB.BI.Datamart;
@@ -56,10 +56,10 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// DI constructor
         /// </summary>
-        public DefaultDatamartManager(IBiDatamartRepository datamartRegistry, 
-            ILocalizationService localizationService, 
-            IBiMetadataRepository metadataRepository, 
-            IPolicyEnforcementService pepService, 
+        public DefaultDatamartManager(IBiDatamartRepository datamartRegistry,
+            ILocalizationService localizationService,
+            IBiMetadataRepository metadataRepository,
+            IPolicyEnforcementService pepService,
             IAuditService auditService,
             IConfigurationManager configurationManager)
         {
@@ -77,17 +77,17 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void InitializeDataSources()
         {
-            foreach(var registeredDatamart in this.m_datamartRegistry.Find(o=>o.ObsoletionTime == null))
+            foreach (var registeredDatamart in this.m_datamartRegistry.Find(o => o.ObsoletionTime == null))
             {
                 // Get the produces context
                 var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == registeredDatamart.Id).FirstOrDefault();
                 // Produce the connection string
-                if(definition == null) // not available
+                if (definition == null) // not available
                 {
                     this.m_tracer.TraceWarning("Removing registration for {0} as its definition is not available", registeredDatamart.Id);
                     this.m_datamartRegistry.Unregister(registeredDatamart);
                 }
-                else 
+                else
                 {
                     using (AuthenticationContext.EnterSystemContext())
                     {
@@ -134,7 +134,7 @@ namespace SanteDB.BI.Services.Impl
 
             // If the definition has changed since the last validation then re-validate
             byte[] defHash = null;
-            using(var ms = new MemoryStream())
+            using (var ms = new MemoryStream())
             {
                 datamartDefinition.Save(ms);
                 defHash = SHA256.Create().ComputeHash(ms.ToArray());

@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2023, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -16,12 +16,14 @@
  * the License.
  * 
  * User: fyfej
- * Date: 2023-5-19
+ * Date: 2023-6-21
  */
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
+using SanteDB.Core.i18n;
+using SanteDB.Core.Model.Map;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,6 +38,19 @@ namespace SanteDB.BI.Util
     /// </summary>
     public static class BiUtils
     {
+
+        private static readonly Dictionary<BiDataType, Type> s_typeMap = new Dictionary<BiDataType, Type>()
+        {
+            { BiDataType.Binary, typeof(byte[]) },
+            { BiDataType.Boolean, typeof(bool) },
+            { BiDataType.Date, typeof(DateTime) },
+            { BiDataType.DateTime, typeof(DateTimeOffset) },
+            { BiDataType.Decimal, typeof(decimal) },
+            { BiDataType.Float, typeof(float) },
+            { BiDataType.Integer, typeof(int) },
+            { BiDataType.String, typeof(string) },
+            { BiDataType.Uuid, typeof(Guid) }
+        };
 
         private static IBiMetadataRepository s_repository = ApplicationServiceContext.Current.GetService<IBiMetadataRepository>();
 
@@ -169,6 +184,29 @@ namespace SanteDB.BI.Util
             finally
             {
                 parentScope.Pop();
+            }
+        }
+
+        /// <summary>
+        /// Change the type of the value
+        /// </summary>
+        /// <param name="sourceValue"></param>
+        /// <param name="targetType"></param>
+        /// <returns></returns>
+        public static object ChangeType(object sourceValue, BiDataType targetType)
+        {
+            if (sourceValue == null)
+            {
+                return null;
+            }
+            else if(s_typeMap.TryGetValue(targetType, out var destType) && 
+                MapUtil.TryConvert(sourceValue, destType, out var result))
+            {
+                return result;
+            }
+            else
+            {
+                throw new InvalidOperationException(String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, sourceValue.GetType(), targetType));
             }
         }
 
