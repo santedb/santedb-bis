@@ -124,15 +124,15 @@ namespace SanteDB.BI.Services.Impl
                 }
 
                 var definition = asset as BiDefinition;
-                if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
-                    definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
-                {
-                    return (TBisDefinition)definition;
-                }
-                else
-                {
-                    throw new SecurityException(ErrorMessages.PRIVACY_VIOLATION_DETECTED);
-                }
+                //if ((definition?.MetaData?.Demands?.Count ?? 0) == 0 ||
+                //    definition?.MetaData?.Demands.All(o => this.m_policyEnforcementService.SoftDemand(o, AuthenticationContext.Current.Principal)) == true)
+                //{
+                return (TBisDefinition)definition;
+                //}
+                //else
+                //{
+                //    throw new SecurityException(ErrorMessages.PRIVACY_VIOLATION_DETECTED);
+                //}
             }
             return null;
         }
@@ -330,8 +330,8 @@ namespace SanteDB.BI.Services.Impl
                         }
                     })
                     .OfType<TBisDefinition>()
-                    .Where(filter.Compile())
-                    .Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
+                    .Where(filter.Compile()));
+                    //.Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
             }
 
             return new MemoryQueryResultSet<TBisDefinition>();
