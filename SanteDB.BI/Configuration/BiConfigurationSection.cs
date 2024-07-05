@@ -19,6 +19,8 @@
  * Date: 2023-6-21
  */
 using SanteDB.Core.Configuration;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml.Serialization;
 
@@ -39,6 +41,15 @@ namespace SanteDB.BI.Configuration
         [DisplayName("Maximum BI Result Set Size")]
         [Description("Sets the maximum number of results that can be returned in a BI result set. This will prevent BI reports from consuming large amounts of data (default is 10,000)")]
         public int? MaxBiResultSetSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the identifiers of datamarts which should be automatically registered
+        /// </summary>
+        [XmlArray("dataMarts"), XmlArrayItem("register")]
+        [Category("Datamarts")]
+        [DisplayName("Automatically Register")]
+        [Description("Sets the data mart identifiers which are to be automatically registered if they aren't already registered")]
+        public List<String> AutoRegisterDatamarts { get; set; }
 
     }
 }

@@ -36,6 +36,7 @@ namespace SanteDB.Rest.BIS
     /// </summary>
     [Description("Exposes the SanteDB Business Intelligence functions (reports, queries, etc.) over HTTP REST")]
     [ApiServiceProvider("Business Intelligence Service", typeof(BisServiceBehavior), ServiceEndpointType.BusinessIntelligenceService, Configuration = typeof(BisServiceConfigurationSection))]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer

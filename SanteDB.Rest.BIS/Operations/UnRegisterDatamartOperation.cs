@@ -33,6 +33,7 @@ namespace SanteDB.Rest.BIS.Operations
     /// <summary>
     /// Un-Registers a datamart operation
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class UnRegisterDatamartOperation : IApiChildOperation
     {
         private readonly IBiMetadataRepository m_metadataRepository;

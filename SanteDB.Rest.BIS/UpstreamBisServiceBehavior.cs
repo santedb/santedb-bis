@@ -41,6 +41,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// BIS behavior that can call the upstream
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class UpstreamBisServiceBehavior : BisServiceBehavior
     {
         private readonly IUpstreamIntegrationService m_upstreamIntegrationService;

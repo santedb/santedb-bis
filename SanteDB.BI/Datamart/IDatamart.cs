@@ -26,6 +26,7 @@ using System.Collections.Generic;
 
 namespace SanteDB.BI.Datamart
 {
+
     /// <summary>
     /// An abstract representation of a datamart which has been registered in the manager
     /// </summary>
@@ -64,5 +65,6 @@ namespace SanteDB.BI.Datamart
         /// Gets the hash of the definition
         /// </summary>
         byte[] DefinitionHash { get; }
+
     }
 }

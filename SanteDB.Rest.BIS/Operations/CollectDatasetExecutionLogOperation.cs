@@ -34,6 +34,7 @@ namespace SanteDB.Rest.BIS.Operations
     /// <summary>
     /// Collect dataset execution log
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class CollectDatasetExecutionLogOperation : IApiChildOperation
     {
         private readonly IBiDatamartRepository m_datamartRepository;

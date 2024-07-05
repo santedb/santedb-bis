@@ -55,6 +55,7 @@ namespace SanteDB.Rest.BIS
     /// Default implementation of the BIS service contract
     /// </summary>
     [ServiceBehavior(Name = BisMessageHandler.ConfigurationName, InstanceMode = ServiceInstanceMode.Singleton)]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class BisServiceBehavior : IBisServiceContract
     {
 

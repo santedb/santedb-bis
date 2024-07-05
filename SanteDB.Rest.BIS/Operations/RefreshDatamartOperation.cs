@@ -35,6 +35,7 @@ namespace SanteDB.Rest.BIS.Operations
     /// <summary>
     /// Refreshes a registered 
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class RefreshDatamartOperation : IApiChildOperation
     {
         private readonly IBiMetadataRepository m_metadataRepository;

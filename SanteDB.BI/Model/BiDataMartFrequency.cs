@@ -18,29 +18,31 @@
  * User: fyfej
  * Date: 2023-6-21
  */
-using SanteDB.BI.Model;
-using SanteDB.BI.Services;
-using SanteDB.Core.Model.Query;
-using System;
-using System.Linq.Expressions;
+using System.Xml.Serialization;
 
-namespace SanteDB.Rest.BIS
+namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// BI metadata extensions
+    /// Datamart refresh frequency
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    internal static class BiMetadataExtensions
+    [XmlType(nameof(BiDataMartFrequency), Namespace = BiConstants.XmlNamespace)]
+    public enum BiDataMartFrequency
     {
-
         /// <summary>
-        /// Convert a non-generic query to the proper invokation
+        /// At most, should be refreshed daily
         /// </summary>
-        public static IQueryResultSet Query(this IBiMetadataRepository me, Type definitionType, Expression<Func<BiDefinition, bool>> expression)
-        {
-            var convertedExpression = QueryExpressionParser.BuildLinqExpression(definitionType, QueryExpressionBuilder.BuildQuery(expression));
-            var mi = me.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query), new Type[] { definitionType }, new Type[] { convertedExpression.GetType() });
-            return mi.Invoke(me, new object[] { convertedExpression }) as IQueryResultSet;
-        }
+        [XmlEnum("daily")]
+        Daily,
+        /// <summary>
+        /// At most, should be refreshed weekly
+        /// </summary>
+        [XmlEnum("weekly")]
+        Weekly,
+        /// <summary>
+        /// At most, should be refreshed monthly
+        /// </summary>
+        [XmlEnum("monthly")]
+        Monthly
+
     }
 }

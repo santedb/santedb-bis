@@ -28,6 +28,7 @@ namespace SanteDB.Rest.BIS.Configuration
     /// BIS Service configuration section
     /// </summary>
     [XmlType(nameof(BisServiceConfigurationSection), Namespace = "http://santedb.org/configuration")]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class BisServiceConfigurationSection : IConfigurationSection
     {
 
