@@ -50,6 +50,7 @@ namespace SanteDB.BI.Model
                     (BiDefinition)this.Parameters.FirstOrDefault(o => o.Id == id) ??
                     (BiDefinition)this.Queries.FirstOrDefault(o => o.Id == id) ??
                     (BiDefinition)this.Reports.FirstOrDefault(o => o.Id == id) ??
+                    (BiDefinition)this.RefSets.FirstOrDefault(o => o.Id == id) ??
                     (BiDefinition)this.Views.FirstOrDefault(o => o.Id == id);
             }
         }
@@ -78,6 +79,12 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlArray("formats"), XmlArrayItem("add"), JsonProperty("formats")]
         public List<BiRenderFormatDefinition> Formats { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of data sources
+        /// </summary>
+        [XmlArray("refSets"), XmlArrayItem("add"), JsonProperty("refSets")]
+        public List<BiReferenceDataSourceDefinition> RefSets { get; set; }
 
         /// <summary>
         /// Gets or sets the list of parameter definitions

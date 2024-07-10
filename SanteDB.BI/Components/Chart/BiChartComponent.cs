@@ -20,8 +20,11 @@
  */
 using DynamicExpresso;
 using Newtonsoft.Json;
+using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
+using SanteDB.Core.i18n;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -89,18 +92,39 @@ namespace SanteDB.BI.Components.Chart
                     // Now sort the result set by the key
                     var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
                     var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
+                    
                     var axisDataExpression = (labels ?? axis).Value;
                     var axisFormat = (labels ?? axis).Attribute("format")?.Value;
                     var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.First()), axisDataExpression);
                     var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).ToList();
 
+                    var refSets = element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset");
+
                     // If the axis is formatted, then group
-                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => $"'{String.Format($"{{0:{axisFormat}}}", o)}'").Distinct();
+                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => String.Format($"{{0:{axisFormat}}}", o)).Distinct();
+
+
+                    var refSetSource = element.Attribute("ref-source")?.Value;
+                    IEnumerable<dynamic> refData = null;
+                    if (!String.IsNullOrEmpty(refSetSource))
+                    {
+                        refData = (context.Root as RootRenderContext).GetOrExecuteQuery(refSetSource)?.Records;
+                        if(refData == null)
+                        {
+                            throw new BiException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, refSetSource), context.ScopedObject, null);
+                        }
+                        // If we're doing a X/Y we just read the regular data in X/Y format otherwise we only want labels for our data
+                        if(labels != null)
+                        {
+                            refData = refData.OfType<IDictionary<String, Object>>().Where(o => axisElements.Contains(o[o.Keys.First()].ToString())).OfType<dynamic>();
+                        }
+                    }
+
 
                     // Is this a labeled data set?
                     if (labels != null)
                     {
-                        writer.WriteAttributeString("labels", $"[{String.Join(",", axisElements)}]");
+                        writer.WriteAttributeString("labels", $"[{String.Join(",", axisElements.Select(o=>$"'{o}'"))}]");
                     }
                     else // it is an X/Y dataset
                     {
@@ -129,99 +153,89 @@ namespace SanteDB.BI.Components.Chart
                     // Now process datasets
                     List<ExpandoObject> dataSetOptions = new List<ExpandoObject>();
                     var dataGroup = chartData.GroupBy(o => $"'{String.Format($"{{0:{axisFormat}}}", axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)))}'");
+                    var refGroup = refData?.OfType<IDictionary<String, Object>>().GroupBy(o => o[o.Keys.First()], o=>(dynamic)o);
 
-                    foreach (var ds in element.Elements((XNamespace)BiConstants.ComponentNamespace + "dataset"))
+                    foreach (var ds in element.Elements((XNamespace)BiConstants.ComponentNamespace + "dataset").Union(element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset")))
                     {
                         try
                         {
-                            var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataGroup.First().First()), ds.Value);
+
+                            var elementSource = ds.Name.LocalName.Equals("dataset") ? dataGroup : refGroup;
+
+                            var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, elementSource.First().First()), ds.Value);
 
                             IDictionary<String, Object> data = new ExpandoObject();
                             data.Add("label", ReportViewUtil.GetString(ds.Attribute("label")?.Value ?? "unknown"));
 
-                            if (ds.Attribute("backgroundColor") != null)
+                            foreach (var attr in ds.Attributes().Where(d => d.Name.LocalName != "label"))
                             {
-                                data.Add("backgroundColor", ds.Attribute("backgroundColor").Value);
+                                data.Add(attr.Name.LocalName, attr.Value);
                             }
 
-                            if (ds.Attribute("borderColor") != null)
-                            {
-                                data.Add("borderColor", ds.Attribute("borderColor").Value);
-                            }
-
-                            if (ds.Attribute("type") != null)
-                            {
-                                data.Add("type", ds.Attribute("type").Value);
-                            }
-
-                            if (ds.Attribute("fill") != null)
-                            {
-                                data.Add("fill", Boolean.Parse(ds.Attribute("fill").Value));
-                            }
 
                             if (axis != null) // this is an X/Y plot
                             {
-                                switch (ds.Attribute("aggregate")?.Value ?? "sum")
+                                switch (ds.Attribute("fn")?.Value ?? "sum")
                                 {
                                     case "count":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null) }).ToArray());
                                         break;
 
                                     case "sum":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
                                         break;
 
                                     case "avg":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
                                         break;
 
                                     case "min":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
                                         break;
 
                                     case "max":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
                                         break;
 
                                     case "first":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First())) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First())) }).ToArray());
                                         break;
 
                                     case "last":
-                                        data.Add("data", dataGroup.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last())) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last())) }).ToArray());
                                         break;
                                 }
                             }
                             else
                             {
-                                switch (ds.Attribute("aggregate")?.Value ?? "sum")
+                                switch (ds.Attribute("fn")?.Value ?? "sum")
                                 {
                                     case "count":
-                                        data.Add("data", dataGroup.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null)).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null)).ToArray());
                                         break;
 
                                     case "sum":
-                                        data.Add("data", dataGroup.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
                                         break;
 
                                     case "avg":
-                                        data.Add("data", dataGroup.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
                                         break;
 
                                     case "min":
-                                        data.Add("data", dataGroup.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
                                         break;
 
                                     case "max":
-                                        data.Add("data", dataGroup.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
                                         break;
 
                                     case "first":
-                                        data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First()))).ToArray());
+                                        data.Add("data", elementSource.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First()))).ToArray());
                                         break;
 
                                     case "last":
-                                        data.Add("data", dataGroup.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last()))).ToArray());
+                                        data.Add("data", elementSource.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last()))).ToArray());
                                         break;
                                 }
                             }

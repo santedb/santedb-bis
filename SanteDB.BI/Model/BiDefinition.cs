@@ -84,6 +84,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiQueryDefinition))]
     [XmlInclude(typeof(BiParameterDefinition))]
     [XmlInclude(typeof(BiReportDefinition))]
+    [XmlInclude(typeof(BiReferenceDataSourceDefinition))]
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
@@ -118,6 +119,7 @@ namespace SanteDB.BI.Model
                 typeof(BiSchemaTableDefinition),
                 typeof(BiSchemaViewDefinition),
                 typeof(BiDataFlowDefinition),
+                typeof(BiReferenceDataSourceDefinition),
                 typeof(BiPackage)
             };
 

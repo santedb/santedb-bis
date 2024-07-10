@@ -53,6 +53,7 @@ namespace SanteDB.BI.Model
         [XmlArray("dataSources"),
             XmlArrayItem("query", typeof(BiQueryDefinition)),
             XmlArrayItem("view", typeof(BiViewDefinition)),
+            XmlArrayItem("refData", typeof(BiReferenceDataSourceDefinition)),
             JsonProperty("dataSources")]
         public List<BiDefinition> DataSource { get; set; }
 
