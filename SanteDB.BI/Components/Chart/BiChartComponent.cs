@@ -70,7 +70,9 @@ namespace SanteDB.BI.Components.Chart
             }
             using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
             {
-                if (!dataSource.Records.Any())
+                var noRec = element.Attribute("no-records")?.Value;
+
+                if (!dataSource.Records.Any() && !"show".Equals(noRec))
                 {
                     writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");
                 }
@@ -91,8 +93,8 @@ namespace SanteDB.BI.Components.Chart
                     chartContext.Tags.Add("expressions", new Dictionary<String, Lambda>());
                     // Now sort the result set by the key
                     var labels = element.Element((XNamespace)BiConstants.ComponentNamespace + "labels");
-                    var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "axis");
-                    
+                    var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "xAxis");
+
                     var axisDataExpression = (labels ?? axis).Value;
                     var axisFormat = (labels ?? axis).Attribute("format")?.Value;
                     var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.First()), axisDataExpression);
@@ -103,28 +105,32 @@ namespace SanteDB.BI.Components.Chart
                     // If the axis is formatted, then group
                     var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => String.Format($"{{0:{axisFormat}}}", o)).Distinct();
 
-
                     var refSetSource = element.Attribute("ref-source")?.Value;
                     IEnumerable<dynamic> refData = null;
                     if (!String.IsNullOrEmpty(refSetSource))
                     {
                         refData = (context.Root as RootRenderContext).GetOrExecuteQuery(refSetSource)?.Records;
-                        if(refData == null)
+                        if (refData == null)
                         {
                             throw new BiException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, refSetSource), context.ScopedObject, null);
                         }
                         // If we're doing a X/Y we just read the regular data in X/Y format otherwise we only want labels for our data
-                        if(labels != null)
+                        if (labels != null)
                         {
                             refData = refData.OfType<IDictionary<String, Object>>().Where(o => axisElements.Contains(o[o.Keys.First()].ToString())).OfType<dynamic>();
                         }
                     }
 
+                    var yAxisLabel = element.Element((XNamespace)BiConstants.ComponentNamespace + "yAxis")?.Attribute("label")?.Value;
+                    if(!String.IsNullOrEmpty(yAxisLabel))
+                    {
+                        writer.WriteAttributeString("valueLabel", $"'{yAxisLabel}'");
+                    }
 
                     // Is this a labeled data set?
                     if (labels != null)
                     {
-                        writer.WriteAttributeString("labels", $"[{String.Join(",", axisElements.Select(o=>$"'{o}'"))}]");
+                        writer.WriteAttributeString("labels", $"[{String.Join(",", axisElements.Select(o => $"'{o}'"))}]");
                     }
                     else // it is an X/Y dataset
                     {
@@ -152,7 +158,10 @@ namespace SanteDB.BI.Components.Chart
 
                     // Now process datasets
                     List<ExpandoObject> dataSetOptions = new List<ExpandoObject>();
-                    var dataGroup = chartData.GroupBy(o => $"'{String.Format($"{{0:{axisFormat}}}", axisSelector.Invoke(ReportViewUtil.ToParameterArray(o)))}'");
+                    var dataGroup = chartData.GroupBy(o => {
+                        var axsValue = axisSelector.Invoke(ReportViewUtil.ToParameterArray(o));
+                        return !string.IsNullOrEmpty(axisFormat) ? $"{String.Format($"{{0:{axisFormat}}}", axsValue)}" : axsValue;
+                    });
                     var refGroup = refData?.OfType<IDictionary<String, Object>>().GroupBy(o => o[o.Keys.First()], o=>(dynamic)o);
 
                     foreach (var ds in element.Elements((XNamespace)BiConstants.ComponentNamespace + "dataset").Union(element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset")))
@@ -175,6 +184,7 @@ namespace SanteDB.BI.Components.Chart
 
                             if (axis != null) // this is an X/Y plot
                             {
+
                                 switch (ds.Attribute("fn")?.Value ?? "sum")
                                 {
                                     case "count":

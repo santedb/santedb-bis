@@ -218,6 +218,7 @@ namespace SanteDB.BI.Services.Impl
                 this.m_definitionCache.TryRemove(typeof(BiRenderFormatDefinition), out _);
                 this.m_definitionCache.TryRemove(typeof(BiDataFlowDefinition), out _);
                 this.m_definitionCache.TryRemove(typeof(BiDatamartDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiReferenceDataSourceDefinition), out _);
                 var solutions = this.m_solutionManagerService?.Solutions.ToList();
 
                 // Doesn't have a solution manager
