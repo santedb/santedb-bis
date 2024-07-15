@@ -124,7 +124,7 @@ namespace SanteDB.BI.Components.Chart
                     var yAxisLabel = element.Element((XNamespace)BiConstants.ComponentNamespace + "yAxis")?.Attribute("label")?.Value;
                     if(!String.IsNullOrEmpty(yAxisLabel))
                     {
-                        writer.WriteAttributeString("valueLabel", $"'{yAxisLabel}'");
+                        writer.WriteAttributeString("value-label", $"'{yAxisLabel}'");
                     }
 
                     // Is this a labeled data set?
