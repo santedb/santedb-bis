@@ -43,6 +43,11 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlArray("select"), XmlArrayItem("column"), JsonProperty("select")]
         public List<BiAggregateSqlColumnReference> Columns { get; set; }
-
+        
+        /// <summary>
+        /// Gets or sets the selectors
+        /// </summary>
+        [XmlArray("order"), XmlArrayItem("column"), JsonProperty("order")]
+        public List<BiSqlColumnReference> Sorting { get; set; }
     }
 }

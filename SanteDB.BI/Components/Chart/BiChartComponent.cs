@@ -121,10 +121,22 @@ namespace SanteDB.BI.Components.Chart
                         }
                     }
 
-                    var yAxisLabel = element.Element((XNamespace)BiConstants.ComponentNamespace + "yAxis")?.Attribute("label")?.Value;
-                    if(!String.IsNullOrEmpty(yAxisLabel))
+                    var yAxis = element.Element((XNamespace)BiConstants.ComponentNamespace + "yAxis");
+                    if(yAxis != null)
                     {
-                        writer.WriteAttributeString("value-label", $"'{yAxisLabel}'");
+                        writer.WriteStartAttribute("y-axis");
+
+                        writer.WriteString($"{{ scaleLabel: '{yAxis.Attribute("label")?.Value}' ");
+                        if(yAxis.Attribute("min") != null)
+                        {
+                            writer.WriteString($", min: {yAxis.Attribute("min").Value} ");
+                        }
+                        if (yAxis.Attribute("max") != null)
+                        {
+                            writer.WriteString($", max: {yAxis.Attribute("max").Value} ");
+                        }
+                        writer.WriteString("}");
+                        writer.WriteEndAttribute();
                     }
 
                     // Is this a labeled data set?
@@ -134,13 +146,19 @@ namespace SanteDB.BI.Components.Chart
                     }
                     else // it is an X/Y dataset
                     {
-                        writer.WriteStartAttribute("axis");
+                        writer.WriteStartAttribute("x-axis");
                         writer.WriteString("{ type: '");
 
                         // First determine type
                         if (typeof(DateTime).IsAssignableFrom(axisSelector.Invoke(ReportViewUtil.ToParameterArray(chartData.First())).GetType()))
                         {
-                            writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{(axis.Attribute("time-unit")?.Value ?? "day")}' }}");
+                            var tu = (axis.Attribute("time-unit")?.Value ?? "day");
+                            var displayFormat = axis.Attribute("display-format")?.Value;
+                            if(!String.IsNullOrEmpty(displayFormat))
+                            {
+                                displayFormat = $"\"{displayFormat}\"";
+                            }
+                            writer.WriteString($"time', time: {{ distribution: 'linear', unit: '{tu}', displayFormats: {{ { tu } : { (displayFormat ?? "null") } }} }}");
                         }
                         else
                         {

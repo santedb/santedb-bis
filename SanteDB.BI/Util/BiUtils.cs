@@ -122,7 +122,7 @@ namespace SanteDB.BI.Util
 
                     // Clone the return value - as we don't want to muck up repository copy of the object
                     var retVal = ResolveRefs(resolvedTarget, parentScope);
-                    retVal.Label = definition.Label ?? definition.Label;
+                    retVal.Label = definition.Label ?? retVal.Label;
                     if (retVal is BiParameterDefinition bid && definition is BiParameterDefinition did)
                     {
                         bid.Required = did.Required;

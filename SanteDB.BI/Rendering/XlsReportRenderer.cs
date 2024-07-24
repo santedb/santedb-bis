@@ -141,7 +141,7 @@ namespace SanteDB.BI.Rendering
                                     case XmlNodeType.Text:
                                         if (currentWorksheet?.ActiveCell != null)
                                         {
-                                            currentWorksheet.ActiveCell.Value += xr.Value;
+                                            currentWorksheet.ActiveCell.Value += xr.Value.Trim();
                                         }
                                         break;
                                 }

@@ -153,9 +153,16 @@ namespace SanteDB.BI.Components.Data
                     throw new InvalidOperationException("Field is missing a <bi:cell> element");
                 }
                 writer.WriteStartElement("td", BiConstants.HtmlNamespace);
-                foreach (var el in cell.Elements())
+                foreach (var nd in cell.Nodes())
                 {
-                    ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                    if (nd is XElement el)
+                    {
+                        ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                    }
+                    else if(nd is XText tx)
+                    {
+                        writer.WriteString(tx.Value);
+                    }
                 }
 
                 writer.WriteEndElement();

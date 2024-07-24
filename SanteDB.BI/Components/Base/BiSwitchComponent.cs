@@ -46,7 +46,7 @@ namespace SanteDB.BI.Components.Base
 
             foreach (var whenClauseElement in element.Elements((XNamespace)BiConstants.ComponentNamespace + "when"))
             {
-                var op = whenClauseElement.Attribute("op").Value;
+                var op = whenClauseElement.Attribute("op")?.Value ?? "eq";
                 var isNot = whenClauseElement.Attribute("not")?.Value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
                 var xmlValue = whenClauseElement.Attribute("value").Value;
                 object value = null;
