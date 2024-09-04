@@ -124,7 +124,7 @@ namespace SanteDB.BI.Components.Chart
                     var yAxis = element.Element((XNamespace)BiConstants.ComponentNamespace + "yAxis");
                     if(yAxis != null)
                     {
-                        writer.WriteStartAttribute("y-axis");
+                        writer.WriteStartAttribute("axis-y");
 
                         writer.WriteString($"{{ scaleLabel: '{yAxis.Attribute("label")?.Value}' ");
                         if(yAxis.Attribute("min") != null)
@@ -146,7 +146,7 @@ namespace SanteDB.BI.Components.Chart
                     }
                     else // it is an X/Y dataset
                     {
-                        writer.WriteStartAttribute("x-axis");
+                        writer.WriteStartAttribute("axis-x");
                         writer.WriteString("{ type: '");
 
                         // First determine type
