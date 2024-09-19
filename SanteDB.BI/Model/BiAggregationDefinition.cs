@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -43,6 +41,11 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlArray("select"), XmlArrayItem("column"), JsonProperty("select")]
         public List<BiAggregateSqlColumnReference> Columns { get; set; }
-
+        
+        /// <summary>
+        /// Gets or sets the selectors
+        /// </summary>
+        [XmlArray("order"), XmlArrayItem("column"), JsonProperty("order")]
+        public List<BiSqlColumnReference> Sorting { get; set; }
     }
 }

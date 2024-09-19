@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-12-6
  */
 using SanteDB.BI.Datamart;
 using SanteDB.BI.Datamart.DataFlow;
@@ -34,6 +32,7 @@ namespace SanteDB.Rest.BIS.Operations
     /// <summary>
     /// Collect dataset execution log
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class CollectDatasetExecutionLogOperation : IApiChildOperation
     {
         private readonly IBiDatamartRepository m_datamartRepository;

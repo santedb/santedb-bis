@@ -15,15 +15,15 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using RestSrvr;
+using SanteDB.BI.Configuration;
 using SanteDB.BI.Datamart;
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Util;
+using SanteDB.Core;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Exceptions;
 using SanteDB.Core.i18n;
@@ -50,7 +50,7 @@ namespace SanteDB.BI.Services.Impl
         private readonly IBiMetadataRepository m_metadataRepository;
         private readonly IPolicyEnforcementService m_pepService;
         private readonly IAuditService m_auditService;
-        private readonly IConfigurationManager m_configurationManager;
+        private readonly BiConfigurationSection m_configuration;
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(DefaultDatamartManager));
 
         /// <summary>
@@ -61,6 +61,7 @@ namespace SanteDB.BI.Services.Impl
             IBiMetadataRepository metadataRepository,
             IPolicyEnforcementService pepService,
             IAuditService auditService,
+            IThreadPoolService threadPoolService,
             IConfigurationManager configurationManager)
         {
             this.m_datamartRegistry = datamartRegistry;
@@ -68,8 +69,11 @@ namespace SanteDB.BI.Services.Impl
             this.m_metadataRepository = metadataRepository;
             this.m_pepService = pepService;
             this.m_auditService = auditService;
-            this.m_configurationManager = configurationManager;
-            this.InitializeDataSources();
+            this.m_configuration = configurationManager.GetSection<BiConfigurationSection>();
+
+            ApplicationServiceContext.Current.Started += (o,e) =>
+                threadPoolService.QueueUserWorkItem(_ => this.InitializeDataSources());
+
         }
 
         /// <summary>
@@ -77,27 +81,50 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void InitializeDataSources()
         {
-            foreach (var registeredDatamart in this.m_datamartRegistry.Find(o => o.ObsoletionTime == null))
+            using(AuthenticationContext.EnterSystemContext()) { 
+            // Register the default datamarts
+            if(this.m_configuration?.AutoRegisterDatamarts?.Any() == true)
             {
-                // Get the produces context
-                var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == registeredDatamart.Id).FirstOrDefault();
-                // Produce the connection string
-                if (definition == null) // not available
+                foreach(var cnf in this.m_configuration.AutoRegisterDatamarts)
                 {
-                    this.m_tracer.TraceWarning("Removing registration for {0} as its definition is not available", registeredDatamart.Id);
-                    this.m_datamartRegistry.Unregister(registeredDatamart);
-                }
-                else
-                {
-                    using (AuthenticationContext.EnterSystemContext())
+                    if(!this.m_datamartRegistry.Find(o=>o.Id == cnf).Any())
                     {
-                        this.m_tracer.TraceInfo("Registering transient connection string for datamart {0}", definition.Id);
-                        using (var context = this.m_datamartRegistry.GetExecutionContext(registeredDatamart, DataFlowExecutionPurposeType.Discovery))
+                        var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == cnf).FirstOrDefault();
+                        if(definition == null)
                         {
-                            // Getting the integrator should create the 
-                            using (var integrator = context.GetIntegrator(definition.Produces))
+                            this.m_tracer.TraceWarning("Cannot automatically register {0}...", cnf);
+                        }
+                        else
+                        {
+                            this.m_tracer.TraceInfo("Registering {0}...", cnf);
+                            this.m_datamartRegistry.Register(definition);
+                        }
+                    }
+                }
+            }
+
+                foreach (var registeredDatamart in this.m_datamartRegistry.Find(o => o.ObsoletionTime == null))
+                {
+                    // Get the produces context
+                    var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == registeredDatamart.Id).FirstOrDefault();
+                    // Produce the connection string
+                    if (definition == null) // not available
+                    {
+                        this.m_tracer.TraceWarning("Removing registration for {0} as its definition is not available", registeredDatamart.Id);
+                        this.m_datamartRegistry.Unregister(registeredDatamart);
+                    }
+                    else
+                    {
+                        using (AuthenticationContext.EnterSystemContext())
+                        {
+                            this.m_tracer.TraceInfo("Registering transient connection string for datamart {0}", definition.Id);
+                            using (var context = this.m_datamartRegistry.GetExecutionContext(registeredDatamart, DataFlowExecutionPurposeType.Discovery))
                             {
-                                this.m_metadataRepository.Insert(integrator.DataSource); // register the data source
+                                // Getting the integrator should create the 
+                                using (var integrator = context.GetIntegrator(definition.Produces))
+                                {
+                                    this.m_metadataRepository.Insert(integrator.DataSource); // register the data source
+                                }
                             }
                         }
                     }
@@ -130,6 +157,30 @@ namespace SanteDB.BI.Services.Impl
             if (datamart == null)
             {
                 throw new KeyNotFoundException(String.Format(ErrorMessages.DEPENDENT_CONFIGURATION_MISSING, datamartDefinition.Id));
+            }
+
+            // If the last time this was run is outside of the max refresh frequency stop
+            if (datamartDefinition.RefreshFrequency.HasValue && purpose.HasFlag(DataFlowExecutionPurposeType.Refresh))
+            {
+                var lastExec = datamart.FlowExecutions.OrderByDescending(o => o.Finished ?? o.Started).FirstOrDefault();
+                DateTimeOffset permittedCutOff = DateTimeOffset.MinValue;
+                switch (datamartDefinition.RefreshFrequency.Value)
+                {
+                    case BiDataMartFrequency.Daily:
+                        permittedCutOff = lastExec?.Finished.GetValueOrDefault().AddDays(1) ?? DateTimeOffset.MinValue;
+                        break;
+                    case BiDataMartFrequency.Weekly:
+                        permittedCutOff = lastExec?.Finished.GetValueOrDefault().AddDays(7) ?? DateTimeOffset.MinValue;
+                        break;
+                    case BiDataMartFrequency.Monthly:
+                        permittedCutOff = lastExec?.Finished.GetValueOrDefault().AddMonths(1) ?? DateTimeOffset.MinValue;
+                        break;
+                }
+                if(permittedCutOff > DateTimeOffset.Now)
+                {
+                    this.m_tracer.TraceWarning("Datamart {0} cannot be refreshed until {1}", datamart.Id, permittedCutOff);
+                    return null;
+                }
             }
 
             // If the definition has changed since the last validation then re-validate
@@ -172,7 +223,10 @@ namespace SanteDB.BI.Services.Impl
             try
             {
                 this.m_pepService.Demand(PermissionPolicyIdentifiers.AdministerWarehouse);
-                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement))
+                var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement);
+                if (context == null) return;
+
+                using (context)
                 {
                     try
                     {
@@ -230,7 +284,10 @@ namespace SanteDB.BI.Services.Impl
                 this.m_pepService.Demand(PermissionPolicyIdentifiers.AdministerWarehouse);
                 this.m_metadataRepository.Remove<BiDataSourceDefinition>(datamartDefinition.Produces.Id);
 
-                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.SchemaManagement | DataFlowExecutionPurposeType.DatabaseManagement))
+                var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.SchemaManagement | DataFlowExecutionPurposeType.DatabaseManagement);
+                if (context == null) return;
+
+                using (context)
                 {
                     try
                     {
@@ -340,7 +397,10 @@ namespace SanteDB.BI.Services.Impl
                     purpose |= DataFlowExecutionPurposeType.Diagnostics;
                 }
 
-                using (var context = this.GetDataFlowExecutionContext(datamartDefinition, purpose))
+                var context = this.GetDataFlowExecutionContext(datamartDefinition, purpose);
+                if (context == null) return null;
+
+                using (context)
                 {
 
                     using (var integrator = context.GetIntegrator(datamartDefinition.Produces))
@@ -399,6 +459,10 @@ namespace SanteDB.BI.Services.Impl
                         return context.DiagnosticSession;
                     }
                 }
+            }
+            catch(BiException)
+            {
+                throw;
             }
             catch (Exception e)
             {

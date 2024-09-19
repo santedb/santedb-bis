@@ -15,9 +15,8 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
+using DocumentFormat.OpenXml.InkML;
 using Newtonsoft.Json;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Util;
@@ -84,6 +83,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiQueryDefinition))]
     [XmlInclude(typeof(BiParameterDefinition))]
     [XmlInclude(typeof(BiReportDefinition))]
+    [XmlInclude(typeof(BiReferenceDataSourceDefinition))]
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
@@ -118,6 +118,7 @@ namespace SanteDB.BI.Model
                 typeof(BiSchemaTableDefinition),
                 typeof(BiSchemaViewDefinition),
                 typeof(BiDataFlowDefinition),
+                typeof(BiReferenceDataSourceDefinition),
                 typeof(BiPackage)
             };
 
@@ -287,7 +288,9 @@ namespace SanteDB.BI.Model
             {
                 if (this.m_validationResult == null)
                 {
-                    var copy = BiUtils.ResolveRefs(this);
+                    var copy = Activator.CreateInstance(this.GetType()) as BiDefinition;
+                    copy.CopyObjectData(this);
+                    BiUtils.ResolveRefs(copy);
                     this.m_validationResult = copy.Validate(true);
                 }
                 return this.m_validationResult;

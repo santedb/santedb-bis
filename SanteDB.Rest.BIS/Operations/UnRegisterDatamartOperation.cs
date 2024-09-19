@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Datamart;
 using SanteDB.BI.Model;
@@ -33,6 +31,7 @@ namespace SanteDB.Rest.BIS.Operations
     /// <summary>
     /// Un-Registers a datamart operation
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class UnRegisterDatamartOperation : IApiChildOperation
     {
         private readonly IBiMetadataRepository m_metadataRepository;

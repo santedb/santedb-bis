@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using ClosedXML.Excel;
 using SanteDB.BI.Components;
@@ -141,7 +139,7 @@ namespace SanteDB.BI.Rendering
                                     case XmlNodeType.Text:
                                         if (currentWorksheet?.ActiveCell != null)
                                         {
-                                            currentWorksheet.ActiveCell.Value += xr.Value;
+                                            currentWorksheet.ActiveCell.Value += xr.Value.Trim();
                                         }
                                         break;
                                 }

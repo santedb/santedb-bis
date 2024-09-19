@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.Core.Configuration;
 using System.ComponentModel;
@@ -28,6 +26,7 @@ namespace SanteDB.Rest.BIS.Configuration
     /// BIS Service configuration section
     /// </summary>
     [XmlType(nameof(BisServiceConfigurationSection), Namespace = "http://santedb.org/configuration")]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class BisServiceConfigurationSection : IConfigurationSection
     {
 

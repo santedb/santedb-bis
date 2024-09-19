@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.Core.Model.Attributes;
@@ -26,6 +24,7 @@ using System.Collections.Generic;
 
 namespace SanteDB.BI.Datamart
 {
+
     /// <summary>
     /// An abstract representation of a datamart which has been registered in the manager
     /// </summary>
@@ -64,5 +63,6 @@ namespace SanteDB.BI.Datamart
         /// Gets the hash of the definition
         /// </summary>
         byte[] DefinitionHash { get; }
+
     }
 }

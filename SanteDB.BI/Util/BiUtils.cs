@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
@@ -86,8 +84,9 @@ namespace SanteDB.BI.Util
             try
             {
 
-                var clonedDefinition = Activator.CreateInstance(definition.GetType()) as BiDefinition;
-                clonedDefinition.CopyObjectData(definition);
+                //var clonedDefinition = Activator.CreateInstance(definition.GetType()) as BiDefinition;
+                //clonedDefinition.CopyObjectData(definition);
+                var clonedDefinition = definition;
                 parentScope.Push(clonedDefinition);
 
                 if (!String.IsNullOrEmpty(clonedDefinition.Ref))
@@ -122,7 +121,7 @@ namespace SanteDB.BI.Util
 
                     // Clone the return value - as we don't want to muck up repository copy of the object
                     var retVal = ResolveRefs(resolvedTarget, parentScope);
-                    retVal.Label = definition.Label ?? definition.Label;
+                    retVal.Label = definition.Label ?? retVal.Label;
                     if (retVal is BiParameterDefinition bid && definition is BiParameterDefinition did)
                     {
                         bid.Required = did.Required;

@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using RestSrvr;
 using SanteDB.Core;
@@ -36,6 +34,7 @@ namespace SanteDB.Rest.BIS
     /// </summary>
     [Description("Exposes the SanteDB Business Intelligence functions (reports, queries, etc.) over HTTP REST")]
     [ApiServiceProvider("Business Intelligence Service", typeof(BisServiceBehavior), ServiceEndpointType.BusinessIntelligenceService, Configuration = typeof(BisServiceConfigurationSection))]
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class BisMessageHandler : IDaemonService, IApiEndpointProvider
     {
         // Tracer

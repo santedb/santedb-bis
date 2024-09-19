@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
@@ -42,18 +40,6 @@ namespace SanteDB.BI.Model
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
     public class BiDatamartDefinition : BiDefinition
     {
-
-        /// <summary>
-        /// Gets or sets the transform definition that this is based on
-        /// </summary>
-        [XmlElement("basedOn"), JsonProperty("basedOn")]
-        public BiObjectReference BasedOn { get; set; }
-
-        /// <summary>
-        /// Identifies that this mart extends another
-        /// </summary>
-        [XmlElement("extends"), JsonProperty("extends")]
-        public BiObjectReference Extends { get; set; }
 
         /// <summary>
         /// Gets or sets the data mart that this mart definition produces
@@ -82,6 +68,12 @@ namespace SanteDB.BI.Model
         [XmlElement("startFlow"), JsonProperty("startFlow")]
         public BiObjectReference EntryFlow { get; set; }
 
+        /// <summary>
+        /// Gets or sets the refresh frequency of the datamart
+        /// </summary>
+        [XmlElement("refreshFrequency"), JsonProperty("refreshFrequency")]
+        public BiDataMartFrequency? RefreshFrequency { get; set; }
+
         /// <inheritdoc />
         internal override BiDefinition FindObjectByName(string name)
         {
@@ -99,7 +91,7 @@ namespace SanteDB.BI.Model
                 yield return itm;
             }
 
-            if ((this.SchemaObjects == null || this.SchemaObjects.Count == 0) && this.BasedOn == null)
+            if ((this.SchemaObjects == null || this.SchemaObjects.Count == 0))
             {
                 yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bre.mart.schema.missing", string.Format(ErrorMessages.MISSING_VALUE, nameof(SchemaObjects)), Guid.Empty);
             }

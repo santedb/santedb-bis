@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using DynamicExpresso;
 using SanteDB.BI.Rendering;
@@ -153,9 +151,16 @@ namespace SanteDB.BI.Components.Data
                     throw new InvalidOperationException("Field is missing a <bi:cell> element");
                 }
                 writer.WriteStartElement("td", BiConstants.HtmlNamespace);
-                foreach (var el in cell.Elements())
+                foreach (var nd in cell.Nodes())
                 {
-                    ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                    if (nd is XElement el)
+                    {
+                        ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                    }
+                    else if(nd is XText tx)
+                    {
+                        writer.WriteString(tx.Value);
+                    }
                 }
 
                 writer.WriteEndElement();

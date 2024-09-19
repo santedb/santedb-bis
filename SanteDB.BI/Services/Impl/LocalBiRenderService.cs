@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Jobs;
 using SanteDB.BI.Model;
@@ -79,7 +77,7 @@ namespace SanteDB.BI.Services.Impl
                 {
                     jobManager.SetJobSchedule(job, new DayOfWeek[]
                     {
-                    DayOfWeek.Saturday
+                        DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday
                     }, new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0)); // First run for tomorrow
                 }
             }

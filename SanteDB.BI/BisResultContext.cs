@@ -15,13 +15,17 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
+using SanteDB.Core.Data.Import;
+using SanteDB.Core.Data.Import.Format;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace SanteDB.BI
 {
@@ -30,6 +34,38 @@ namespace SanteDB.BI
     /// </summary>
     public class BisResultContext : IDisposable
     {
+
+        private static readonly IForeignDataFormat m_csvFormat = new CsvForeignDataFormat();
+
+        /// <summary>
+        /// Create a new result context
+        /// </summary>
+        public BisResultContext(BiReferenceDataSourceDefinition rawDefinition)
+        {
+            this.Records = this.IterateRawDefinition(rawDefinition).ToArray();
+        }
+
+        /// <summary>
+        /// Iterate the raw definitions
+        /// </summary>
+        private IEnumerable<dynamic> IterateRawDefinition(BiReferenceDataSourceDefinition brd)
+        {
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(brd.Data.Trim())))
+            using (var file = m_csvFormat.Open(ms))
+            using (var rdr = file.CreateReader())
+            {
+
+                while (rdr.MoveNext())
+                {
+                    IDictionary<string, object> record = new ExpandoObject();
+                    for (var col = 0; col < rdr.ColumnCount; col++)
+                    {
+                        record.Add(rdr.GetName(col), rdr[col]);
+                    }
+                    yield return record;
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a new result context

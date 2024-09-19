@@ -17,32 +17,25 @@
  * 
  */
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// Schema view definition
+    /// A data source that is just raw CSV data
     /// </summary>
-    [XmlRoot(nameof(BiSchemaViewDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlType(nameof(BiSchemaViewDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlType(nameof(BiReferenceDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
+    [XmlRoot(nameof(BiReferenceDataSourceDefinition), Namespace = BiConstants.XmlNamespace)]
     [JsonObject]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
-    public class BiSchemaViewDefinition : BiSchemaObjectDefinition
+    public class BiReferenceDataSourceDefinition : BiDefinition
     {
 
         /// <summary>
-        /// True if the view is materialized
+        /// Gets or sets the data
         /// </summary>
-        [XmlAttribute("materialized"), JsonProperty("materialized")]
-        public bool IsMaterialized { get; set; }
+        [XmlText, JsonProperty("csv")]
+        public string Data { get; set; }
 
-        /// <summary>
-        /// Gets or sets the query for this view
-        /// </summary>
-        [XmlArray("sql"), XmlArrayItem("add"), JsonProperty("query")]
-        public List<BiSqlDefinition> Query { get; set; }
     }
-
 }

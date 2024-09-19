@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -29,6 +27,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// BI metadata extensions
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal static class BiMetadataExtensions
     {
 

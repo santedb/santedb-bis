@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Rendering;
 using SanteDB.Core.Model.Map;
@@ -46,7 +44,7 @@ namespace SanteDB.BI.Components.Base
 
             foreach (var whenClauseElement in element.Elements((XNamespace)BiConstants.ComponentNamespace + "when"))
             {
-                var op = whenClauseElement.Attribute("op").Value;
+                var op = whenClauseElement.Attribute("op")?.Value ?? "eq";
                 var isNot = whenClauseElement.Attribute("not")?.Value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
                 var xmlValue = whenClauseElement.Attribute("value").Value;
                 object value = null;

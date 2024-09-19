@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using RestSrvr;
 using RestSrvr.Attributes;
@@ -41,6 +39,7 @@ namespace SanteDB.Rest.BIS
     /// <summary>
     /// BIS behavior that can call the upstream
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class UpstreamBisServiceBehavior : BisServiceBehavior
     {
         private readonly IUpstreamIntegrationService m_upstreamIntegrationService;

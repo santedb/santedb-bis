@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using Newtonsoft.Json;
 using SanteDB.Core.BusinessRules;
@@ -53,6 +51,7 @@ namespace SanteDB.BI.Model
         [XmlArray("dataSources"),
             XmlArrayItem("query", typeof(BiQueryDefinition)),
             XmlArrayItem("view", typeof(BiViewDefinition)),
+            XmlArrayItem("refData", typeof(BiReferenceDataSourceDefinition)),
             JsonProperty("dataSources")]
         public List<BiDefinition> DataSource { get; set; }
 

@@ -15,8 +15,6 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
 using SanteDB.Core.Applets;
@@ -218,6 +216,7 @@ namespace SanteDB.BI.Services.Impl
                 this.m_definitionCache.TryRemove(typeof(BiRenderFormatDefinition), out _);
                 this.m_definitionCache.TryRemove(typeof(BiDataFlowDefinition), out _);
                 this.m_definitionCache.TryRemove(typeof(BiDatamartDefinition), out _);
+                this.m_definitionCache.TryRemove(typeof(BiReferenceDataSourceDefinition), out _);
                 var solutions = this.m_solutionManagerService?.Solutions.ToList();
 
                 // Doesn't have a solution manager

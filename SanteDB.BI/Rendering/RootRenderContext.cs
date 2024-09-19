@@ -15,18 +15,19 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: fyfej
- * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
 using SanteDB.Core;
+using SanteDB.Core.Data.Import.Format;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace SanteDB.BI.Rendering
 {
@@ -100,7 +101,7 @@ namespace SanteDB.BI.Rendering
                     (viewDef as BiQueryDefinition)?.DataSources.FirstOrDefault(o => o.Name == "main") ?? (viewDef as BiQueryDefinition)?.DataSources.FirstOrDefault();
 
                 IBiDataSource providerImplementation = null;
-                if (dsource.ProviderType != null)
+                if (dsource?.ProviderType != null)
                 {
                     providerImplementation = ApplicationServiceContext.Current.GetService<IServiceManager>().CreateInjected(dsource.ProviderType) as IBiDataSource;
                 }
@@ -121,23 +122,26 @@ namespace SanteDB.BI.Rendering
                     count = tCount;
                 }
 
-                if (viewDef is BiViewDefinition)
+                switch(viewDef)
                 {
-                    retVal = providerImplementation.ExecuteView(viewDef as BiViewDefinition, this.Parameters, 0, count);
-                }
-                else if (viewDef is BiQueryDefinition)
-                {
-                    retVal = providerImplementation.ExecuteQuery(viewDef as BiQueryDefinition, this.Parameters, null, 0, count);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Cannot determine data source type of {name}");
+                    case BiViewDefinition bvd:
+                        retVal = providerImplementation.ExecuteView(bvd, this.Parameters, 0, count);
+                        break;
+                    case BiQueryDefinition bqd:
+                        retVal = providerImplementation.ExecuteQuery(bqd, this.Parameters, null, 0, count);
+                        break;
+                    case BiReferenceDataSourceDefinition brd:
+                        retVal = new BisResultContext(brd);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Cannot determine data source type of {name}");
                 }
 
                 this.m_dataSources.Add(name, retVal);
             }
             return retVal;
         }
+
 
         /// <summary>
         /// Gets the paren of this context

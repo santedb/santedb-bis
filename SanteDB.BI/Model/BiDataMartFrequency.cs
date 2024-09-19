@@ -16,33 +16,31 @@
  * the License.
  * 
  */
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
     /// <summary>
-    /// Schema view definition
+    /// Datamart refresh frequency
     /// </summary>
-    [XmlRoot(nameof(BiSchemaViewDefinition), Namespace = BiConstants.XmlNamespace)]
-    [XmlType(nameof(BiSchemaViewDefinition), Namespace = BiConstants.XmlNamespace)]
-    [JsonObject]
-    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
-    public class BiSchemaViewDefinition : BiSchemaObjectDefinition
+    [XmlType(nameof(BiDataMartFrequency), Namespace = BiConstants.XmlNamespace)]
+    public enum BiDataMartFrequency
     {
-
         /// <summary>
-        /// True if the view is materialized
+        /// At most, should be refreshed daily
         /// </summary>
-        [XmlAttribute("materialized"), JsonProperty("materialized")]
-        public bool IsMaterialized { get; set; }
-
+        [XmlEnum("daily")]
+        Daily,
         /// <summary>
-        /// Gets or sets the query for this view
+        /// At most, should be refreshed weekly
         /// </summary>
-        [XmlArray("sql"), XmlArrayItem("add"), JsonProperty("query")]
-        public List<BiSqlDefinition> Query { get; set; }
+        [XmlEnum("weekly")]
+        Weekly,
+        /// <summary>
+        /// At most, should be refreshed monthly
+        /// </summary>
+        [XmlEnum("monthly")]
+        Monthly
+
     }
-
 }
