@@ -16,6 +16,7 @@
  * the License.
  * 
  */
+using DocumentFormat.OpenXml.InkML;
 using Newtonsoft.Json;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Util;
@@ -287,7 +288,9 @@ namespace SanteDB.BI.Model
             {
                 if (this.m_validationResult == null)
                 {
-                    var copy = BiUtils.ResolveRefs(this);
+                    var copy = Activator.CreateInstance(this.GetType()) as BiDefinition;
+                    copy.CopyObjectData(this);
+                    BiUtils.ResolveRefs(copy);
                     this.m_validationResult = copy.Validate(true);
                 }
                 return this.m_validationResult;
