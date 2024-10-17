@@ -40,8 +40,8 @@
     <EmbeddedResource Include="Resources\csv.xsl" />
   </ItemGroup>  
   <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.101.0" />
-    <PackageReference Include="DynamicExpresso.Core" Version="2.16.0" />
+    <PackageReference Include="ClosedXML" Version="0.104.1" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>  
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
