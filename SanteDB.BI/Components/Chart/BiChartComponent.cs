@@ -187,6 +187,11 @@ namespace SanteDB.BI.Components.Chart
 
                             var elementSource = ds.Name.LocalName.Equals("dataset") ? dataGroup : refGroup;
 
+                            if(!elementSource.Any())
+                            {
+                                continue; 
+                            }
+
                             var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, elementSource.First().First()), ds.Value);
 
                             IDictionary<String, Object> data = new ExpandoObject();
