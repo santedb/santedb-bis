@@ -128,8 +128,8 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                                 readSourceDataExpression = Expression.Call(null, typeof(BiUtils).GetMethod(nameof(BiUtils.ChangeType)), Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)), Expression.Constant(dt));
                                 goto default;
                             case BiConceptMappingTransform cm:
-
-                                return Expression.Call(null, resolveConceptMethod, Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)));
+                                readSourceDataExpression = Expression.Call(null, resolveConceptMethod, Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)));
+                                goto default;
                             default:
                                 readSourceDataExpression = readSourceDataExpression ?? Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name));
                                 return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), readSourceDataExpression);
