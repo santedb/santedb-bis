@@ -90,6 +90,7 @@ namespace SanteDB.BI.Model
         [XmlElement("fixed", typeof(String))]
         [XmlElement("cast", typeof(BiDataType))]
         [XmlElement("lookup", typeof(BiColumnMappingTransformJoin))]
+        [XmlElement("concept", typeof(BiConceptMappingTransform))]
         public Object TransformExpression { get; set; }
 
         internal override IEnumerable<DetectedIssue> Validate()

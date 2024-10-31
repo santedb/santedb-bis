@@ -19,7 +19,11 @@
 using SanteDB.BI.Model;
 using SanteDB.BI.Util;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model.DataTypes;
+using SanteDB.Core.Model.EntityLoader;
 using System;
+using System.CodeDom;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -32,6 +36,27 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
     /// </summary>
     internal class MappingExecutor : DataStreamExecutorBase<BiDataFlowMappingStep>
     {
+
+        private static ConcurrentDictionary<Guid, String> s_resolvedConcepts = new ConcurrentDictionary<Guid, string>();
+        
+        /// <summary>
+        /// Fast resolve concept
+        /// </summary>
+        public static String FastResolveConcept(object inputRaw)
+        {
+            if(inputRaw == null)
+            {
+                return null;
+            }
+
+            _ = inputRaw is Guid input || Guid.TryParse(inputRaw.ToString(), out input);
+            if(!s_resolvedConcepts.TryGetValue(input, out var retVal))
+            {
+                retVal = EntitySource.Current.Provider.Query<Concept>(o => o.Key == input).Select(o => o.Mnemonic).FirstOrDefault();
+                s_resolvedConcepts.TryAdd(input, retVal);
+            }
+            return retVal;
+        }
 
         /// <inheritdoc />
         protected override IEnumerable<dynamic> ProcessStream(BiDataFlowMappingStep flowStep, DataFlowScope scope, IEnumerable<dynamic> inputStream)
@@ -76,7 +101,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         {
             var getDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.GetData));
             var setDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.SetData));
-
+            var resolveConceptMethod = typeof(MappingExecutor).GetMethod(nameof(FastResolveConcept));
 
             var inputParm = Expression.Parameter(typeof(DataFlowStreamTuple), "input");
             var resultVar = Expression.Variable(typeof(DataFlowStreamTuple), "result");
@@ -102,6 +127,9 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                             case BiDataType dt:
                                 readSourceDataExpression = Expression.Call(null, typeof(BiUtils).GetMethod(nameof(BiUtils.ChangeType)), Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)), Expression.Constant(dt));
                                 goto default;
+                            case BiConceptMappingTransform cm:
+
+                                return Expression.Call(null, resolveConceptMethod, Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)));
                             default:
                                 readSourceDataExpression = readSourceDataExpression ?? Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name));
                                 return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), readSourceDataExpression);

@@ -179,7 +179,9 @@ namespace SanteDB.BI.Services.Impl
                 if(permittedCutOff > DateTimeOffset.Now)
                 {
                     this.m_tracer.TraceWarning("Datamart {0} cannot be refreshed until {1}", datamart.Id, permittedCutOff);
+#if !DEBUG
                     return null;
+#endif
                 }
             }
 

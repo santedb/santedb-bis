@@ -52,6 +52,7 @@ namespace SanteDB.BI.Model
         [XmlArrayItem("transform", typeof(BiDataFlowMappingStep))]
         [XmlArrayItem("crosstab", typeof(BiDataFlowCrosstabStep))]
         [XmlArrayItem("transaction", typeof(BiDataFlowTransactionStep))]
+        [XmlArrayItem("distinct", typeof(BiDataFlowDistinctStep))]
         [XmlArrayItem("log", typeof(BiDataFlowLogStep))]
         [JsonProperty("step")]
         public List<BiDataFlowStep> Steps { get; set; }
