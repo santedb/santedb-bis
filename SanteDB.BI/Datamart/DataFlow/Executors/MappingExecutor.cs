@@ -16,6 +16,7 @@
  * the License.
  * 
  */
+using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Util;
 using SanteDB.Core.i18n;
@@ -64,7 +65,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
 
             // Get or open all reference columns for lookup
             var mapFnVarName = $"mapfn.{flowStep.Name}";
-            if (!scope.TryGetSysVar(mapFnVarName, out Func<DataFlowStreamTuple, DataFlowStreamTuple> mappingFunc))
+            if (!scope.TryGetSysVar(mapFnVarName, out Func<DataFlowScope, DataFlowStreamTuple, DataFlowStreamTuple> mappingFunc))
             {
                 mappingFunc = this.BuildMappingFunc(flowStep);
                 scope.SetSysVar(mapFnVarName, mappingFunc);
@@ -79,7 +80,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 int nRecs = 0;
                 foreach (var itm in inputStream)
                 {
-                    var record = mappingFunc(CreateStreamTuple(itm));
+                    var record = mappingFunc(scope, CreateStreamTuple(itm));
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, record);
@@ -97,13 +98,14 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
         /// <summary>
         /// Builds a mapping function 
         /// </summary>
-        private Func<DataFlowStreamTuple, DataFlowStreamTuple> BuildMappingFunc(BiDataFlowMappingStep flowStep)
+        private Func<DataFlowScope, DataFlowStreamTuple, DataFlowStreamTuple> BuildMappingFunc(BiDataFlowMappingStep flowStep)
         {
             var getDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.GetData));
             var setDataMethod = typeof(DataFlowStreamTuple).GetMethod(nameof(DataFlowStreamTuple.SetData));
             var resolveConceptMethod = typeof(MappingExecutor).GetMethod(nameof(FastResolveConcept));
 
             var inputParm = Expression.Parameter(typeof(DataFlowStreamTuple), "input");
+            var scopeParm = Expression.Parameter(typeof(DataFlowScope), "scope");
             var resultVar = Expression.Variable(typeof(DataFlowStreamTuple), "result");
             var initializeResult = Expression.Assign(resultVar, Expression.New(typeof(DataFlowStreamTuple)));
             var labelTarget = Expression.Label(typeof(DataFlowStreamTuple));
@@ -122,8 +124,17 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         {
                             case string str:
                                 return Expression.Call(resultVar, setDataMethod, Expression.Constant(column.Target.Name), Expression.Constant(str));
+                            case BiVariableLookupTransform var:
+                                readSourceDataExpression = Expression.Call(scopeParm, typeof(DataFlowScope).GetMethod(nameof(DataFlowScope.GetVariable)), Expression.Constant(var.Name));
+                                if (var.ThrowIfNotFound)
+                                {
+                                    readSourceDataExpression = Expression.Coalesce(readSourceDataExpression, Expression.Throw(Expression.New(typeof(DataFlowException).GetConstructor(new Type[] { typeof(BiDataFlowStep), typeof(String) }), Expression.Constant(flowStep), Expression.Constant(ErrorMessages.DEPENDENT_PROPERTY_NULL))));
+                                }
+                                goto default;
+
                             case BiColumnMappingTransformJoin tj:
                                 throw new NotSupportedException(ErrorMessages.NOT_SUPPORTED); // not supported yet
+                                
                             case BiDataType dt:
                                 readSourceDataExpression = Expression.Call(null, typeof(BiUtils).GetMethod(nameof(BiUtils.ChangeType)), Expression.Call(inputParm, getDataMethod, Expression.Constant(column.Source.Name)), Expression.Constant(dt));
                                 goto default;
@@ -139,7 +150,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         ));
 
 
-            return Expression.Lambda<Func<DataFlowStreamTuple, DataFlowStreamTuple>>(body, inputParm).Compile();
+            return Expression.Lambda<Func<DataFlowScope, DataFlowStreamTuple, DataFlowStreamTuple>>(body, scopeParm, inputParm).Compile();
         }
     }
 }

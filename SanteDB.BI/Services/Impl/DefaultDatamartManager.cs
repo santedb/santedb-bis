@@ -433,12 +433,14 @@ namespace SanteDB.BI.Services.Impl
                             var entryObject = datamartDefinition.EntryFlow?.Resolved ?? datamartDefinition.DataFlows.Find(o => o.Name == "main");
                             if (entryObject is BiDataFlowStep dfd)
                             {
-                                var executionScope = new DataFlowScope("$", context);
-                                executionScope.DeclareConstant(BiConstants.AuditDataFlowParameterName, audit);
-                                executionScope.DeclareConstant(BiConstants.PrincipalDataFlowParameterName, AuthenticationContext.Current.Principal.Identity.Name);
-                                executionScope.DeclareConstant(BiConstants.StartTimeDataFlowParameterName, DateTimeOffset.Now);
-                                executionScope.DeclareConstant(BiConstants.DataMartDataFlowParameterName, datamartDefinition.Id);
-                                dfd.Execute(executionScope).Count();
+                                using (var executionScope = new DataFlowScope("$", context))
+                                {
+                                    executionScope.DeclareConstant(BiConstants.AuditDataFlowParameterName, audit);
+                                    executionScope.DeclareConstant(BiConstants.PrincipalDataFlowParameterName, AuthenticationContext.Current.Principal.Identity.Name);
+                                    executionScope.DeclareConstant(BiConstants.StartTimeDataFlowParameterName, DateTimeOffset.Now);
+                                    executionScope.DeclareConstant(BiConstants.DataMartDataFlowParameterName, datamartDefinition.Id);
+                                    dfd.Execute(executionScope).Count();
+                                }
                             }
                             else
                             {
