@@ -236,13 +236,16 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// </summary>
         public void Dispose()
         {
-            foreach(var itm in this.m_variables.ToArray())
+            if (this.m_parent == null)
             {
-                if (itm.Value.Value is IDisposable disp)
+                foreach (var itm in this.m_variables.ToArray())
                 {
-                    disp.Dispose();
+                    if (itm.Value.Value is IDisposable disp)
+                    {
+                        disp.Dispose();
+                    }
+                    this.m_variables.Remove(itm.Key);
                 }
-                this.m_variables.Remove(itm.Key);
             }
         }
 
