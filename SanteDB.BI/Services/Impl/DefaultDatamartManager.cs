@@ -435,6 +435,7 @@ namespace SanteDB.BI.Services.Impl
                             {
                                 using (var executionScope = new DataFlowScope("$", context))
                                 {
+                                    executionScope.DeclareConstant(BiConstants.ContextIdParameterName, context.Key);
                                     executionScope.DeclareConstant(BiConstants.AuditDataFlowParameterName, audit);
                                     executionScope.DeclareConstant(BiConstants.PrincipalDataFlowParameterName, AuthenticationContext.Current.Principal.Identity.Name);
                                     executionScope.DeclareConstant(BiConstants.StartTimeDataFlowParameterName, DateTimeOffset.Now);

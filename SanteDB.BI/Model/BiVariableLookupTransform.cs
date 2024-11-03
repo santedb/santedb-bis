@@ -25,7 +25,7 @@ namespace SanteDB.BI.Model
     /// Variable lookup
     /// </summary>
     [XmlType(nameof(BiVariableLookupTransform), Namespace = BiConstants.XmlNamespace)]
-    internal class BiVariableLookupTransform 
+    public class BiVariableLookupTransform 
     {
 
         /// <summary>
