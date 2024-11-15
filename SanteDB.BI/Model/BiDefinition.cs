@@ -288,9 +288,7 @@ namespace SanteDB.BI.Model
             {
                 if (this.m_validationResult == null)
                 {
-                    var copy = Activator.CreateInstance(this.GetType()) as BiDefinition;
-                    copy.CopyObjectData(this);
-                    BiUtils.ResolveRefs(copy);
+                    var copy = BiUtils.ResolveRefs(this);
                     this.m_validationResult = copy.Validate(true);
                 }
                 return this.m_validationResult;

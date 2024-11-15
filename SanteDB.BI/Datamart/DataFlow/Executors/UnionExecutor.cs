@@ -38,7 +38,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
             var diagnosticLog = scope.Context.DiagnosticSession?.LogStartAction(flowStep);
             try
             {
-                foreach (var itm in inputStream.Union(masterList))
+                foreach (var itm in inputStream.Concat(masterList))
                 {
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
                     diagnosticLog?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);

@@ -50,7 +50,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 IEnumerable<dynamic> recordSource = null;
                 try
                 {
-                    recordSource = dataSource.Query(brs.Definition, brs.Schema);
+                    recordSource = dataSource.Query(brs.Definition, scope, brs.Schema);
                 }
                 catch (Exception e)
                 {

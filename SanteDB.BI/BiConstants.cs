@@ -58,5 +58,10 @@ namespace SanteDB.BI
         /// The target mart
         /// </summary>
         public const string DataMartDataFlowParameterName = "$targetMart";
+
+        /// <summary>
+        /// Context identifier parameter name
+        /// </summary>
+        public const string ContextIdParameterName = "$contextId";
     }
 }

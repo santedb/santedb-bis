@@ -19,13 +19,14 @@
 using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SanteDB.BI.Datamart.DataFlow
 {
     /// <summary>
     /// A class for a "current scope" in which a particular data flow object is operating
     /// </summary>
-    internal class DataFlowScope
+    internal class DataFlowScope : IDisposable, IDataIntegratorVariableProvider
     {
 
         /// <summary>
@@ -214,6 +215,10 @@ namespace SanteDB.BI.Datamart.DataFlow
         {
             if (this.m_variables.TryGetValue(name, out var valStruct))
             {
+                if(valStruct.Readonly)
+                {
+                    throw new InvalidOperationException(String.Format(ErrorMessages.OBJECT_READONLY, name));
+                }
                 valStruct.Value = value;
             }
             else if (this.m_parent != null)
@@ -226,5 +231,37 @@ namespace SanteDB.BI.Datamart.DataFlow
             }
         }
 
+        /// <summary>
+        /// Dispose
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.m_parent == null)
+            {
+                foreach (var itm in this.m_variables.ToArray())
+                {
+                    if (itm.Value.Value is IDisposable disp)
+                    {
+                        disp.Dispose();
+                    }
+                    this.m_variables.Remove(itm.Key);
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        bool IDataIntegratorVariableProvider.TryGetVariable(string variableName, out dynamic value)
+        {
+            if(this.m_variables.TryGetValue(variableName, out var valueDef))
+            {
+                value = valueDef.Value;
+                return true;
+            }
+            else
+            {
+                value = null;
+                return false;
+            }
+        }
     }
 }

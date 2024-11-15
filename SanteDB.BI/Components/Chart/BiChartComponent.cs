@@ -96,12 +96,12 @@ namespace SanteDB.BI.Components.Chart
                     var axisDataExpression = (labels ?? axis).Value;
                     var axisFormat = (labels ?? axis).Attribute("format")?.Value;
                     var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.First()), axisDataExpression);
-                    var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).ToList();
+                    var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).ToList();
 
                     var refSets = element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset");
 
                     // If the axis is formatted, then group
-                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o))).Select(o => String.Format($"{{0:{axisFormat}}}", o)).Distinct();
+                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).Select(o => String.Format($"{{0:{axisFormat}}}", o)).Distinct();
 
                     var refSetSource = element.Attribute("ref-source")?.Value;
                     IEnumerable<dynamic> refData = null;
@@ -148,7 +148,7 @@ namespace SanteDB.BI.Components.Chart
                         writer.WriteString("{ type: '");
 
                         // First determine type
-                        if (typeof(DateTime).IsAssignableFrom(axisSelector.Invoke(ReportViewUtil.ToParameterArray(chartData.First())).GetType()))
+                        if (typeof(DateTime).IsAssignableFrom(axisSelector.Invoke(ReportViewUtil.ToParameterArray(chartData.First(), axisSelector)).GetType()))
                         {
                             var tu = (axis.Attribute("time-unit")?.Value ?? "day");
                             var displayFormat = axis.Attribute("display-format")?.Value;
@@ -175,7 +175,7 @@ namespace SanteDB.BI.Components.Chart
                     // Now process datasets
                     List<ExpandoObject> dataSetOptions = new List<ExpandoObject>();
                     var dataGroup = chartData.GroupBy(o => {
-                        var axsValue = axisSelector.Invoke(ReportViewUtil.ToParameterArray(o));
+                        var axsValue = axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector));
                         return !string.IsNullOrEmpty(axisFormat) ? $"{String.Format($"{{0:{axisFormat}}}", axsValue)}" : axsValue;
                     });
                     var refGroup = refData?.OfType<IDictionary<String, Object>>().GroupBy(o => o[o.Keys.First()], o=>(dynamic)o);
@@ -186,6 +186,11 @@ namespace SanteDB.BI.Components.Chart
                         {
 
                             var elementSource = ds.Name.LocalName.Equals("dataset") ? dataGroup : refGroup;
+
+                            if(!elementSource.Any())
+                            {
+                                continue; 
+                            }
 
                             var dataSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, elementSource.First().First()), ds.Value);
 
@@ -204,31 +209,31 @@ namespace SanteDB.BI.Components.Chart
                                 switch (ds.Attribute("fn")?.Value ?? "sum")
                                 {
                                     case "count":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e, dataSelector)) != null) }).ToArray());
                                         break;
 
                                     case "sum":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector))) }).ToArray());
                                         break;
 
                                     case "avg":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector))) }).ToArray());
                                         break;
 
                                     case "min":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector))) }).ToArray());
                                         break;
 
                                     case "max":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e))) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector))) }).ToArray());
                                         break;
 
                                     case "first":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First())) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First(), dataSelector)) }).ToArray());
                                         break;
 
                                     case "last":
-                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last())) }).ToArray());
+                                        data.Add("data", elementSource.Select(o => new { x = o.Key, y = this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last(), dataSelector)) }).ToArray());
                                         break;
                                 }
                             }
@@ -237,31 +242,31 @@ namespace SanteDB.BI.Components.Chart
                                 switch (ds.Attribute("fn")?.Value ?? "sum")
                                 {
                                     case "count":
-                                        data.Add("data", elementSource.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e)) != null)).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Count(e => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(e, dataSelector)) != null)).ToArray());
                                         break;
 
                                     case "sum":
-                                        data.Add("data", elementSource.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Sum(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector)))).ToArray());
                                         break;
 
                                     case "avg":
-                                        data.Add("data", elementSource.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Average(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector)))).ToArray());
                                         break;
 
                                     case "min":
-                                        data.Add("data", elementSource.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Min(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector)))).ToArray());
                                         break;
 
                                     case "max":
-                                        data.Add("data", elementSource.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e)))).ToArray());
+                                        data.Add("data", elementSource.Select(o => o.Max(e => (decimal?)this.SafeInvoke(dataSelector, 0, ReportViewUtil.ToParameterArray(e, dataSelector)))).ToArray());
                                         break;
 
                                     case "first":
-                                        data.Add("data", elementSource.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First()))).ToArray());
+                                        data.Add("data", elementSource.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.First(), dataSelector))).ToArray());
                                         break;
 
                                     case "last":
-                                        data.Add("data", elementSource.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last()))).ToArray());
+                                        data.Add("data", elementSource.Select(o => this.SafeInvoke(dataSelector, null, ReportViewUtil.ToParameterArray(o.Last(), dataSelector))).ToArray());
                                         break;
                                 }
                             }

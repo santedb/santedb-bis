@@ -84,9 +84,9 @@ namespace SanteDB.BI.Util
             try
             {
 
-                //var clonedDefinition = Activator.CreateInstance(definition.GetType()) as BiDefinition;
-                //clonedDefinition.CopyObjectData(definition);
-                var clonedDefinition = definition;
+                var clonedDefinition = Activator.CreateInstance(definition.GetType()) as BiDefinition;
+                clonedDefinition.CopyObjectData(definition);
+                //var clonedDefinition = definition;
                 parentScope.Push(clonedDefinition);
 
                 if (!String.IsNullOrEmpty(clonedDefinition.Ref))

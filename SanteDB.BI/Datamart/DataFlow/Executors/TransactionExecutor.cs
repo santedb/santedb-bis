@@ -48,17 +48,19 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 var dataSource = bts.InputConnection.ResolveReferenceTo<BiDataFlowStep>(scope).Execute(scope).First() as IDataIntegrator;
                 try
                 {
-                    scope = new DataFlowScope(bts.Name, scope);
-                    using (var tx = dataSource.BeginTransaction())
+                    using (var newScope = new DataFlowScope(bts.Name, scope))
                     {
+                        using (var tx = dataSource.BeginTransaction())
+                        {
 
 
-                        var executeRoot = bts.GetExecutionTreeRoot();
-                        scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bts.FormatExecutionPlan());
-                        // Now we process the terminal objects and execute them
-                        var processedRecords = executeRoot.SelectMany(o => o.Execute(scope)).Count();
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, processedRecords);
-                        dataSource.CommitTransaction();
+                            var executeRoot = bts.GetExecutionTreeRoot();
+                            newScope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bts.FormatExecutionPlan());
+                            // Now we process the terminal objects and execute them
+                            var processedRecords = executeRoot.SelectMany(o => o.Execute(newScope)).Count();
+                            myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, processedRecords);
+                            dataSource.CommitTransaction();
+                        }
                     }
                 }
                 catch (Exception e)

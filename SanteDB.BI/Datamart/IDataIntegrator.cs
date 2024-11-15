@@ -16,6 +16,7 @@
  * the License.
  * 
  */
+using SanteDB.BI.Datamart.DataFlow;
 using SanteDB.BI.Model;
 using System;
 using System.Collections.Generic;
@@ -112,8 +113,9 @@ namespace SanteDB.BI.Datamart
         /// </summary>
         /// <param name="queryToExecute">The SQL to execute</param>
         /// <param name="outputSchema">The output schema</param>
+        /// <param name="argumentProvider">The resolver for argument values</param>
         /// <returns>The results loaded from the database</returns>
-        IEnumerable<dynamic> Query(IEnumerable<BiSqlDefinition> queryToExecute, BiSchemaTableDefinition outputSchema = null);
+        IEnumerable<dynamic> Query(IEnumerable<BiSqlDefinition> queryToExecute, IDataIntegratorVariableProvider argumentProvider, BiSchemaTableDefinition outputSchema = null);
 
         /// <summary>
         /// Inserts the specified <paramref name="dataToInsert"/> in <paramref name="target"/>

@@ -62,45 +62,47 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 });
 
                 // Define this scope
-                scope = new DataFlowScope(bfd.Name, scope);
-
-                // Find all objects which have no input stream dependencies - these represent our "start" objects for the data
-                // flow definition. Data flows don't start with the first object and work backwards, rather they rely on a streaming 
-                // paradigm. 
-
-                // If there is an explicit returning step - then that is our start object
-                if (bfd.ReturnObject?.Resolved is BiDataFlowStep retStep)
+                using (var newScope = new DataFlowScope(bfd.Name, scope))
                 {
-                    scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, $"Execution Plan: {retStep.Name}");
 
-                    var sw = new Stopwatch();
-                    sw.Start();
-                    var nRecs = 0;
-                    foreach (var itm in retStep.Execute(scope))
-                    {
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
-                        yield return itm;
-                    }
-                    sw.Stop();
-                }
-                else
-                {
-                    try
-                    {
-                        var executeRoot = bfd.GetExecutionTreeRoot();
-                        scope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bfd.FormatExecutionPlan());
-                        // Now we process the terminal objects and execute them
-                        var processedRecords = executeRoot.SelectMany(o => o.Execute(scope)).Count();
-                        myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, processedRecords);
-                    }
-                    catch (Exception e)
-                    {
-                        throw new DataFlowException(flowStep, e);
-                    }
+                    // Find all objects which have no input stream dependencies - these represent our "start" objects for the data
+                    // flow definition. Data flows don't start with the first object and work backwards, rather they rely on a streaming 
+                    // paradigm. 
 
-                    yield break;
+                    // If there is an explicit returning step - then that is our start object
+                    if (bfd.ReturnObject?.Resolved is BiDataFlowStep retStep)
+                    {
+                        newScope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, $"Execution Plan: {retStep.Name}");
+
+                        var sw = new Stopwatch();
+                        sw.Start();
+                        var nRecs = 0;
+                        foreach (var itm in retStep.Execute(newScope))
+                        {
+                            myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, ++nRecs);
+                            myAction?.LogSample(DataFlowDiagnosticSampleType.RecordThroughput, (nRecs / (float)sw.ElapsedMilliseconds) * 100.0f);
+                            myAction?.LogSample(DataFlowDiagnosticSampleType.CurrentRecord, itm);
+                            yield return itm;
+                        }
+                        sw.Stop();
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var executeRoot = bfd.GetExecutionTreeRoot();
+                            newScope.Context.Log(System.Diagnostics.Tracing.EventLevel.Verbose, bfd.FormatExecutionPlan());
+                            // Now we process the terminal objects and execute them
+                            var processedRecords = executeRoot.SelectMany(o => o.Execute(newScope)).Count();
+                            myAction?.LogSample(DataFlowDiagnosticSampleType.TotalRecordProcessed, processedRecords);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new DataFlowException(flowStep, e);
+                        }
+
+                        yield break;
+                    }
                 }
             }
             finally

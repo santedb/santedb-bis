@@ -20,6 +20,7 @@ using DynamicExpresso;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -52,9 +53,16 @@ namespace SanteDB.BI.Components
         /// <summary>
         /// Convert to parameter array
         /// </summary>
-        public static object[] ToParameterArray(dynamic context)
+        public static object[] ToParameterArray(dynamic context, DynamicExpresso.Lambda expression)
         {
-            return (context as IDictionary<String, Object>).Select(o => o.Value).ToArray();
+            if(context is IDictionary<String, object> dictValues)
+            {
+                return expression.DeclaredParameters.Select(o => dictValues.TryGetValue(o.Name, out var rv) ? rv : null).ToArray();
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(context), String.Format(ErrorMessages.ARGUMENT_INCOMPATIBLE_TYPE, typeof(IDictionary<String, Object>), context.GetType()));
+            }
         }
 
         /// <summary>
@@ -104,7 +112,8 @@ namespace SanteDB.BI.Components
             }
             else // complex expression
             {
-                return context.CompileExpression(field).Invoke(ToParameterArray(context.ScopedObject));
+                var fld = context.CompileExpression(field);
+                return fld.Invoke(ToParameterArray(context.ScopedObject, fld));
             }
         }
 

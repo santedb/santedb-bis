@@ -179,7 +179,9 @@ namespace SanteDB.BI.Services.Impl
                 if(permittedCutOff > DateTimeOffset.Now)
                 {
                     this.m_tracer.TraceWarning("Datamart {0} cannot be refreshed until {1}", datamart.Id, permittedCutOff);
+#if !DEBUG
                     return null;
+#endif
                 }
             }
 
@@ -431,12 +433,15 @@ namespace SanteDB.BI.Services.Impl
                             var entryObject = datamartDefinition.EntryFlow?.Resolved ?? datamartDefinition.DataFlows.Find(o => o.Name == "main");
                             if (entryObject is BiDataFlowStep dfd)
                             {
-                                var executionScope = new DataFlowScope("$", context);
-                                executionScope.DeclareConstant(BiConstants.AuditDataFlowParameterName, audit);
-                                executionScope.DeclareConstant(BiConstants.PrincipalDataFlowParameterName, AuthenticationContext.Current.Principal.Identity.Name);
-                                executionScope.DeclareConstant(BiConstants.StartTimeDataFlowParameterName, DateTimeOffset.Now);
-                                executionScope.DeclareConstant(BiConstants.DataMartDataFlowParameterName, datamartDefinition.Id);
-                                dfd.Execute(executionScope).Count();
+                                using (var executionScope = new DataFlowScope("$", context))
+                                {
+                                    executionScope.DeclareConstant(BiConstants.ContextIdParameterName, context.Key);
+                                    executionScope.DeclareConstant(BiConstants.AuditDataFlowParameterName, audit);
+                                    executionScope.DeclareConstant(BiConstants.PrincipalDataFlowParameterName, AuthenticationContext.Current.Principal.Identity.Name);
+                                    executionScope.DeclareConstant(BiConstants.StartTimeDataFlowParameterName, DateTimeOffset.Now);
+                                    executionScope.DeclareConstant(BiConstants.DataMartDataFlowParameterName, datamartDefinition.Id);
+                                    dfd.Execute(executionScope).Count();
+                                }
                             }
                             else
                             {
