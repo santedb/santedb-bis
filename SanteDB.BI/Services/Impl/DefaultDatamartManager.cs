@@ -220,6 +220,7 @@ namespace SanteDB.BI.Services.Impl
                 .WithHttpInformation(RestOperationContext.Current?.IncomingRequest)
                 .WithLocalDestination()
                 .WithPrincipal()
+                .WithSensitivity(Core.Model.Attributes.ResourceSensitivityClassification.Administrative)
                 .WithRemoteSource(RemoteEndpointUtil.Current.GetRemoteClient());
 
             try
@@ -277,6 +278,7 @@ namespace SanteDB.BI.Services.Impl
                 .WithEventType("InitDataMart", "http://santedb.org/conceptset/SecurityAuditCode#BI", "Migrate Data Mart")
                 .WithHttpInformation(RestOperationContext.Current?.IncomingRequest)
                 .WithLocalDestination()
+                .WithSensitivity(Core.Model.Attributes.ResourceSensitivityClassification.Administrative)
                 .WithPrincipal()
                 .WithRemoteSource(RemoteEndpointUtil.Current.GetRemoteClient());
 
@@ -382,6 +384,7 @@ namespace SanteDB.BI.Services.Impl
                 .WithEventIdentifier(Core.Model.Audit.EventIdentifierType.ApplicationActivity)
                 .WithEventType("RefreshDataMart", "http://santedb.org/conceptset/SecurityAuditCode#BI", "Refresh Data Mart")
                 .WithHttpInformation(RestOperationContext.Current?.IncomingRequest)
+                .WithSensitivity(Core.Model.Attributes.ResourceSensitivityClassification.Administrative)
                 .WithLocalDestination()
                 .WithPrincipal()
                 .WithRemoteSource(RemoteEndpointUtil.Current.GetRemoteClient());
