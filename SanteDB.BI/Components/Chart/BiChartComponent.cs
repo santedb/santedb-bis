@@ -100,7 +100,7 @@ namespace SanteDB.BI.Components.Chart
                         axisFormat = $":{axisFormat}";
                     }
 
-                    var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.First()), axisDataExpression);
+                    var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.FirstOrDefault()), axisDataExpression);
                     var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).ToList();
 
                     var refSets = element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset");
