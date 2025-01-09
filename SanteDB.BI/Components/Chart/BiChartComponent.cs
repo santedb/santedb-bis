@@ -94,14 +94,19 @@ namespace SanteDB.BI.Components.Chart
                     var axis = element.Element((XNamespace)BiConstants.ComponentNamespace + "xAxis");
 
                     var axisDataExpression = (labels ?? axis).Value;
-                    var axisFormat = (labels ?? axis).Attribute("format")?.Value;
+                    var axisFormat = (labels ?? axis).Attribute("format")?.Value ?? String.Empty;
+                    if(!String.IsNullOrEmpty(axisFormat))
+                    {
+                        axisFormat = $":{axisFormat}";
+                    }
+
                     var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.First()), axisDataExpression);
                     var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).ToList();
 
                     var refSets = element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset");
 
                     // If the axis is formatted, then group
-                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).Select(o => String.Format($"{{0:{axisFormat}}}", o)).Distinct();
+                    var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).Select(o => String.Format($"{{0{axisFormat}}}", o ?? "null")).Distinct();
 
                     var refSetSource = element.Attribute("ref-source")?.Value;
                     IEnumerable<dynamic> refData = null;
