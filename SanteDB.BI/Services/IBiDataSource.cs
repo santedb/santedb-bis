@@ -78,6 +78,6 @@ namespace SanteDB.BI.Services
         /// <param name="periodStarting">The starting time of the period</param>
         /// <param name="periodEnding">The stop time of the period</param>
         /// <returns>The execution result set</returns>
-        BisResultContext ExecuteIndicator(BiIndicatorDefinition indicatorDef, DateTimeOffset periodStarting, DateTimeOffset periodEnding);
+        IEnumerable<BisIndicatorMeasureResultContext> ExecuteIndicator(BiIndicatorDefinition indicatorDef, DateTimeOffset periodStarting, DateTimeOffset periodEnding);
     }
 }
