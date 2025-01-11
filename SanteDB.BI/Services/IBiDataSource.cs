@@ -28,7 +28,6 @@ namespace SanteDB.BI.Services
     public interface IBiDataSource
     {
 
-
         /// <summary>
         /// Executes the specified <paramref name="queryDefinition"/> using the specified <paramref name="parameters"/>
         /// </summary>
@@ -71,5 +70,14 @@ namespace SanteDB.BI.Services
         /// <param name="count">The number of results to retrieve</param>
         /// <returns>The constructed result context</returns>
         BisResultContext ExecuteView(BiViewDefinition viewDef, IDictionary<string, object> parameters, int? offset = null, int? count = null);
+
+        /// <summary>
+        /// Executes the specified <paramref name="indicatorDef"/> and returns a data result context with the results 
+        /// </summary>
+        /// <param name="indicatorDef">The indicator definition</param>
+        /// <param name="periodStarting">The starting time of the period</param>
+        /// <param name="periodEnding">The stop time of the period</param>
+        /// <returns>The execution result set</returns>
+        BisResultContext ExecuteIndicator(BiIndicatorDefinition indicatorDef, DateTimeOffset periodStarting, DateTimeOffset periodEnding);
     }
 }

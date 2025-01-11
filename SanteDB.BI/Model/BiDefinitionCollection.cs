@@ -38,6 +38,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
     [XmlInclude(typeof(BiDatamartDefinition))]
+    [XmlInclude(typeof(BiIndicatorDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiPackage))]
     [XmlInclude(typeof(DatamartInfo))]
