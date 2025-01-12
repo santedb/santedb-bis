@@ -45,7 +45,7 @@ namespace SanteDB.BI.Services
         /// <param name="count">The count of BIS definitions to return</param>
         /// <param name="offset">The offset of the first result</param>
         [Obsolete("Use Query(Expression<Func<TBidDefinition, bool>>)", true)]
-        IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition;
+        IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition, new();
 
         /// <summary>
         /// Query the underlying BI definition repository for the specified <typeparamref name="TBisDefinition"/>
@@ -54,7 +54,7 @@ namespace SanteDB.BI.Services
         /// <param name="filter">The filter to apply</param>
         /// <returns>A <see cref="IQueryResultSet"/> representing the results of the query</returns>
         IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter)
-            where TBisDefinition : BiDefinition;
+            where TBisDefinition : BiDefinition, new();
 
         /// <summary>
         /// Get the specified BI definition by identifier
@@ -62,14 +62,14 @@ namespace SanteDB.BI.Services
         /// <typeparam name="TBisDefinition">The type of definition to fetch</typeparam>
         /// <param name="id">The identifier of the object to fetch</param>
         /// <returns>The fetched definition</returns>
-        TBisDefinition Get<TBisDefinition>(String id) where TBisDefinition : BiDefinition;
+        TBisDefinition Get<TBisDefinition>(String id) where TBisDefinition : BiDefinition, new();
 
         /// <summary>
         /// Removes the specified BI definition from the repository
         /// </summary>
         /// <typeparam name="TBisDefinition">The type of metadata to remove</typeparam>
         /// <param name="id">The id of the defintion to remove</param>
-        void Remove<TBisDefinition>(String id) where TBisDefinition : BiDefinition;
+        void Remove<TBisDefinition>(String id) where TBisDefinition : BiDefinition, new();
 
         /// <summary>
         /// Inserts the specified BI definition into the repository
@@ -77,7 +77,7 @@ namespace SanteDB.BI.Services
         /// <typeparam name="TBisDefinition">The type of BIS definition to be added</typeparam>
         /// <param name="metadata">The metadata to be added</param>
         /// <returns>The inserted data (if the repository made any changes)</returns>
-        TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition;
+        TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition, new();
 
     }
 }

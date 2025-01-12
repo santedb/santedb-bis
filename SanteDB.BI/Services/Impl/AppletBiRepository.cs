@@ -108,7 +108,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Gets the specified object from the specified type repository
         /// </summary>
-        public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition
+        public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition, new()
         {
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions) &&
                 definitions.TryGetValue(id, out Object asset))
@@ -138,7 +138,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Inserts the specified definition into the cache
         /// </summary>
-        public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition
+        public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition, new()
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
@@ -177,7 +177,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Queries the specified definition type
         /// </summary>
-        public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition
+        public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition, new()
         {
             return this.Query<TBisDefinition>(filter).Skip(offset).Take(count ?? 100);
         }
@@ -185,7 +185,7 @@ namespace SanteDB.BI.Services.Impl
         /// <summary>
         /// Remove the specified object from the repository
         /// </summary>
-        public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
+        public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition, new()
         {
             // Demand unrestricted metadata
             if (AuthenticationContext.Current.Principal != AuthenticationContext.SystemPrincipal)
@@ -308,7 +308,7 @@ namespace SanteDB.BI.Services.Impl
 
         /// <inheritdoc/>
         public IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter)
-            where TBisDefinition : BiDefinition
+            where TBisDefinition : BiDefinition, new()
         {
             // TODO: If the definition is an applet asset then load it
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out Dictionary<String, Object> definitions))

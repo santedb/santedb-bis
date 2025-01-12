@@ -40,6 +40,8 @@ namespace SanteDB.Rest.BIS
     [ServiceKnownResource(typeof(BiViewDefinition))]
     [ServiceKnownResource(typeof(BiRenderFormatDefinition))]
     [ServiceKnownResource(typeof(BiDataFlowDefinition))]
+    [ServiceKnownResource(typeof(BiIndicatorDefinition))]
+    [ServiceKnownResource(typeof(BiIndicatorPeriodDefinition))]
     [ServiceKnownResource(typeof(BiDatamartDefinition))]
     [ServiceKnownResource(typeof(DatamartInfo))]
     [ServiceProduces("application/json")]
