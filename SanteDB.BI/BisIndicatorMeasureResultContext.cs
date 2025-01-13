@@ -13,6 +13,7 @@ namespace SanteDB.BI
     {
         public BisIndicatorMeasureResultContext(
             BiIndicatorDefinition indicatorDefinition,
+            BiIndicatorMeasureDefinition measureDefinition,
             String measureOrStratifierName,
             IDictionary<string, object> arguments, 
             IBiDataSource dataSource, 
@@ -20,9 +21,15 @@ namespace SanteDB.BI
             DateTime startTime
         ) : base(indicatorDefinition.Query, arguments, dataSource, results, startTime)
         {
+            this.Measure = measureDefinition;
             this.Indicator = indicatorDefinition;
-            this.MeasureOrStratifierName = measureOrStratifierName;
+            this.StratifierPath = measureOrStratifierName;
         }
+
+        /// <summary>
+        /// Gets the measure that generated this result set
+        /// </summary>
+        public BiIndicatorMeasureDefinition Measure { get; }
 
         /// <summary>
         /// Gets the indicator definition that this result context is based on
@@ -31,6 +38,6 @@ namespace SanteDB.BI
         /// <summary>
         /// Mesure and stratification names
         /// </summary>
-        public string MeasureOrStratifierName { get; }
+        public string StratifierPath { get; }
     }
 }

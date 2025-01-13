@@ -25,6 +25,18 @@ namespace SanteDB.BI.Model
         public BiQueryDefinition Query { get; set; }
 
         /// <summary>
+        /// Gets or sets the period of the measure (how often the measure is to be taken)
+        /// </summary>
+        [XmlElement("period"), JsonProperty("period")]
+        public BiIndicatorPeriodDefinition Period { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subject reference
+        /// </summary>
+        [XmlElement("subject"), JsonProperty("subject")]
+        public BiIndicatorSubjectFieldRef Subject { get; set; }
+
+        /// <summary>
         /// Gets or sets the measures in this indicator
         /// </summary>
         [XmlArray("measures"), XmlArrayItem("add"), JsonProperty("measures")]
@@ -33,11 +45,19 @@ namespace SanteDB.BI.Model
         /// <inheritdoc/>
         internal override IEnumerable<DetectedIssue> Validate(bool isRoot)
         {
-            if(this.Measures?.Any() != true)
+            if (this.Period == null)
             {
-                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.measure.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Measures)), DetectedIssueKeys.InvalidDataIssue);
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.indicator.period.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Period)), DetectedIssueKeys.InvalidDataIssue);
             }
-            foreach(var itm in base.Validate(isRoot))
+            if (this.Measures?.Any() != true)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.indicator.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Measures)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            if (this.Subject == null)
+            {
+                yield return new DetectedIssue(DetectedIssuePriorityType.Error, "bi.indicator.subject.missing", String.Format(ErrorMessages.MISSING_VALUE, nameof(Subject)), DetectedIssueKeys.InvalidDataIssue);
+            }
+            foreach (var itm in base.Validate(isRoot))
             {
                 yield return itm;
             }

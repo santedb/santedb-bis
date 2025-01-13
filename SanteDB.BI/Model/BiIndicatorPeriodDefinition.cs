@@ -25,6 +25,15 @@ namespace SanteDB.BI.Model
         public static readonly BiIndicatorPeriod Empty = new BiIndicatorPeriod(default(DateTime), default(DateTime), default(long));
 
         /// <summary>
+        /// Create new period 
+        /// </summary>
+        /// <param name="start">Start date</param>
+        /// <param name="end">End date</param>
+        public BiIndicatorPeriod(DateTime start, DateTime end) : this(start, end, default(long))
+        {
+        }
+
+        /// <summary>
         /// Indicator period constructor
         /// </summary>
         internal BiIndicatorPeriod(DateTime start, DateTime end, long index)

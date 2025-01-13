@@ -75,9 +75,9 @@ namespace SanteDB.BI.Services
         /// Executes the specified <paramref name="indicatorDef"/> and returns a data result context with the results 
         /// </summary>
         /// <param name="indicatorDef">The indicator definition</param>
-        /// <param name="periodStarting">The starting time of the period</param>
-        /// <param name="periodEnding">The stop time of the period</param>
+        /// <param name="period">The starting time of the period</param>
+        /// <param name="subjectId">If filtering to a specific subject</param>
         /// <returns>The execution result set</returns>
-        IEnumerable<BisIndicatorMeasureResultContext> ExecuteIndicator(BiIndicatorDefinition indicatorDef, DateTimeOffset periodStarting, DateTimeOffset periodEnding);
+        IEnumerable<BisIndicatorMeasureResultContext> ExecuteIndicator(BiIndicatorDefinition indicatorDef, BiIndicatorPeriod period, String subjectId = null);
     }
 }
