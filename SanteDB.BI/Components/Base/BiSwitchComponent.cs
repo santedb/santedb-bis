@@ -56,7 +56,7 @@ namespace SanteDB.BI.Components.Base
                 }
                 else if (!MapUtil.TryConvert(xmlValue, fieldValue?.GetType() ?? typeof(object), out value))
                 {
-                    throw new InvalidOperationException($"Switch statement from {fieldValue} to {xmlValue}");
+                    value = ReportViewUtil.GetValue(context, xmlValue);
                 }
 
                 // Operator

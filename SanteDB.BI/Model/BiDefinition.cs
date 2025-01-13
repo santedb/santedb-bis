@@ -23,6 +23,7 @@ using SanteDB.BI.Util;
 using SanteDB.Core.BusinessRules;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Attributes;
+using SanteDB.Core.Model.Interfaces;
 using SanteDB.Core.Model.Serialization;
 using System;
 using System.Collections;
@@ -90,10 +91,12 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiSchemaTableDefinition))]
     [XmlInclude(typeof(BiSchemaViewDefinition))]
     [XmlInclude(typeof(BiDatamartDefinition))]
+    [XmlInclude(typeof(BiIndicatorDefinition))]
+    [XmlInclude(typeof(BiIndicatorPeriodDefinition))]
     [XmlInclude(typeof(BiPackage))]
     [XmlInclude(typeof(BiReportViewDefinition))]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiDefinition
+    public class BiDefinition : IIdentifiedResource
     {
         // Serializers
         private static List<XmlSerializer> s_serializers = new List<XmlSerializer>(10);
@@ -116,6 +119,8 @@ namespace SanteDB.BI.Model
                 typeof(BiReportViewDefinition),
                 typeof(BiDatamartDefinition),
                 typeof(BiSchemaTableDefinition),
+                typeof(BiIndicatorDefinition),
+                typeof(BiIndicatorPeriodDefinition),
                 typeof(BiSchemaViewDefinition),
                 typeof(BiDataFlowDefinition),
                 typeof(BiReferenceDataSourceDefinition),
@@ -161,6 +166,11 @@ namespace SanteDB.BI.Model
         public Guid Uuid { get; set; }
 
         /// <summary>
+        /// UUID has been specified
+        /// </summary>
+        public bool ShouldSerializeUuid() => this.Uuid != Guid.Empty;
+
+        /// <summary>
         /// Gets or sets the label
         /// </summary>
         [XmlAttribute("label"), JsonProperty("label")]
@@ -189,6 +199,22 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("status"), JsonProperty("status")]
         public BiDefinitionStatus Status { get; set; }
+
+        /// <summary>
+        /// Status has been specified
+        /// </summary>
+        [XmlIgnore, JsonIgnore]
+        public bool StatusSpecified { get; set; }
+
+        /// <inheritdoc/>
+        [XmlIgnore, JsonIgnore]
+        Guid? IIdentifiedResource.Key { get => this.Uuid; set => this.Uuid = value.GetValueOrDefault(); }
+
+        /// <inheritdoc/>
+        string IIdentifiedResource.Tag => $"{this.GetType().GetSerializationName()}/{this.Id}";
+
+        /// <inheritdoc/>
+        DateTimeOffset IIdentifiedResource.ModifiedOn => DateTimeOffset.MinValue;
 
         /// <summary>
         /// Saves this metadata definition to the specified stream

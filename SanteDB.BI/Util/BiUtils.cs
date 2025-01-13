@@ -129,16 +129,22 @@ namespace SanteDB.BI.Util
                     retVal.Name = definition.Name ?? retVal.Name;
 
                     // This value is a resolved wrapper - so we want to set its resolved property
-                    if (clonedDefinition is BiObjectReference bor)
+                    switch (clonedDefinition)
                     {
-                        bor.Resolved = retVal;
-                        return clonedDefinition;
+                        case BiObjectReference bor:
+                            bor.Resolved = retVal;
+                            return clonedDefinition;
+                        case BiIndicatorPeriodDefinition bip:
+                            var rvDfn = retVal as BiIndicatorPeriodDefinition;
+                            rvDfn.PeriodStartParameter = bip.PeriodStartParameter?? rvDfn.PeriodStartParameter;
+                            rvDfn.PeriodEndParameter = bip.PeriodEndParameter ?? rvDfn.PeriodEndParameter;
+                            return rvDfn;
+                        default:
+                            clonedDefinition.Ref = null;
+                            return retVal;
                     }
-                    else
-                    {
-                        clonedDefinition.Ref = null;
-                        return retVal;
-                    }
+
+
                 }
                 else  // Cascade
                 {

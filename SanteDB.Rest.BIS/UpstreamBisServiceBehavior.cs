@@ -63,7 +63,6 @@ namespace SanteDB.Rest.BIS
                   ApplicationServiceContext.Current.GetService<IRestClientFactory>(),
                   ApplicationServiceContext.Current.GetService<IBiMetadataRepository>(),
                   ApplicationServiceContext.Current.GetService<IBiDatamartRepository>()
-
                 )
         {
 

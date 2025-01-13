@@ -78,5 +78,18 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("public"), JsonProperty("public")]
         public bool IsPublic { get; set; }
+
+        /// <summary>
+        /// Last modified by
+        /// </summary>
+        [XmlElement("lastModified"), JsonProperty("lastModified")]
+        public DateTime LastModified { get; set; }
+
+        /// <summary>
+        /// Last modified by
+        /// </summary>
+        [XmlElement("lastModifiedProvenance"), JsonProperty("lastModifiedProvenance")]
+        public Guid LastModifiedBy { get; set; }
+
     }
 }

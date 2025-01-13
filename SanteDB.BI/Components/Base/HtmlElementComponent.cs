@@ -18,6 +18,7 @@
  */
 using SanteDB.BI.Rendering;
 using System;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -28,6 +29,8 @@ namespace SanteDB.BI.Components.Base
     /// </summary>
     public class HtmlElementComponent : IBiViewComponent
     {
+        private static readonly Regex m_extractBindingRegex = new Regex(@"\$\{([^\}\:]+)(?::([^\}]+))?\}", RegexOptions.Compiled);
+
         /// <summary>
         /// Handles all HTML
         /// </summary>
@@ -56,7 +59,17 @@ namespace SanteDB.BI.Components.Base
                 }
                 else if (node is XText xtext)
                 {
-                    var text = xtext.Value;
+                    var text = m_extractBindingRegex.Replace(xtext.Value, (o) =>
+                    {
+                        // Attempt to get the binding parameter
+                        var format = String.Empty;
+                        if (!String.IsNullOrEmpty(o.Groups[2].Value))
+                        {
+                            format = $":{o.Groups[2].Value}";
+                        }
+                        return String.Format($"{{0}}{format}", ReportViewUtil.GetValue(context, o.Groups[1].Value));
+                    });
+
                     if (!String.IsNullOrWhiteSpace(text))
                     {
                         writer.WriteString(text);

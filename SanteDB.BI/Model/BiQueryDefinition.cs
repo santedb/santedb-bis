@@ -45,6 +45,12 @@ namespace SanteDB.BI.Model
         }
 
         /// <summary>
+        /// Adds other registered queries in the BI subsystem to the WITH clause
+        /// </summary>
+        [XmlElement("with"), JsonProperty("with")]
+        public List<BiQueryDefinition> WithQuery { get; set; }
+
+        /// <summary>
         /// Gets or sets the data sources
         /// </summary>
         [XmlArray("dataSources"), XmlArrayItem("add"), JsonProperty("dataSources")]

@@ -18,6 +18,8 @@
  */
 using Newtonsoft.Json;
 using SanteDB.BI.Datamart;
+using SanteDB.Core.Model.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -38,12 +40,13 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(BiRenderFormatDefinition))]
     [XmlInclude(typeof(BiDataFlowDefinition))]
     [XmlInclude(typeof(BiDatamartDefinition))]
+    [XmlInclude(typeof(BiIndicatorDefinition))]
     [XmlInclude(typeof(BiDataSourceDefinition))]
     [XmlInclude(typeof(BiPackage))]
     [XmlInclude(typeof(DatamartInfo))]
     [XmlInclude(typeof(DatamartLogEntry))]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiDefinitionCollection
+    public class BiDefinitionCollection : IResourceCollection
     {
 
         /// <summary>
@@ -86,5 +89,19 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("totalResults"), JsonProperty("totalResults")]
         public int? TotalResults { get; set; }
+
+        /// <inheritdoc/>
+        [JsonIgnore, XmlIgnore]
+        IEnumerable<IIdentifiedResource> IResourceCollection.Item => this.Resources;
+
+        /// <inheritdoc/>
+        [JsonIgnore, XmlIgnore]
+        int? IResourceCollection.TotalResults => this.TotalResults;
+
+        /// <exception cref="NotSupportedException"></exception>
+        void IResourceCollection.AddAnnotationToAll(object annotation)
+        {
+            throw new NotSupportedException();
+        }
     }
 }

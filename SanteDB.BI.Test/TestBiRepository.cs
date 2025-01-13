@@ -63,7 +63,7 @@ namespace SanteDB.BI.Test
         }
 
         /// <inheritdoc/>
-        public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition
+        public TBisDefinition Get<TBisDefinition>(string id) where TBisDefinition : BiDefinition, new()
         {
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var itms))
             {
@@ -77,7 +77,7 @@ namespace SanteDB.BI.Test
         }
 
         /// <inheritdoc/>
-        public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition
+        public TBisDefinition Insert<TBisDefinition>(TBisDefinition metadata) where TBisDefinition : BiDefinition, new()
         {
             if (!this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var items))
             {
@@ -90,11 +90,11 @@ namespace SanteDB.BI.Test
         }
 
         /// <inheritdoc/>
-        public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition
+        public IEnumerable<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter, int offset, int? count) where TBisDefinition : BiDefinition, new()
             => this.Query(filter).Skip(offset).Take(count ?? 100);
 
         /// <inheritdoc/>
-        public IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter) where TBisDefinition : BiDefinition
+        public IQueryResultSet<TBisDefinition> Query<TBisDefinition>(Expression<Func<TBisDefinition, bool>> filter) where TBisDefinition : BiDefinition, new()
         {
             if (this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var defs))
             {
@@ -104,7 +104,7 @@ namespace SanteDB.BI.Test
         }
 
         /// <inheritdoc/>
-        public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition
+        public void Remove<TBisDefinition>(string id) where TBisDefinition : BiDefinition, new()
         {
             if (!this.m_definitionCache.TryGetValue(typeof(TBisDefinition), out var items))
             {

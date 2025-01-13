@@ -29,6 +29,8 @@ using System.Text;
 
 namespace SanteDB.BI
 {
+
+
     /// <summary>
     /// Represents an execution context containing results
     /// </summary>
@@ -70,16 +72,17 @@ namespace SanteDB.BI
         /// <summary>
         /// Creates a new result context
         /// </summary>
-        public BisResultContext(BiQueryDefinition definition,
+        public BisResultContext(
+            BiQueryDefinition definition,
             IDictionary<String, Object> arguments,
-            IBiDataSource source,
+            IBiDataSource dataSource,
             IEnumerable<dynamic> results,
             DateTime startTime
             )
         {
             this.Arguments = arguments;
             this.Records = results;
-            this.DataSource = source;
+            this.DataSource = dataSource;
             this.QueryDefinition = definition;
             this.StartTime = startTime;
             this.StopTime = DateTime.Now;

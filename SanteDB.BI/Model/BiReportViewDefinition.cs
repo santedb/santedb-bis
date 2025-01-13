@@ -26,6 +26,24 @@ using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
+
+    /// <summary>
+    /// The classification of view type
+    /// </summary>
+    [XmlType(nameof(BiReportViewType), Namespace = BiConstants.XmlNamespace)]
+    public enum BiReportViewType
+    {
+        /// <summary>
+        /// The report is a tabular report
+        /// </summary>
+        [XmlEnum("tabular")]
+        Tabular,
+        /// <summary>
+        /// The report is a chart
+        /// </summary>
+        [XmlEnum("chart")]
+        Chart
+    }
     /// <summary>
     /// Represents a view
     /// </summary>
@@ -35,6 +53,24 @@ namespace SanteDB.BI.Model
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage] // Serialization class
     public class BiReportViewDefinition : BiDefinition
     {
+
+        /// <summary>
+        /// Gets or sets the type of report view
+        /// </summary>
+        [XmlAttribute("type"), JsonProperty("type")]
+        public BiReportViewType Type { get; set; }
+
+        /// <summary>
+        /// Don't allow the export of this view
+        /// </summary>
+        [XmlAttribute("no-export"), JsonProperty("noExport")]
+        public bool PreventExport { get; set; }
+
+        /// <summary>
+        /// Don't allow printing
+        /// </summary>
+        [XmlAttribute("no-print"), JsonProperty("noPrint")]
+        public bool PreventPrinting { get; set; }
 
         /// <summary>
         /// Gets or sets the body of the element
