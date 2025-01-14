@@ -92,7 +92,7 @@ namespace SanteDB.BI.Model
         /// Gets or sets the name of the column
         /// </summary>
         [XmlAttribute("name"), JsonProperty("name")]
-        public string Name { get; set; }
+        public virtual string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the selection text for the column

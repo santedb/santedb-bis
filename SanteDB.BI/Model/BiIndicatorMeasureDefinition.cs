@@ -14,20 +14,18 @@ namespace SanteDB.BI.Model
     public class BiIndicatorMeasureDefinition : BiDefinition
     {
 
-
         /// <summary>
-        /// Gets or sets the column definition for the numerator
+        /// Gets or sets the computations
         /// </summary>
-        [XmlElement("numerator"), JsonProperty("numerator")]
-        public BiAggregateSqlColumnReference Numerator { get; set; }
-
-
-        /// <summary>
-        /// Gets or sets the column definition for the denominator
-        /// </summary>
-        [XmlElement("denominator"), JsonProperty("denominator")]
-        public BiAggregateSqlColumnReference Denominator { get; set; }
-
+        [XmlArray("computed-by"),
+            XmlArrayItem("numerator", typeof(BiMeasureComputationNumerator)),
+            XmlArrayItem("numerator-exclusion" ,typeof(BiMeasureComputationNumeratorExclusion)),
+            XmlArrayItem("denominator", typeof(BiMeasureComputationDenominator)),
+            XmlArrayItem("denominator-exclusion", typeof(BiMeasureComputationDenominatorExclusion)),
+            XmlArrayItem("score", typeof(BiMeasureComputationScore)), 
+            JsonProperty("computedBy")]
+        public List<BiMeasureComputationColumnReference> Computation { get; set; }
+        
         /// <summary>
         /// Gets or sets the stratification definitions
         /// </summary>
