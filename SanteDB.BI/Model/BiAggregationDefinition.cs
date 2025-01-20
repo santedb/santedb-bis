@@ -47,5 +47,6 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlArray("order"), XmlArrayItem("column"), JsonProperty("order")]
         public List<BiOrderSqlColumnReference> Sorting { get; set; }
+
     }
 }
