@@ -375,7 +375,8 @@ namespace SanteDB.BI.Model
             {
                 return bid.Id == this.Id &&
                     bid.Name == this.Name &&
-                    bid.Ref == this.Ref;
+                    bid.Ref == this.Ref &&
+                    bid.GetType() == this.GetType();
             }
             return base.Equals(obj);
         }

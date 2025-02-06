@@ -17,36 +17,34 @@
  * 
  */
 using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
 
 namespace SanteDB.BI.Model
 {
+
     /// <summary>
-    /// Represents a BI Aggregation definition
+    /// Ordering direction
     /// </summary>
-    [XmlType(nameof(BiAggregationDefinition), Namespace = BiConstants.XmlNamespace), JsonObject]
-    [ExcludeFromCodeCoverage] // Serialization class
-    public class BiAggregationDefinition : BiSqlDefinition
+    [XmlType(nameof(BiOrderColumnDirection), Namespace = BiConstants.XmlNamespace)]
+    public enum BiOrderColumnDirection
     {
-        /// <summary>
-        /// Gets or sets the groupings
-        /// </summary>
-        [XmlArray("grouping"), XmlArrayItem("column"), JsonProperty("grouping")]
-        public List<BiSqlColumnReference> Groupings { get; set; }
+        [XmlEnum("asc")]
+        Ascending,
+        [XmlEnum("desc")]
+        Descending
+    }
+
+    /// <summary>
+    /// Ordering
+    /// </summary>
+    [XmlType(nameof(BiOrderSqlColumnReference), Namespace = BiConstants.XmlNamespace)]
+    public class BiOrderSqlColumnReference : BiSqlColumnReference
+    {
 
         /// <summary>
-        /// Gets or sets the selectors
+        /// Gets or sets the sorting direction
         /// </summary>
-        [XmlArray("select"), XmlArrayItem("column"), JsonProperty("select")]
-        public List<BiAggregateSqlColumnReference> Columns { get; set; }
-        
-        /// <summary>
-        /// Gets or sets the selectors
-        /// </summary>
-        [XmlArray("order"), XmlArrayItem("column"), JsonProperty("order")]
-        public List<BiOrderSqlColumnReference> Sorting { get; set; }
-
+        [XmlAttribute("direction"), JsonProperty("direction")]
+        public BiOrderColumnDirection Direction { get; set; }
     }
 }

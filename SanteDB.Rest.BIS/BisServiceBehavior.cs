@@ -57,27 +57,6 @@ namespace SanteDB.Rest.BIS
     public class BisServiceBehavior : IBisServiceContract
     {
 
-        /// <summary>
-        /// Default context parameters to be sent to all reports
-        /// </summary>
-        protected readonly Dictionary<String, Func<Object>> m_contextParams = new Dictionary<string, Func<object>>()
-        {
-            { "Context.UserName", () => AuthenticationContext.Current.Principal.Identity.Name },
-            { "Context.UserId", () => {
-                using(AuthenticationContext.EnterSystemContext()){
-                    return ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUser(AuthenticationContext.Current.Principal.Identity)?.Key;
-                }
-            }
-            },
-            { "Context.UserEntityId", () => {
-                using(AuthenticationContext.EnterSystemContext()){
-                    return ApplicationServiceContext.Current.GetService<ISecurityRepositoryService>().GetUserEntity(AuthenticationContext.Current.Principal.Identity)?.Key;
-                }
-                }
-            },
-            { "Context.Language", () => AuthenticationContext.Current.Principal.GetClaimValue(SanteDBClaimTypes.Language) ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
-        };
-
         // Default tracer
         private readonly Tracer m_tracer = Tracer.GetTracer(typeof(BisServiceBehavior));
 
@@ -390,29 +369,7 @@ namespace SanteDB.Rest.BIS
         /// <summary>
         /// Creates a parameter dictionary from the HTTP request context
         /// </summary>
-        private IDictionary<String, Object> CreateParameterDictionary()
-        {
-            // Parameters
-            Dictionary<String, object> parameters = RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString().ToDictionary().ToDictionary(o => o.Key, o => o.Value.Length == 1 ? o.Value[0] : (object)o.Value);
-
-            // Context parameters
-            foreach (var kv in this.m_contextParams)
-            {
-                if (!parameters.ContainsKey(kv.Key))
-                {
-                    try
-                    {
-                        parameters.Add(kv.Key, kv.Value());
-                    }
-                    catch (Exception e)
-                    {
-                        this.m_tracer.TraceWarning("Cannot hydrate parameter {0} : {1}", kv.Key, e);
-                    }
-                }
-            }
-
-            return parameters;
-        }
+        private IDictionary<String, Object> CreateParameterDictionary() =>  RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString().ToDictionary().ToDictionary(o => o.Key, o => o.Value.Length == 1 ? o.Value[0] : (object)o.Value);
 
         /// <summary>
         /// Render the specified query

@@ -80,7 +80,7 @@ namespace SanteDB.BI.Components.Data
                         var selKey = $"{resourceType.Name}.{render}";
                         if (!this.m_selectors.TryGetValue(selKey, out var selDelegate))
                         {
-                            var selExpression = QueryExpressionParser.BuildPropertySelector(resourceType, render);
+                            var selExpression = QueryExpressionParser.BuildPropertySelector(resourceType, render, true);
                             var parm = Expression.Parameter(typeof(Object));
                             selDelegate = Expression.Lambda<Func<Object, Object>>(Expression.Invoke(selExpression, Expression.Convert(parm, resourceType)), parm).Compile();
                             this.m_selectors.TryAdd(selKey, selDelegate);
