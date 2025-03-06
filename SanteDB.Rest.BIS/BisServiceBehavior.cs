@@ -344,7 +344,10 @@ namespace SanteDB.Rest.BIS
 
                 int offset = 0, count = 100;
                 _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpOffsetParameterName], out offset);
-                _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName], out count);
+                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName], out count))
+                {
+                    count = 100;
+                }
 
                 var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
                 return queryData;
