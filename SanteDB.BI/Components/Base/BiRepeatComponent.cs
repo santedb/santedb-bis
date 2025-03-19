@@ -72,9 +72,10 @@ namespace SanteDB.BI.Components.Base
                 {
                     foreach (var itm in enumerable)
                     {
-                        foreach (var el in element.Elements())
+                        var subCtx = new RenderContext(context, itm);
+                        foreach (var el in element.Nodes())
                         {
-                            ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                            ReportViewUtil.Write(writer, el, subCtx);
                         }
                     }
                 }

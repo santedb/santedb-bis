@@ -17,6 +17,7 @@
  * 
  */
 using DynamicExpresso;
+using SanteDB.BI.Datamart.DataFlow.Executors;
 using SanteDB.BI.Rendering;
 using System;
 using System.Collections;
@@ -177,6 +178,18 @@ namespace SanteDB.BI.Components.Data
             writer.WriteStartElement("table", BiConstants.HtmlNamespace);
             if (element.Attribute("source") != null)
             {
+                // Render the title of the table
+                var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
+                if(title != null)
+                {
+                    writer.WriteStartElement("caption", BiConstants.HtmlNamespace);
+                    foreach (var xel in title.Nodes())
+                    {
+                        ReportViewUtil.Write(writer, xel, context);
+                    }
+                    writer.WriteEndElement();
+                }
+
                 // Render from source
                 using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
                 {

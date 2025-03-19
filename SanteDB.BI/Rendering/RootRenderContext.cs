@@ -165,12 +165,25 @@ namespace SanteDB.BI.Rendering
                     this.m_scopedObject = new ExpandoObject();
                     (this.m_scopedObject as IDictionary<String, Object>).Add("Report", this.m_report);
                     (this.m_scopedObject as IDictionary<String, Object>).Add("View", this.m_viewName);
-                    (this.m_scopedObject as IDictionary<String, Object>).Add("Parameters", this.Parameters);
+                    (this.m_scopedObject as IDictionary<String, Object>).Add("Parameters", this.GetParameterExpando());
                     Func<String, BisResultContext> getOrCreateQuery = (qname) => this.GetOrExecuteQuery(qname);
                     (this.m_scopedObject as IDictionary<String, Object>).Add("DataSource", getOrCreateQuery);
                 }
                 return this.m_scopedObject;
             }
+        }
+
+        /// <summary>
+        /// Get the parameter expando object
+        /// </summary>
+        private ExpandoObject GetParameterExpando()
+        {
+            var retVal = new ExpandoObject() as IDictionary<String, Object>;
+            foreach(var kv in this.Parameters)
+            {
+                retVal.Add(kv.Key, kv.Value);
+            }
+            return (ExpandoObject)retVal;
         }
 
 

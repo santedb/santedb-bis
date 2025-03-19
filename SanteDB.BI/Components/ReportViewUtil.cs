@@ -93,7 +93,7 @@ namespace SanteDB.BI.Components
             // First, find the current data context
             var field = expressionText;
             object value = null;
-
+            
             // Is there an expression?
             if (field.Equals("."))
             {
@@ -181,9 +181,28 @@ namespace SanteDB.BI.Components
         {
             if (nd is XElement el)
             {
+                // Is there a control expression
+                var onlyIfAttr = el.Attribute((XNamespace)BiConstants.ComponentNamespace + "if");
+                if(onlyIfAttr != null)
+                {
+                    // Attempt to get the if statement
+                    try
+                    {
+                        var result = ReportViewUtil.GetValue(context, onlyIfAttr.Value);
+                        if(result is bool bl && !bl || result == null)
+                        {
+                            return;
+                        }
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                }
+
                 // TODO get helper here
                 IBiViewComponent component = ReportViewUtil.GetViewComponent(el.Name);
-
+                
                 if (component == null)
                 {
                     writer.WriteComment($"WARNING: No component for {el.Name} is registered");
