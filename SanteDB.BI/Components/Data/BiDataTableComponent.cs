@@ -176,6 +176,12 @@ namespace SanteDB.BI.Components.Data
             var columnList = element.Elements((XNamespace)BiConstants.ComponentNamespace + "column").ToArray();
 
             writer.WriteStartElement("table", BiConstants.HtmlNamespace);
+
+            foreach(var itm in element.Attributes().Where(r=>r.Name != "source"))
+            {
+                writer.WriteAttributeString(itm.Name.LocalName, itm.Value);
+            }
+
             if (element.Attribute("source") != null)
             {
                 // Render the title of the table
