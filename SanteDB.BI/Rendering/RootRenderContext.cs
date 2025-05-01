@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (C) 2021 - 2024, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
+ * Copyright (C) 2021 - 2025, SanteSuite Inc. and the SanteSuite Contributors (See NOTICE.md for full copyright notices)
  * Copyright (C) 2019 - 2021, Fyfe Software Inc. and the SanteSuite Contributors
  * Portions Copyright (C) 2015-2018 Mohawk College of Applied Arts and Technology
  * 
@@ -15,6 +15,8 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
+ * User: fyfej
+ * Date: 2023-6-21
  */
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
@@ -165,12 +167,25 @@ namespace SanteDB.BI.Rendering
                     this.m_scopedObject = new ExpandoObject();
                     (this.m_scopedObject as IDictionary<String, Object>).Add("Report", this.m_report);
                     (this.m_scopedObject as IDictionary<String, Object>).Add("View", this.m_viewName);
-                    (this.m_scopedObject as IDictionary<String, Object>).Add("Parameters", this.Parameters);
+                    (this.m_scopedObject as IDictionary<String, Object>).Add("Parameters", this.GetParameterExpando());
                     Func<String, BisResultContext> getOrCreateQuery = (qname) => this.GetOrExecuteQuery(qname);
                     (this.m_scopedObject as IDictionary<String, Object>).Add("DataSource", getOrCreateQuery);
                 }
                 return this.m_scopedObject;
             }
+        }
+
+        /// <summary>
+        /// Get the parameter expando object
+        /// </summary>
+        private ExpandoObject GetParameterExpando()
+        {
+            var retVal = new ExpandoObject() as IDictionary<String, Object>;
+            foreach(var kv in this.Parameters)
+            {
+                retVal.Add(kv.Key, kv.Value);
+            }
+            return (ExpandoObject)retVal;
         }
 
 
