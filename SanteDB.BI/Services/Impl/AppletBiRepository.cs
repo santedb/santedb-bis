@@ -91,15 +91,19 @@ namespace SanteDB.BI.Services.Impl
             this.m_serviceManager = serviceManager;
             this.m_defaultDataSource = defaultDataSource;
 
-            // Re-scans the loaded applets for definitions when the collection has changed
-            this.m_appletManager.Changed += (oa, ea) =>
-            {
-                this.LoadAllDefinitions();
-            };
+
 
             if (this.m_solutionManagerService != null && this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
             {
                 notify.CollectionChanged += (oa, eo) =>
+                {
+                    this.LoadAllDefinitions();
+                };
+            }
+            else
+            {
+                // Re-scans the loaded applets for definitions when the collection has changed
+                this.m_appletManager.Changed += (oa, ea) =>
                 {
                     this.LoadAllDefinitions();
                 };
@@ -332,7 +336,7 @@ namespace SanteDB.BI.Services.Impl
                     })
                     .OfType<TBisDefinition>()
                     .Where(filter.Compile()));
-                    //.Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
+                //.Where(o => (o.MetaData?.Demands?.Count ?? 0) == 0 || o.MetaData?.Demands?.All(d => this.m_policyEnforcementService.SoftDemand(d, AuthenticationContext.Current.Principal)) == true));
             }
 
             return new MemoryQueryResultSet<TBisDefinition>();
