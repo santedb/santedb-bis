@@ -91,23 +91,11 @@ namespace SanteDB.BI.Services.Impl
             this.m_serviceManager = serviceManager;
             this.m_defaultDataSource = defaultDataSource;
 
-
-
-            if (this.m_solutionManagerService != null && this.m_solutionManagerService.Solutions is INotifyCollectionChanged notify)
+            // Re-scans the loaded applets for definitions when the collection has changed
+            this.m_appletManager.Changed += (oa, ea) =>
             {
-                notify.CollectionChanged += (oa, eo) =>
-                {
-                    this.LoadAllDefinitions();
-                };
-            }
-            else
-            {
-                // Re-scans the loaded applets for definitions when the collection has changed
-                this.m_appletManager.Changed += (oa, ea) =>
-                {
-                    this.LoadAllDefinitions();
-                };
-            }
+                this.LoadAllDefinitions();
+            };
             this.LoadAllDefinitions();
         }
 
