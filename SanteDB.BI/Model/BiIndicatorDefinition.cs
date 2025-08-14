@@ -51,6 +51,12 @@ namespace SanteDB.BI.Model
         public BiIndicatorPeriodDefinition Period { get; set; }
 
         /// <summary>
+        /// Gets or ses the reference ranges
+        /// </summary>
+        [XmlElement("referenceRange"), JsonProperty("referenceRange")]
+        public List<BiSqlDefinition> ReferenceRanges { get; set; }
+
+        /// <summary>
         /// Gets or sets the subject reference
         /// </summary>
         [XmlElement("subject"), JsonProperty("subject")]
