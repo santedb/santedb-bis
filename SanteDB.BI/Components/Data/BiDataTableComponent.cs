@@ -179,7 +179,7 @@ namespace SanteDB.BI.Components.Data
 
             writer.WriteStartElement("table", BiConstants.HtmlNamespace);
 
-            foreach(var itm in element.Attributes().Where(r=>r.Name != "source"))
+            foreach(var itm in element.Attributes().Where(r=>r.Name != "source" && r.Name != "xmlns"))
             {
                 writer.WriteAttributeString(itm.Name.LocalName, itm.Value);
             }
