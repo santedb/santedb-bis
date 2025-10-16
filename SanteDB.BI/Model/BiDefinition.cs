@@ -194,7 +194,7 @@ namespace SanteDB.BI.Model
         /// Allows for the association of an external identifier
         /// </summary>
         [XmlElement("identifier"), JsonProperty("identifier")]
-        public BiIdentity Identifier { get; set; }
+        public List<BiIdentity> Identifier { get; set; }
 
         /// <summary>
         /// Gets or sets the status of the BI artifact
@@ -359,9 +359,9 @@ namespace SanteDB.BI.Model
         {
             var retVal = Activator.CreateInstance(this.GetType()) as BiDefinition;
             retVal.Id = this.Id;
-            if (this.Identifier != null)
+            if (this.Identifier.Any())
             {
-                retVal.Identifier = new BiIdentity().CopyObjectData(this.Identifier);
+                retVal.Identifier = this.Identifier.Select(i=> new BiIdentity().CopyObjectData(i)).ToList();
             }
             retVal.Name = this.Name;
             retVal.Label = this.Label;
