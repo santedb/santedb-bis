@@ -18,10 +18,13 @@
  * User: fyfej
  * Date: 2025-1-10
  */
+using DocumentFormat.OpenXml.Wordprocessing;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
+using SanteDB.Core.i18n;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SanteDB.BI
@@ -55,9 +58,43 @@ namespace SanteDB.BI
         /// Gets the indicator definition that this result context is based on
         /// </summary>
         public BiIndicatorDefinition Indicator { get; }
+
         /// <summary>
         /// Mesure and stratification names
         /// </summary>
-        public string StratifierPath { get; }
+        public String StratifierPath { get; }
+
+        /// <summary>
+        /// Get all identifiers on the current result set
+        /// </summary>
+        /// <returns>The identity of the appropriate stratum</returns>
+        public List<BiIdentity> GetResultSetIdentifiers()
+        {
+            var stratumPath = new Queue<String>(this.StratifierPath.Split('/').Skip(1));
+            if(!stratumPath.Any())
+            {
+                return this.Measure.Identifier;
+            }
+            else
+            {
+                var rootStratumName = stratumPath.Dequeue();
+                var searchStratum = this.Measure.Stratifiers.Find(o => o.Name == rootStratumName); // First represents the first stratifier
+                while(stratumPath.Any())
+                {
+                    if (searchStratum.ThenBy.Name == stratumPath.Peek())
+                    {
+                        searchStratum = searchStratum.ThenBy;
+                        stratumPath.Dequeue();
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(String.Format(ErrorMessages.DATA_STRUCTURE_NOT_APPROPRIATE, nameof(BiIndicatorMeasureStratifier.ThenBy), $" the stratum name {searchStratum.ThenBy.Name} does not match expected value of {stratumPath.Peek()}"));
+                    }
+
+                }
+                return searchStratum.Identifier;
+            }
+        }
     }
+
 }
