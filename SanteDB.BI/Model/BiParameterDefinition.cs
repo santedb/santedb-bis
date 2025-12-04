@@ -143,6 +143,13 @@ namespace SanteDB.BI.Model
         [XmlAttribute("default"), JsonProperty("default")]
         public string DefaultValue { get; set; }
 
+
+        /// <summary>
+        /// If there is an expression which is used to specify the fixed value for this parameter - this is the 
+        /// </summary>
+        [XmlAttribute("fixedValueExpression"), JsonProperty("fixedValueExpression")]
+        public string FixedValueExpression { get; set; }
+
         /// <summary>
         /// Required value
         /// </summary>
