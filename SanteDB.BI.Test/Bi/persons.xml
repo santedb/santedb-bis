@@ -42,6 +42,8 @@
 	          psn_tbl.DOB,
 	          psn_tbl.DCSD_UTC,
 	          gndr.MNEMONIC AS gender,
+	          MRTL.MNEMONIC AS MARITAL_STS,
+			  
 	          plt.LNG_CS AS primary_language,
 	          occ.MNEMONIC AS occupation,
 	          vip.MNEMONIC AS vip,
@@ -54,6 +56,7 @@
 	          LEFT JOIN cd_vrsn_tbl occ ON (occ.CD_ID = psn_tbl.OCC_CD_ID AND occ.HEAD = 1)
 	          LEFT JOIN cd_vrsn_tbl vip ON (vip.CD_ID = psn_tbl.VIP_STS_CD_ID AND vip.HEAD = 1)
 	          LEFT JOIN cd_vrsn_tbl nat ON (nat.CD_ID = psn_tbl.NAT_CD_ID AND nat.HEAD = 1)
+	          LEFT JOIN cd_vrsn_tbl MRTL ON (MRTL.CD_ID = MRTL_STS_CD_ID  AND MRTL.OBSLT_UTC IS NULL)
 	          LEFT JOIN ent_rel_tbl dsdl ON (dsdl.SRC_ENT_ID = ENT_VRSN_tbl.ENT_ID AND dsdl.REL_TYP_CD_ID = x'72175F4580F5E84786BDB5CE25D351F9' AND dsdl.OBSLT_VRSN_SEQ_ID IS NULL)
 	          LEFT JOIN ent_tel_tbl home ON (home.ent_id = ENT_VRSN_tbl.ENT_ID AND home.OBSLT_VRSN_SEQ_ID IS NULL AND home.USE_CD_ID = x'D8AFFAC490FC30438B4BE4E64C86B87B')
 	          LEFT JOIN ent_tel_tbl cell ON (cell.ent_id = ENT_VRSN_TBL.ent_id AND cell.OBSLT_VRSN_SEQ_ID IS NULL AND cell.TYP_CD_ID  = x'E9A4C0C138424440B89B9C9798995B90' OR cell.USE_CD_ID = x'0EF961E139590E43861AF8E885CC353D')
@@ -76,6 +79,7 @@
 	          psn_tbl.DCSD_UTC,
 	          gndr.MNEMONIC AS gender,
 	          plt.LNG_CS AS primary_language,
+	          MRTL.MNEMONIC AS MARITAL_STS,  
 	          occ.MNEMONIC AS occupation,
 	          vip.MNEMONIC AS vip,
 	          nat.MNEMONIC AS nationality,
@@ -87,6 +91,7 @@
 	          LEFT JOIN cd_vrsn_tbl occ ON (occ.CD_ID = psn_tbl.OCC_CD_ID AND occ.HEAD)
 	          LEFT JOIN cd_vrsn_tbl vip ON (vip.CD_ID = psn_tbl.VIP_STS_CD_ID AND vip.HEAD)
 	          LEFT JOIN cd_vrsn_tbl nat ON (nat.CD_ID = psn_tbl.NAT_CD_ID AND nat.HEAD)
+	          LEFT JOIN cd_vrsn_tbl MRTL ON (MRTL.CD_ID = MRTL_STS_CD_ID  AND MRTL.OBSLT_UTC IS NULL)
 	          LEFT JOIN ent_rel_tbl dsdl ON (dsdl.SRC_ENT_ID = ENT_VRSN_tbl.ENT_ID AND dsdl.REL_TYP_CD_ID = '455F1772-F580-47E8-86BD-B5CE25D351F9' AND dsdl.OBSLT_VRSN_SEQ_ID IS NULL)
 	          LEFT JOIN ent_tel_tbl home ON (home.ent_id = ENT_VRSN_tbl.ENT_ID AND home.OBSLT_VRSN_SEQ_ID IS NULL AND home.USE_CD_ID = 'f3132fc0-aadd-40b7-b875-961c40695389')
 	          LEFT JOIN ent_tel_tbl cell ON (cell.ent_id = ENT_VRSN_TBL.ent_id AND cell.OBSLT_VRSN_SEQ_ID IS NULL AND cell.TYP_CD_ID  = 'c1c0a4e9-4238-4044-b89b-9c9798995b90' OR cell.USE_CD_ID = 'E161F90E-5939-430E-861A-F8E885CC353D')
