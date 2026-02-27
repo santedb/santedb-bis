@@ -237,6 +237,7 @@ namespace SanteDB.BI.Services.Impl
         {
             var bisDefinitions = appletCollection.SelectMany(o => o.Assets)
                 .Where(o => o.Name.StartsWith("bi/") && o.Name.EndsWith(".xml"))
+                .ToArray()
                 .Select(o =>
                 {
                     try
