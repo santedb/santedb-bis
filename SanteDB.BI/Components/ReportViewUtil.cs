@@ -128,7 +128,7 @@ namespace SanteDB.BI.Components
         public static Lambda CompileExpression(this IRenderContext me, String fieldOrExpression)
         {
             IDictionary<String, Lambda> exprs = me.Parent?.Tags["expressions"] as IDictionary<String, Lambda>;
-
+            
             Lambda evaluator = null;
             if (exprs?.TryGetValue(fieldOrExpression, out evaluator) != true)
             {

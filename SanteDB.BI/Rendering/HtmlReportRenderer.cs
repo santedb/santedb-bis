@@ -77,13 +77,12 @@ namespace SanteDB.BI.Rendering
             using (var xw = XmlWriter.Create(retVal, new XmlWriterSettings()
             {
                 CloseOutput = false,
-
+                OmitXmlDeclaration = true,
 #if DEBUG
                 Indent = true,
                 NewLineOnAttributes = true
 #else
-                Indent = false,
-                OmitXmlDeclaration = true
+                Indent = false
 #endif
             }))
             {
