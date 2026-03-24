@@ -82,7 +82,7 @@ namespace SanteDB.BI.Rendering
                 Indent = true,
                 NewLineOnAttributes = true
 #else
-                Indent = false,
+                Indent = false
 #endif
 
             }))

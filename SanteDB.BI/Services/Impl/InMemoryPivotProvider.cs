@@ -20,6 +20,7 @@
  */
 using Microsoft.CSharp.RuntimeBinder;
 using SanteDB.BI.Model;
+using SanteDB.BI.Util;
 using SanteDB.Core.Model.Query;
 using System;
 using System.Collections;
@@ -111,15 +112,12 @@ namespace SanteDB.BI.Services.Impl
                 var keyValue = tuple[pivot.Key];
                 if (currentTuple == null)
                 {
-                    currentTuple = new ExpandoObject();
-                    currentTuple.Add(pivot.Key, keyValue);
+                    currentTuple = this.CreateNewAggregateTuple(tuple, pivot);
                 }
                 else if (!keyValue.Equals(currentTuple[pivot.Key]))
                 {
                     yield return this.AggregateTuple(currentTuple, pivot);
-
-                    currentTuple = new ExpandoObject();
-                    currentTuple.Add(pivot.Key, keyValue);
+                    currentTuple = this.CreateNewAggregateTuple(tuple, pivot);
                 }
 
                 // Add extra columns that are in the result set but not the column selector, key, or value
@@ -150,9 +148,6 @@ namespace SanteDB.BI.Services.Impl
                 {
                     currentTuple[columnName] = tuple[pivot.Value];
                 }
-
-
-
             }
 
             if (currentTuple != null)
@@ -161,6 +156,16 @@ namespace SanteDB.BI.Services.Impl
             }
 
 
+        }
+
+        /// <summary>
+        /// Create a new aggregate tuple source
+        /// </summary>
+        private ExpandoObject CreateNewAggregateTuple(IDictionary<String, Object> currentTuple, BiViewPivotDefinition pivot)
+        {
+            var retVal = new ExpandoObject() as IDictionary<String, Object>;
+            retVal.Add(pivot.Key, currentTuple[pivot.Key]);
+            return retVal as ExpandoObject;
         }
 
         /// <summary>
