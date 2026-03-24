@@ -73,7 +73,7 @@ namespace SanteDB.BI.Services.Impl
             this.m_auditService = auditService;
             this.m_configuration = configurationManager.GetSection<BiConfigurationSection>();
 
-            ApplicationServiceContext.Current.Started += (o,e) =>
+            ApplicationServiceContext.Current.Started += (o, e) =>
                 threadPoolService.QueueUserWorkItem(_ => this.InitializeDataSources());
 
         }
@@ -83,27 +83,28 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         private void InitializeDataSources()
         {
-            using(AuthenticationContext.EnterSystemContext()) { 
-            // Register the default datamarts
-            if(this.m_configuration?.AutoRegisterDatamarts?.Any() == true)
+            using (AuthenticationContext.EnterSystemContext())
             {
-                foreach(var cnf in this.m_configuration.AutoRegisterDatamarts)
+                // Register the default datamarts
+                if (this.m_configuration?.AutoRegisterDatamarts?.Any() == true)
                 {
-                    if(!this.m_datamartRegistry.Find(o=>o.Id == cnf).Any())
+                    foreach (var cnf in this.m_configuration.AutoRegisterDatamarts)
                     {
-                        var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == cnf).FirstOrDefault();
-                        if(definition == null)
+                        if (!this.m_datamartRegistry.Find(o => o.Id == cnf).Any())
                         {
-                            this.m_tracer.TraceWarning("Cannot automatically register {0}...", cnf);
-                        }
-                        else
-                        {
-                            this.m_tracer.TraceInfo("Registering {0}...", cnf);
-                            this.m_datamartRegistry.Register(definition);
+                            var definition = this.m_metadataRepository.Query<BiDatamartDefinition>(o => o.Id == cnf).FirstOrDefault();
+                            if (definition == null)
+                            {
+                                this.m_tracer.TraceWarning("Cannot automatically register {0}...", cnf);
+                            }
+                            else
+                            {
+                                this.m_tracer.TraceInfo("Registering {0}...", cnf);
+                                this.m_datamartRegistry.Register(definition);
+                            }
                         }
                     }
                 }
-            }
 
                 foreach (var registeredDatamart in this.m_datamartRegistry.Find(o => o.ObsoletionTime == null))
                 {
@@ -178,7 +179,7 @@ namespace SanteDB.BI.Services.Impl
                         permittedCutOff = lastExec?.Finished.GetValueOrDefault().AddMonths(1) ?? DateTimeOffset.MinValue;
                         break;
                 }
-                if(permittedCutOff > DateTimeOffset.Now)
+                if (permittedCutOff > DateTimeOffset.Now)
                 {
                     this.m_tracer.TraceWarning("Datamart {0} cannot be refreshed until {1}", datamart.Id, permittedCutOff);
 #if !DEBUG
@@ -231,35 +232,40 @@ namespace SanteDB.BI.Services.Impl
                 var context = this.GetDataFlowExecutionContext(datamartDefinition, DataFlowExecutionPurposeType.DatabaseManagement | DataFlowExecutionPurposeType.SchemaManagement);
                 if (context == null) return;
 
-                using (context)
+                try
                 {
-                    try
+                    using (var integrator = context.GetIntegrator(datamartDefinition.Produces))
                     {
-                        using (var integrator = context.GetIntegrator(datamartDefinition.Produces))
+                        this.m_tracer.TraceInfo("Dropping datamart schema {0}", datamartDefinition.Id);
+                        try
                         {
-                            this.m_tracer.TraceInfo("Dropping datamart schema {0}", datamartDefinition.Id);
                             integrator.DropDatabase();
-
-                            audit.WithAuditableObjects(new AuditableObject()
-                            {
-                                IDTypeCode = AuditableObjectIdType.Custom,
-                                CustomIdTypeCode = new AuditCode(nameof(BiDataSourceDefinition), "http://santedb.org/bi"),
-                                LifecycleType = AuditableObjectLifecycle.PermanentErasure,
-                                NameData = datamartDefinition.Produces.Name,
-                                ObjectId = datamartDefinition.Produces.Id,
-                                Role = AuditableObjectRole.DataRepository,
-                                Type = AuditableObjectType.SystemObject
-                            });
                         }
-                        context.SetOutcome(DataFlowExecutionOutcomeType.Success);
-                    }
-                    catch (Exception e)
-                    {
-                        context.Log(System.Diagnostics.Tracing.EventLevel.Error, $"Destroy {datamartDefinition} failed with {e.ToHumanReadableString()}");
-                        context.SetOutcome(DataFlowExecutionOutcomeType.Fail);
+                        catch (InvalidOperationException)
+                        {
+                            this.m_tracer.TraceWarning("Cannot drop underlying database");
+                        }
+                        audit.WithAuditableObjects(new AuditableObject()
+                        {
+                            IDTypeCode = AuditableObjectIdType.Custom,
+                            CustomIdTypeCode = new AuditCode(nameof(BiDataSourceDefinition), "http://santedb.org/bi"),
+                            LifecycleType = AuditableObjectLifecycle.PermanentErasure,
+                            NameData = datamartDefinition.Produces.Name,
+                            ObjectId = datamartDefinition.Produces.Id,
+                            Role = AuditableObjectRole.DataRepository,
+                            Type = AuditableObjectType.SystemObject
+                        });
                     }
                 }
-                this.m_metadataRepository.Remove<BiDataSourceDefinition>(datamartDefinition.Produces.Id);
+                finally
+                {
+                    context.Dispose();
+                }
+
+                using (AuthenticationContext.EnterSystemContext())
+                {
+                    this.m_metadataRepository.Remove<BiDataSourceDefinition>(datamartDefinition.Produces.Id);
+                }
                 audit.WithOutcome(OutcomeIndicator.Success).Send();
 
             }
@@ -470,7 +476,7 @@ namespace SanteDB.BI.Services.Impl
                     }
                 }
             }
-            catch(BiException)
+            catch (BiException)
             {
                 throw;
             }

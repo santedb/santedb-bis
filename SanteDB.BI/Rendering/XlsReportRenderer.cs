@@ -102,6 +102,12 @@ namespace SanteDB.BI.Rendering
                                                 {
                                                     nextRow = true;
                                                 }
+                                                else if (currentWorksheet.ActiveCell.IsMerged())
+                                                {
+                                                    // Rowspan? Let's go to the cell that isn't merged
+                                                    var mergeRange = currentWorksheet.ActiveCell.MergedRange();
+                                                    currentWorksheet.ActiveCell = mergeRange.LastCell().CellBelow().WorksheetRow().FirstCell();
+                                                }
                                                 else
                                                 {
                                                     currentWorksheet.ActiveCell = currentWorksheet.ActiveCell.CellBelow().WorksheetRow().FirstCell();
@@ -119,7 +125,16 @@ namespace SanteDB.BI.Rendering
                                                 {
                                                     if (currentWorksheet.ActiveCell.IsMerged())
                                                     {
-                                                        currentWorksheet.ActiveCell = currentWorksheet.ActiveCell.MergedRange().LastCell().CellRight();
+                                                        // Is the merge range horizontal or vertiacal
+                                                        var mergeRange = currentWorksheet.ActiveCell.MergedRange();
+                                                        if (mergeRange.FirstCell().Address.RowNumber == mergeRange.LastCell().Address.RowNumber)
+                                                        {
+                                                            currentWorksheet.ActiveCell = currentWorksheet.ActiveCell.MergedRange().LastCell().CellRight();
+                                                        }
+                                                        else
+                                                        {
+                                                            currentWorksheet.ActiveCell = currentWorksheet.ActiveCell.MergedRange().FirstCell().CellRight();
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -129,6 +144,10 @@ namespace SanteDB.BI.Rendering
                                                 if (Int32.TryParse(xr.GetAttribute("colspan"), out var colspan))
                                                 {
                                                     currentWorksheet.Range(currentWorksheet.ActiveCell.Address, currentWorksheet.Cell(currentWorksheet.ActiveCell.Address.RowNumber, currentWorksheet.ActiveCell.Address.ColumnNumber + colspan - 1).Address).Merge();
+                                                }
+                                                if (Int32.TryParse(xr.GetAttribute("rowspan"), out var rowspan))
+                                                {
+                                                    currentWorksheet.Range(currentWorksheet.ActiveCell.Address, currentWorksheet.Cell(currentWorksheet.ActiveCell.Address.RowNumber + rowspan - 1, currentWorksheet.ActiveCell.Address.ColumnNumber).Address).Merge();
                                                 }
 
                                                 if (xr.LocalName == "th")

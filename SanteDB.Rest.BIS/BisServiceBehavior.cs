@@ -411,7 +411,7 @@ namespace SanteDB.Rest.BIS
                 }
                 else
                 {
-                    var expression = QueryExpressionParser.BuildLinqExpression(rt, RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString());
+                    var expression = QueryExpressionParser.BuildLinqExpression(rt, RestOperationContext.Current.IncomingRequest.Url.Query.ParseQueryString(), "b", forceLoad: true, coalesceOutput: true, alwaysCoalesce: true);
                     // Execute the query
                     var retVal = (this.m_metadataRepository.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query),
                         new Type[] { rt },

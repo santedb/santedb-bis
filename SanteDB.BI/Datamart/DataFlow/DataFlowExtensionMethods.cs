@@ -127,7 +127,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <summary>
         /// Set a system variable if not already set 
         /// </summary>
-        internal static void SetSysVar<TValue>(this DataFlowScope scope, string name, TValue value)
+        internal static void SetSysVar<TValue>(this DataFlowScope scope, string name, TValue value, bool isReference = false)
         {
             if (scope == null)
             {
@@ -135,7 +135,7 @@ namespace SanteDB.BI.Datamart.DataFlow
             }
             else if (!String.IsNullOrEmpty(name))
             {
-                scope.DeclareConstant($"${name}", value);
+                scope.DeclareConstant($"${name}", value, isReference);
             }
         }
 
