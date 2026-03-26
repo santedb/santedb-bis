@@ -22,6 +22,7 @@ using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.Core.i18n;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -68,19 +69,24 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                 }
 
                 // Create a sub-scope for the call
-                using (var newScope = new DataFlowScope($"{scope.Name}_call", scope.Root))
+                using (var newScope = new DataFlowScope($"{scope.Name}_call", scope))
                 {
                     dcs.Arguments.ForEach(a =>
                     {
                         var argValue = a.SimpleValue;
                         if (a.SimpleValue is BiObjectReference bir)
                         {
+
                             // If there's already an open or actioned object in scope use it!
                             if (scope.TryGetSysVar(bir.Ref, out object val))
                             {
-                                newScope.SetSysVar(bir.Ref, val);
+                                newScope.SetSysVar(bir.Ref, val, isReference: true);
+                                argValue = bir.Resolved;
                             }
-                            argValue = bir.Resolved;
+                            else
+                            {
+                                throw new ArgumentException(String.Format(ErrorMessages.REFERENCE_NOT_FOUND, bir.Ref));
+                            }
                         }
 
                         newScope.DeclareConstant(a.Name, argValue);

@@ -43,16 +43,22 @@ namespace SanteDB.BI.Datamart.DataFlow
             /// <summary>
             /// Create a new scoped variable
             /// </summary>
-            public BiFlowScopeVariable(bool constant, dynamic value)
+            public BiFlowScopeVariable(bool constant, dynamic value, bool isReference)
             {
                 this.Readonly = constant;
                 this.m_value = value;
+                this.IsReference = isReference;
             }
 
             /// <summary>
             /// True if the variable is constant
             /// </summary>
             public bool Readonly { get; }
+
+            /// <summary>
+            /// Gets the scope that declared this variable
+            /// </summary>
+            public bool IsReference { get; }
 
             /// <summary>
             /// The value of the variable
@@ -177,15 +183,16 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <exception cref="ArgumentException">The varaible has already been declared</exception>
         /// <param name="initialValue">The initial value to set</param>
         /// <param name="name">The name of the scope variable</param>
-        internal void DeclareVariable(String name, dynamic initialValue)
+        /// <param name="isReference">True if the constant <paramref name="initialValue"/> was drawn from another scope</param>
+        internal void DeclareVariable(String name, dynamic initialValue, bool isReference = false)
         {
-            if (this.IsVisible(name))
+            if (this.IsVisible(name) && !isReference)
             {
                 throw new ArgumentException(name);
             }
             else
             {
-                this.m_variables.Add(name, new BiFlowScopeVariable(false, initialValue));
+                this.m_variables.Add(name, new BiFlowScopeVariable(false, initialValue, isReference));
             }
         }
 
@@ -195,15 +202,16 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// <exception cref="ArgumentException">The varaible has already been declared</exception>
         /// <param name="initialValue">The initial value to set</param>
         /// <param name="name">The name of the scope variable</param>
-        internal void DeclareConstant(String name, dynamic initialValue)
+        /// <param name="isReference">True if the constant <paramref name="initialValue"/> was drawn from another scope</param>
+        internal void DeclareConstant(String name, dynamic initialValue, bool isReference = false)
         {
-            if (this.IsVisible(name))
+            if (this.IsVisible(name) && !isReference)
             {
                 throw new ArgumentException(name);
             }
             else
             {
-                this.m_variables.Add(name, new BiFlowScopeVariable(true, initialValue));
+                this.m_variables.Add(name, new BiFlowScopeVariable(true, initialValue, isReference));
             }
         }
 
@@ -217,7 +225,7 @@ namespace SanteDB.BI.Datamart.DataFlow
         {
             if (this.m_variables.TryGetValue(name, out var valStruct))
             {
-                if(valStruct.Readonly)
+                if (valStruct.Readonly)
                 {
                     throw new InvalidOperationException(String.Format(ErrorMessages.OBJECT_READONLY, name));
                 }
@@ -238,23 +246,20 @@ namespace SanteDB.BI.Datamart.DataFlow
         /// </summary>
         public void Dispose()
         {
-            if (this.m_parent == null)
+            foreach (var itm in this.m_variables.Where(o=>!o.Value.IsReference).ToArray())
             {
-                foreach (var itm in this.m_variables.ToArray())
+                if (itm.Value.Value is IDisposable disp) // The parent does not see this object instance
                 {
-                    if (itm.Value.Value is IDisposable disp)
-                    {
-                        disp.Dispose();
-                    }
-                    this.m_variables.Remove(itm.Key);
+                    disp.Dispose();
                 }
+                this.m_variables.Remove(itm.Key);
             }
         }
 
         /// <inheritdoc/>
         bool IDataIntegratorVariableProvider.TryGetVariable(string variableName, out dynamic value)
         {
-            if(this.m_variables.TryGetValue(variableName, out var valueDef))
+            if (this.m_variables.TryGetValue(variableName, out var valueDef))
             {
                 value = valueDef.Value;
                 return true;
@@ -265,5 +270,6 @@ namespace SanteDB.BI.Datamart.DataFlow
                 return false;
             }
         }
+
     }
 }

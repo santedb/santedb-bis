@@ -21,10 +21,12 @@
 using DynamicExpresso;
 using SanteDB.BI.Datamart.DataFlow.Executors;
 using SanteDB.BI.Rendering;
+using SanteDB.Core.i18n;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -50,7 +52,7 @@ namespace SanteDB.BI.Components.Data
             {
                 var subFieldStack = new Queue<List<XElement>>();
                 subFieldStack.Enqueue(new List<XElement>(fieldTemplates));
-
+                var maxRowStack = this.PlanRowSpans(fieldTemplates);
                 // Emit the fields
                 while (subFieldStack.Any())
                 {
@@ -68,7 +70,6 @@ namespace SanteDB.BI.Components.Data
                         var subFields = fld.Elements((XNamespace)BiConstants.ComponentNamespace + "column");
                         if (subFields.Any())
                         {
-                            writer.WriteAttributeString("colspan", subFields.Count().ToString());
                             if (subFieldStack.Any())
                             {
                                 subFieldStack.Peek().AddRange(subFields);
@@ -78,9 +79,18 @@ namespace SanteDB.BI.Components.Data
                                 subFieldStack.Enqueue(subFields.ToList());
                             }
                         }
-                        else
+
+                        if (!String.IsNullOrEmpty(fld.Attribute("rowspan")?.Value))
                         {
-                            writer.WriteAttributeString("rowspan", $"{subFieldStack.Count + 1}");
+                            writer.WriteAttributeString("rowspan", fld.Attribute("rowspan")?.Value);
+                        }
+                        if (!String.IsNullOrEmpty(fld.Attribute("colspan")?.Value))
+                        {
+                            writer.WriteAttributeString("colspan", fld.Attribute("colspan")?.Value);
+                        }
+                        if (!String.IsNullOrEmpty(fld.Attribute("_offset")?.Value))
+                        {
+                            writer.WriteAttributeString("_offset", fld.Attribute("_offset")?.Value);
                         }
 
                         // Write out header elements
@@ -106,6 +116,49 @@ namespace SanteDB.BI.Components.Data
                 writer.WriteEndElement();
             }
             writer.WriteEndElement();
+        }
+
+        private int PlanRowSpans(XElement[] fieldTemplates, int currentLevel = 0, int offsetFromParent = 0)
+        {
+            int maxDepth = currentLevel;
+            var columns = fieldTemplates.Where(o => o.Name == (XNamespace)BiConstants.ComponentNamespace + "column").ToArray();
+            foreach (var itm in columns)
+            {
+                var subContents = itm.Elements().Where(o => o.Name == (XNamespace)BiConstants.ComponentNamespace + "column");
+                if (subContents.Any())
+                {
+                    var contentDepth = PlanRowSpans(subContents.ToArray(), currentLevel + 1, Array.IndexOf(columns, itm));
+                    if (contentDepth > maxDepth)
+                    {
+                        maxDepth = contentDepth;
+                    }
+                }
+            }
+
+            // We only support one level of nesting for now - otherwise the user must specify these 
+            foreach (var xe in columns)
+            {
+
+                if (offsetFromParent > 0)
+                {
+                    xe.SetAttributeValue("_offset", offsetFromParent);
+                }
+
+                if (xe.Attribute("rowspan") != null ||
+                    maxDepth - currentLevel == 0) continue;
+
+                var subContents = xe.Elements().Where(o => o.Name == (XNamespace)BiConstants.ComponentNamespace + "column");
+                if (subContents.Any())
+                {
+                    xe.SetAttributeValue("rowspan", maxDepth - currentLevel);
+                    xe.SetAttributeValue("colspan", subContents.Count());
+                }
+                else
+                {
+                    xe.SetAttributeValue("rowspan", (maxDepth - currentLevel) + 1);
+                }
+            }
+            return maxDepth;
         }
 
         /// <summary>
@@ -160,9 +213,16 @@ namespace SanteDB.BI.Components.Data
                     {
                         ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
                     }
-                    else if(nd is XText tx)
+                    else if (nd is XText tx)
                     {
-                        writer.WriteString(tx.Value);
+                        if (String.IsNullOrWhiteSpace(tx.Value))
+                        {
+                            writer.WriteString(" ");
+                        }
+                        else
+                        {
+                            writer.WriteString(tx.Value.Trim());
+                        }
                     }
                 }
 
@@ -179,7 +239,7 @@ namespace SanteDB.BI.Components.Data
 
             writer.WriteStartElement("table", BiConstants.HtmlNamespace);
 
-            foreach(var itm in element.Attributes().Where(r=>r.Name != "source" && r.Name != "xmlns"))
+            foreach (var itm in element.Attributes().Where(r => r.Name != "source" && r.Name != "xmlns"))
             {
                 writer.WriteAttributeString(itm.Name.LocalName, itm.Value);
             }
@@ -188,7 +248,7 @@ namespace SanteDB.BI.Components.Data
             {
                 // Render the title of the table
                 var title = element.Element((XNamespace)BiConstants.ComponentNamespace + "title");
-                if(title != null)
+                if (title != null)
                 {
                     writer.WriteStartElement("caption", BiConstants.HtmlNamespace);
                     foreach (var xel in title.Nodes())

@@ -19,41 +19,43 @@
  - User: fyfej
  - Date: 2023-6-21
  -->
-<xs:schema xmlns:tns="http://santedb.org/bi" elementFormDefault="qualified" targetNamespace="http://santedb.org/bi" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:tns="http://santedb.org/bi" elementFormDefault="qualified"
+	targetNamespace="http://santedb.org/bi" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:import namespace="http://microsoft.com/wsdl/types/" schemaLocation="BaseTypes.xsd" />
-	<xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="xhtml.xsd"/>
+	<xs:import namespace="http://www.w3.org/1999/xhtml" schemaLocation="xhtml.xsd" />
 	<xs:complexType name="BiAggregationDefinition">
 		<xs:complexContent mixed="true">
 			<xs:extension base="tns:BiSqlDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="grouping" type="tns:ArrayOfBiSqlColumnReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="select" type="tns:ArrayOfBiAggregateSqlColumnReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="order" type="tns:ArrayOfBiSqlColumnReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="grouping"
+						type="tns:ArrayOfBiSqlColumnReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="select"
+						type="tns:ArrayOfBiAggregateSqlColumnReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="order"
+						type="tns:ArrayOfBiOrderSqlColumnReference" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="BiSqlDefinition" mixed="true">
-		<xs:complexContent mixed="false">
-			<xs:extension base="tns:BiDefinition">
-				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="providers" type="tns:ArrayOfString2" />
-					<xs:element minOccurs="0" maxOccurs="1" name="materialize" type="tns:BiMaterializeDefinition" />
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="1" name="providers"
+				type="tns:ArrayOfString2" />
+			<xs:element minOccurs="0" maxOccurs="1" name="materialize"
+				type="tns:BiMaterializeDefinition" />
+		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiDefinition">
 		<xs:sequence>
 			<xs:element minOccurs="0" maxOccurs="1" name="meta" type="tns:BiMetadata" />
-			<xs:element minOccurs="0" maxOccurs="1" name="identifier" type="tns:BiIdentity" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="identifier" type="tns:BiIdentity" />
 		</xs:sequence>
 		<xs:attribute name="name" type="xs:string" />
 		<xs:attribute name="id" type="xs:string" />
-		<xs:attribute name="uuid" xmlns:q1="http://microsoft.com/wsdl/types/" type="q1:guid" use="required" />
+		<xs:attribute name="uuid" xmlns:q1="http://microsoft.com/wsdl/types/" type="q1:guid" />
 		<xs:attribute name="label" type="xs:string" />
 		<xs:attribute name="ref" type="xs:string" />
-		<xs:attribute name="status" type="tns:BiDefinitionStatus" use="required" />
+		<xs:attribute name="status" type="tns:BiDefinitionStatus" />
 	</xs:complexType>
 	<xs:complexType name="BiMetadata">
 		<xs:sequence>
@@ -61,7 +63,10 @@
 			<xs:element minOccurs="0" maxOccurs="1" name="authors" type="tns:ArrayOfString" />
 			<xs:element minOccurs="0" maxOccurs="1" name="annotation" type="tns:BiAnnotation" />
 			<xs:element minOccurs="0" maxOccurs="1" name="policies" type="tns:ArrayOfString1" />
-			<xs:element minOccurs="1" maxOccurs="1" name="public" type="xs:boolean" />
+			<xs:element minOccurs="0" maxOccurs="1" name="public" type="xs:boolean" />
+			<xs:element minOccurs="0" maxOccurs="1" name="lastModified" type="xs:dateTime" />
+			<xs:element minOccurs="0" maxOccurs="1" name="lastModifiedProvenance"
+				xmlns:q2="http://microsoft.com/wsdl/types/" type="q2:guid" />
 		</xs:sequence>
 		<xs:attribute name="version" type="xs:string" />
 	</xs:complexType>
@@ -71,18 +76,21 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfString">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="xs:string" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiAnnotation">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="1" xmlns:q2="http://www.w3.org/1999/xhtml" ref="q2:div" />
+			<xs:element minOccurs="0" maxOccurs="1" xmlns:q3="http://www.w3.org/1999/xhtml"
+				ref="q3:div" />
 		</xs:sequence>
 		<xs:attribute name="lang" type="xs:string" />
 	</xs:complexType>
 	<xs:complexType name="ArrayOfString1">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="demand" nillable="true" type="xs:string" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="demand" nillable="true"
+				type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiIdentity">
@@ -103,20 +111,28 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="sources" type="tns:ArrayOfBiDataSourceDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="formats" type="tns:ArrayOfBiRenderFormatDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="refSets" type="tns:ArrayOfBiReferenceDataSourceDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="parameters" type="tns:ArrayOfBiParameterDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="queries" type="tns:ArrayOfBiQueryDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="views" type="tns:ArrayOfBiViewDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="reports" type="tns:ArrayOfBiReportDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="sources"
+						type="tns:ArrayOfBiDataSourceDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="formats"
+						type="tns:ArrayOfBiRenderFormatDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="refSets"
+						type="tns:ArrayOfBiReferenceDataSourceDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="parameters"
+						type="tns:ArrayOfBiParameterDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="queries"
+						type="tns:ArrayOfBiQueryDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="views"
+						type="tns:ArrayOfBiViewDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="reports"
+						type="tns:ArrayOfBiReportDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiDataSourceDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiDataSourceDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiDataSourceDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiDataSourceDefinition">
@@ -129,7 +145,8 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiRenderFormatDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiRenderFormatDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiRenderFormatDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiRenderFormatDefinition">
@@ -143,7 +160,8 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiReferenceDataSourceDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiReferenceDataSourceDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiReferenceDataSourceDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiReferenceDataSourceDefinition" mixed="true">
@@ -153,23 +171,27 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiParameterDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiParameterDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiParameterDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiParameterDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:choice minOccurs="1" maxOccurs="1">
-						<xs:element minOccurs="0" maxOccurs="1" name="query" type="tns:BiQueryDefinition" />
-						<xs:element minOccurs="0" maxOccurs="1" name="values" type="tns:BiQueryParameterValueCollection" />
+					<xs:choice minOccurs="0" maxOccurs="1">
+						<xs:element minOccurs="0" maxOccurs="1" name="query"
+							type="tns:BiQueryDefinition" />
+						<xs:element minOccurs="0" maxOccurs="1" name="values"
+							type="tns:BiQueryParameterValueCollection" />
 					</xs:choice>
 				</xs:sequence>
 				<xs:attribute name="type" type="tns:BiDataType" use="required" />
-				<xs:attribute name="multiple" type="xs:boolean" use="required" />
+				<xs:attribute name="multiple" type="xs:boolean" use="optional" />
 				<xs:attribute name="min" type="xs:string" />
 				<xs:attribute name="max" type="xs:string" />
 				<xs:attribute name="default" type="xs:string" />
+				<xs:attribute name="fixedValueExpression" type="xs:string" />
 				<xs:attribute name="required" type="xs:string" />
 			</xs:extension>
 		</xs:complexContent>
@@ -178,21 +200,28 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="dataSources" type="tns:ArrayOfBiDataSourceDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="parameters" type="tns:ArrayOfBiParameterDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="definitions" type="tns:ArrayOfBiSqlDefinition" />
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="with"
+						type="tns:BiQueryDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="dataSources"
+						type="tns:ArrayOfBiDataSourceDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="parameters"
+						type="tns:ArrayOfBiParameterDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="definitions"
+						type="tns:ArrayOfBiSqlDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiSqlDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiSqlDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiSqlDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiQueryParameterValueCollection">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" type="tns:BisQueryParameterValue" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add"
+				type="tns:BisQueryParameterValue" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BisQueryParameterValue">
@@ -218,28 +247,34 @@
 	</xs:simpleType>
 	<xs:complexType name="ArrayOfBiQueryDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiQueryDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiQueryDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiViewDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiViewDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiViewDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiViewDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="query" type="tns:BiQueryDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="aggregations" type="tns:ArrayOfBiAggregationDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="pivot" type="tns:BiViewPivotDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="query"
+						type="tns:BiQueryDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="aggregations"
+						type="tns:ArrayOfBiAggregationDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="pivot"
+						type="tns:BiViewPivotDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiAggregationDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiAggregationDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiAggregationDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiViewPivotDefinition">
@@ -267,40 +302,48 @@
 	</xs:simpleType>
 	<xs:complexType name="ArrayOfBiReportDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiReportDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiReportDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiReportDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="dataSources" type="tns:ArrayOfChoice1" />
-					<xs:element minOccurs="0" maxOccurs="1" name="views" type="tns:ArrayOfBiReportViewDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="dataSources"
+						type="tns:ArrayOfChoice1" />
+					<xs:element minOccurs="0" maxOccurs="1" name="views"
+						type="tns:ArrayOfBiReportViewDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfChoice1">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element minOccurs="1" maxOccurs="1" name="view" nillable="true" type="tns:BiViewDefinition" />
-			<xs:element minOccurs="1" maxOccurs="1" name="query" nillable="true" type="tns:BiQueryDefinition" />
-			<xs:element minOccurs="1" maxOccurs="1" name="refData" nillable="true" type="tns:BiReferenceDataSourceDefinition" />
+			<xs:element minOccurs="0" maxOccurs="1" name="view" nillable="true"
+				type="tns:BiViewDefinition" />
+			<xs:element minOccurs="0" maxOccurs="1" name="query" nillable="true"
+				type="tns:BiQueryDefinition" />
+			<xs:element minOccurs="0" maxOccurs="1" name="refData" nillable="true"
+				type="tns:BiReferenceDataSourceDefinition" />
 		</xs:choice>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiReportViewDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiReportViewDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiReportViewDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiReportViewDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" xmlns:q3="http://www.w3.org/1999/xhtml" ref="q3:div" />
+					<xs:element minOccurs="0" maxOccurs="1" xmlns:q4="http://www.w3.org/1999/xhtml"
+						ref="q4:div" />
 				</xs:sequence>
 				<xs:attribute name="type" type="tns:BiReportViewType" use="required" />
-				<xs:attribute name="no-export" type="xs:boolean" use="required" />
-				<xs:attribute name="no-print" type="xs:boolean" use="required" />
+				<xs:attribute name="no-export" type="xs:boolean" use="optional" />
+				<xs:attribute name="no-print" type="xs:boolean" use="optional" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -310,32 +353,186 @@
 			<xs:enumeration value="chart" />
 		</xs:restriction>
 	</xs:simpleType>
+	<xs:complexType name="BiIndicatorMeasureStratifier">
+		<xs:complexContent mixed="false">
+			<xs:extension base="tns:BiDefinition">
+				<xs:sequence>
+					<xs:element minOccurs="0" maxOccurs="1" name="select"
+						type="tns:BiSqlColumnReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="thenBy"
+						type="tns:BiIndicatorMeasureStratifier" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="BiSqlColumnReference">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="name" type="xs:string" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiOrderSqlColumnReference">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiSqlColumnReference">
+				<xs:attribute name="direction" type="tns:BiOrderColumnDirection" use="optional" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:simpleType name="BiOrderColumnDirection">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="asc" />
+			<xs:enumeration value="desc" />
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="BiAggregateSqlColumnReference">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiSqlColumnReference">
+				<xs:attribute name="fn" type="tns:BiAggregateFunction" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiMeasureComputationColumnReference" abstract="true">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiAggregateSqlColumnReference" />
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiMeasureComputationScore">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiMeasureComputationColumnReference" />
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiMeasureComputationDenominatorExclusion">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiMeasureComputationColumnReference" />
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiMeasureComputationDenominator">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiMeasureComputationColumnReference" />
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiMeasureComputationNumeratorExclusion">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiMeasureComputationColumnReference" />
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiMeasureComputationNumerator">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiMeasureComputationColumnReference" />
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiIndicatorSubjectFieldRef">
+		<xs:simpleContent>
+			<xs:extension base="tns:BiSqlColumnReference">
+				<xs:attribute name="type" type="xs:string" />
+				<xs:attribute name="parameter" type="xs:string" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="BiIndicatorMeasureDefinition">
+		<xs:complexContent mixed="false">
+			<xs:extension base="tns:BiDefinition">
+				<xs:sequence>
+					<xs:element minOccurs="0" maxOccurs="1" name="computed-by"
+						type="tns:ArrayOfChoice6" />
+					<xs:element minOccurs="0" maxOccurs="1" name="stratify"
+						type="tns:ArrayOfBiIndicatorMeasureStratifier" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ArrayOfChoice6">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element minOccurs="0" maxOccurs="1" name="denominator-exclusion" nillable="true"
+				type="tns:BiMeasureComputationDenominatorExclusion" />
+			<xs:element minOccurs="0" maxOccurs="1" name="numerator" nillable="true"
+				type="tns:BiMeasureComputationNumerator" />
+			<xs:element minOccurs="0" maxOccurs="1" name="numerator-exclusion" nillable="true"
+				type="tns:BiMeasureComputationNumeratorExclusion" />
+			<xs:element minOccurs="0" maxOccurs="1" name="denominator" nillable="true"
+				type="tns:BiMeasureComputationDenominator" />
+			<xs:element minOccurs="0" maxOccurs="1" name="score" nillable="true"
+				type="tns:BiMeasureComputationScore" />
+		</xs:choice>
+	</xs:complexType>
+	<xs:complexType name="ArrayOfBiIndicatorMeasureStratifier">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="by" nillable="true"
+				type="tns:BiIndicatorMeasureStratifier" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="BiIndicatorPeriodDefinition">
+		<xs:complexContent mixed="false">
+			<xs:extension base="tns:BiDefinition">
+				<xs:sequence>
+					<xs:element minOccurs="0" maxOccurs="1" name="notBefore" type="xs:string" />
+					<xs:element minOccurs="0" maxOccurs="1" name="notAfter" type="xs:string" />
+					<xs:element minOccurs="0" maxOccurs="1" name="spec" type="xs:dateTime" />
+					<xs:element minOccurs="0" maxOccurs="1" name="period" type="xs:string" />
+					<xs:element minOccurs="0" maxOccurs="1" name="startParameter" type="xs:string" />
+					<xs:element minOccurs="0" maxOccurs="1" name="endParameter" type="xs:string" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="BiIndicatorDefinition">
+		<xs:complexContent mixed="false">
+			<xs:extension base="tns:BiDefinition">
+				<xs:sequence>
+					<xs:element minOccurs="0" maxOccurs="1" name="query"
+						type="tns:BiQueryDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="period"
+						type="tns:BiIndicatorPeriodDefinition" />
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="referenceRange"
+						type="tns:BiSqlDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="subject"
+						type="tns:BiIndicatorSubjectFieldRef" />
+					<xs:element minOccurs="0" maxOccurs="1" name="measures"
+						type="tns:ArrayOfBiIndicatorMeasureDefinition" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ArrayOfBiIndicatorMeasureDefinition">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true"
+				type="tns:BiIndicatorMeasureDefinition" />
+		</xs:sequence>
+	</xs:complexType>
 	<xs:complexType name="BiDatamartDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="produces" type="tns:BiDataSourceDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="produces"
+						type="tns:BiDataSourceDefinition" />
 					<xs:element minOccurs="0" maxOccurs="1" name="schema" type="tns:ArrayOfChoice5" />
-					<xs:element minOccurs="0" maxOccurs="1" name="dataFlows" type="tns:ArrayOfBiDataFlowDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="startFlow" type="tns:BiObjectReference" />
-					<xs:element minOccurs="1" maxOccurs="1" name="refreshFrequency" nillable="true" type="tns:BiDataMartFrequency" />
+					<xs:element minOccurs="0" maxOccurs="1" name="dataFlows"
+						type="tns:ArrayOfBiDataFlowDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="startFlow"
+						type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="refreshFrequency" nillable="true"
+						type="tns:BiDataMartFrequency" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfChoice5">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element minOccurs="1" maxOccurs="1" name="table" nillable="true" type="tns:BiSchemaTableDefinition" />
-			<xs:element minOccurs="1" maxOccurs="1" name="view" nillable="true" type="tns:BiSchemaViewDefinition" />
+			<xs:element minOccurs="0" maxOccurs="1" name="table" nillable="true"
+				type="tns:BiSchemaTableDefinition" />
+			<xs:element minOccurs="0" maxOccurs="1" name="view" nillable="true"
+				type="tns:BiSchemaViewDefinition" />
 		</xs:choice>
 	</xs:complexType>
 	<xs:complexType name="BiSchemaTableDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiSchemaObjectDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="parent" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="parent"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
-				<xs:attribute name="temporary" type="xs:boolean" use="required" />
+				<xs:attribute name="temporary" type="xs:boolean" use="optional" />
 				<xs:attribute name="tableSpace" type="xs:string" />
 			</xs:extension>
 		</xs:complexContent>
@@ -344,7 +541,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="unbounded" name="column" type="tns:BiSchemaColumnDefinition" />
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="column"
+						type="tns:BiSchemaColumnDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -353,13 +551,14 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="otherTable" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="otherTable"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
-				<xs:attribute name="type" type="tns:BiDataType" use="required" />
-				<xs:attribute name="notNull" type="xs:boolean" use="required" />
-				<xs:attribute name="index" type="xs:boolean" use="required" />
-				<xs:attribute name="unique" type="xs:boolean" use="required" />
-				<xs:attribute name="key" type="xs:boolean" use="required" />
+				<xs:attribute name="type" type="tns:BiDataType" use="optional" />
+				<xs:attribute name="notNull" type="xs:boolean" use="optional" />
+				<xs:attribute name="index" type="xs:boolean" use="optional" />
+				<xs:attribute name="unique" type="xs:boolean" use="optional" />
+				<xs:attribute name="key" type="xs:boolean" use="optional" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -372,23 +571,27 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiSchemaObjectDefinition">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="sql" type="tns:ArrayOfBiSqlDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="sql"
+						type="tns:ArrayOfBiSqlDefinition" />
 				</xs:sequence>
-				<xs:attribute name="materialized" type="xs:boolean" use="required" />
+				<xs:attribute name="materialized" type="xs:boolean" use="optional" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiDataFlowDefinition">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="flow" nillable="true" type="tns:BiDataFlowDefinition" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="flow" nillable="true"
+				type="tns:BiDataFlowDefinition" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiDataFlowDefinition">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiFlowStepCollectionBase">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="parameters" type="tns:ArrayOfChoice4" />
-					<xs:element minOccurs="0" maxOccurs="1" name="return" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="parameters"
+						type="tns:ArrayOfChoice4" />
+					<xs:element minOccurs="0" maxOccurs="1" name="return"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -397,7 +600,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="pipeline" type="tns:ArrayOfChoice3" />
+					<xs:element minOccurs="0" maxOccurs="1" name="pipeline"
+						type="tns:ArrayOfChoice3" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -411,7 +615,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="dataSource" type="tns:BiDataSourceDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="dataSource"
+						type="tns:BiDataSourceDefinition" />
 				</xs:sequence>
 				<xs:attribute name="mode" type="tns:BiDataFlowConnectionMode" use="required" />
 			</xs:extension>
@@ -427,9 +632,12 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="connection" type="tns:BiObjectReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="sql" type="tns:ArrayOfBiSqlDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="schema" type="tns:BiSchemaTableDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="connection"
+						type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="sql"
+						type="tns:ArrayOfBiSqlDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="schema"
+						type="tns:BiSchemaTableDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -438,7 +646,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="dataFlow" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="dataFlow"
+						type="tns:BiObjectReference" />
 					<xs:element minOccurs="0" maxOccurs="1" name="args" type="tns:ArrayOfChoice2" />
 				</xs:sequence>
 			</xs:extension>
@@ -446,19 +655,25 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfChoice2">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element minOccurs="1" maxOccurs="1" name="int" nillable="true" type="tns:BiDataFlowCallArgumentOfInt32" />
-			<xs:element minOccurs="1" maxOccurs="1" name="ref" nillable="true" type="tns:BiDataFlowCallArgumentOfBiObjectReference" />
-			<xs:element minOccurs="1" maxOccurs="1" name="string" nillable="true" type="tns:BiDataFlowCallArgumentOfString" />
-			<xs:element minOccurs="1" maxOccurs="1" name="uuid" nillable="true" type="tns:BiDataFlowCallArgumentOfGuid" />
-			<xs:element minOccurs="1" maxOccurs="1" name="date-time" nillable="true" type="tns:BiDataFlowCallArgumentOfDateTime" />
-			<xs:element minOccurs="1" maxOccurs="1" name="bool" nillable="true" type="tns:BiDataFlowCallArgumentOfBoolean" />
+			<xs:element minOccurs="0" maxOccurs="1" name="int" nillable="true"
+				type="tns:BiDataFlowCallArgumentOfInt32" />
+			<xs:element minOccurs="0" maxOccurs="1" name="ref" nillable="true"
+				type="tns:BiDataFlowCallArgumentOfBiObjectReference" />
+			<xs:element minOccurs="0" maxOccurs="1" name="string" nillable="true"
+				type="tns:BiDataFlowCallArgumentOfString" />
+			<xs:element minOccurs="0" maxOccurs="1" name="uuid" nillable="true"
+				type="tns:BiDataFlowCallArgumentOfGuid" />
+			<xs:element minOccurs="0" maxOccurs="1" name="date-time" nillable="true"
+				type="tns:BiDataFlowCallArgumentOfDateTime" />
+			<xs:element minOccurs="0" maxOccurs="1" name="bool" nillable="true"
+				type="tns:BiDataFlowCallArgumentOfBoolean" />
 		</xs:choice>
 	</xs:complexType>
 	<xs:complexType name="BiDataFlowCallArgumentOfInt32">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowArgumentBase">
 				<xs:sequence>
-					<xs:element minOccurs="1" maxOccurs="1" name="value" type="xs:int" />
+					<xs:element minOccurs="0" maxOccurs="1" name="value" type="xs:int" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -505,7 +720,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowArgumentBase">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="value" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="value"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -514,7 +730,7 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowArgumentBase">
 				<xs:sequence>
-					<xs:element minOccurs="1" maxOccurs="1" name="value" type="xs:dateTime" />
+					<xs:element minOccurs="0" maxOccurs="1" name="value" type="xs:dateTime" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -523,7 +739,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowArgumentBase">
 				<xs:sequence>
-					<xs:element minOccurs="1" maxOccurs="1" name="value" xmlns:q4="http://microsoft.com/wsdl/types/" type="q4:guid" />
+					<xs:element minOccurs="0" maxOccurs="1" name="value"
+						xmlns:q5="http://microsoft.com/wsdl/types/" type="q5:guid" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -532,7 +749,7 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowArgumentBase">
 				<xs:sequence>
-					<xs:element minOccurs="1" maxOccurs="1" name="value" type="xs:boolean" />
+					<xs:element minOccurs="0" maxOccurs="1" name="value" type="xs:boolean" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -550,7 +767,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="input" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="input"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -598,7 +816,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="pivot" type="tns:BiViewPivotDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="pivot"
+						type="tns:BiViewPivotDefinition" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -614,7 +833,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="unbounded" name="map" type="tns:BiColumnMapping" />
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="map"
+						type="tns:BiColumnMapping" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -629,12 +849,15 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiSchemaObjectReference">
 				<xs:sequence>
-					<xs:choice minOccurs="1" maxOccurs="1">
+					<xs:choice minOccurs="0" maxOccurs="1">
 						<xs:element minOccurs="0" maxOccurs="1" name="fixed" type="xs:string" />
-						<xs:element minOccurs="0" maxOccurs="1" name="var" type="tns:BiVariableLookupTransform" />
-						<xs:element minOccurs="1" maxOccurs="1" name="cast" type="tns:BiDataType" />
-						<xs:element minOccurs="0" maxOccurs="1" name="lookup" type="tns:BiColumnMappingTransformJoin" />
-						<xs:element minOccurs="0" maxOccurs="1" name="concept" type="tns:BiConceptMappingTransform" />
+						<xs:element minOccurs="0" maxOccurs="1" name="var"
+							type="tns:BiVariableLookupTransform" />
+						<xs:element minOccurs="0" maxOccurs="1" name="cast" type="tns:BiDataType" />
+						<xs:element minOccurs="0" maxOccurs="1" name="lookup"
+							type="tns:BiColumnMappingTransformJoin" />
+						<xs:element minOccurs="0" maxOccurs="1" name="concept"
+							type="tns:BiConceptMappingTransform" />
 					</xs:choice>
 				</xs:sequence>
 			</xs:extension>
@@ -645,7 +868,7 @@
 	</xs:complexType>
 	<xs:complexType name="BiVariableLookupTransform" mixed="true">
 		<xs:sequence>
-			<xs:element minOccurs="1" maxOccurs="1" name="ThrowIfNotFound" type="xs:boolean" />
+			<xs:element minOccurs="0" maxOccurs="1" name="ThrowIfNotFound" type="xs:boolean" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiConceptMappingTransform" />
@@ -653,10 +876,12 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="connection" type="tns:BiObjectReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="target" type="tns:BiSchemaTableDefinition" />
+					<xs:element minOccurs="0" maxOccurs="1" name="connection"
+						type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="target"
+						type="tns:BiSchemaTableDefinition" />
 				</xs:sequence>
-				<xs:attribute name="truncate" type="xs:boolean" use="required" />
+				<xs:attribute name="truncate" type="xs:boolean" use="optional" />
 				<xs:attribute name="mode" type="tns:DataWriterModeType" use="required" />
 			</xs:extension>
 		</xs:complexContent>
@@ -673,7 +898,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="unbounded" name="with" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="with"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -682,22 +908,25 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="all" type="tns:ArrayOfBiDataFlowStreamFilterSetting" />
+					<xs:element minOccurs="0" maxOccurs="1" name="all"
+						type="tns:ArrayOfBiDataFlowStreamFilterSetting" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiDataFlowStreamFilterSetting">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="when" nillable="true" type="tns:BiDataFlowStreamFilterSetting" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="when" nillable="true"
+				type="tns:BiDataFlowStreamFilterSetting" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiDataFlowStreamFilterSetting">
 		<xs:sequence>
-			<xs:choice minOccurs="1" maxOccurs="1">
+			<xs:choice minOccurs="0" maxOccurs="1">
 				<xs:element minOccurs="0" maxOccurs="1" name="string" type="xs:string" />
-				<xs:element minOccurs="1" maxOccurs="1" name="int" nillable="true" type="xs:long" />
-				<xs:element minOccurs="1" maxOccurs="1" name="bool" nillable="true" type="xs:boolean" />
+				<xs:element minOccurs="0" maxOccurs="1" name="int" nillable="true" type="xs:long" />
+				<xs:element minOccurs="0" maxOccurs="1" name="bool" nillable="true"
+					type="xs:boolean" />
 			</xs:choice>
 		</xs:sequence>
 		<xs:attribute name="field" type="xs:string" />
@@ -717,7 +946,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamFilterSetting">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="call" type="tns:BiDataFlowCallStep" />
+					<xs:element minOccurs="0" maxOccurs="1" name="call"
+						type="tns:BiDataFlowCallStep" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -726,7 +956,8 @@
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiDataFlowStreamStep">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="unbounded" name="when" type="tns:BiDataFlowWhenStatement" />
+					<xs:element minOccurs="0" maxOccurs="unbounded" name="when"
+						type="tns:BiDataFlowWhenStatement" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -738,38 +969,58 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfChoice3">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element minOccurs="1" maxOccurs="1" name="union" nillable="true" type="tns:BiDataFlowUnionStreamStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="crosstab" nillable="true" type="tns:BiDataFlowCrosstabStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="halt" nillable="true" type="tns:BiDataFlowHaltStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="writer" nillable="true" type="tns:BiDataFlowDataWriterStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="reader" nillable="true" type="tns:BiDataFlowDataReaderStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="filter" nillable="true" type="tns:BiDataFlowFilterStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="log" nillable="true" type="tns:BiDataFlowLogStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="call" nillable="true" type="tns:BiDataFlowCallStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="distinct" nillable="true" type="tns:BiDataFlowDistinctStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="choose" nillable="true" type="tns:BiDataFlowChooseStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="transform" nillable="true" type="tns:BiDataFlowMappingStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="connection" nillable="true" type="tns:BiDataFlowConnectionStep" />
-			<xs:element minOccurs="1" maxOccurs="1" name="transaction" nillable="true" type="tns:BiDataFlowTransactionStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="union" nillable="true"
+				type="tns:BiDataFlowUnionStreamStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="crosstab" nillable="true"
+				type="tns:BiDataFlowCrosstabStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="halt" nillable="true"
+				type="tns:BiDataFlowHaltStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="writer" nillable="true"
+				type="tns:BiDataFlowDataWriterStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="reader" nillable="true"
+				type="tns:BiDataFlowDataReaderStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="filter" nillable="true"
+				type="tns:BiDataFlowFilterStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="log" nillable="true"
+				type="tns:BiDataFlowLogStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="call" nillable="true"
+				type="tns:BiDataFlowCallStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="distinct" nillable="true"
+				type="tns:BiDataFlowDistinctStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="choose" nillable="true"
+				type="tns:BiDataFlowChooseStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="transform" nillable="true"
+				type="tns:BiDataFlowMappingStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="connection" nillable="true"
+				type="tns:BiDataFlowConnectionStep" />
+			<xs:element minOccurs="0" maxOccurs="1" name="transaction" nillable="true"
+				type="tns:BiDataFlowTransactionStep" />
 		</xs:choice>
 	</xs:complexType>
 	<xs:complexType name="BiDataFlowTransactionStep">
 		<xs:complexContent mixed="false">
 			<xs:extension base="tns:BiFlowStepCollectionBase">
 				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="connection" type="tns:BiObjectReference" />
+					<xs:element minOccurs="0" maxOccurs="1" name="connection"
+						type="tns:BiObjectReference" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfChoice4">
 		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element minOccurs="1" maxOccurs="1" name="int" nillable="true" type="tns:BiDataFlowParameterOfInt32" />
-			<xs:element minOccurs="1" maxOccurs="1" name="ref" nillable="true" type="tns:BiDataFlowParameterOfBiObjectReference" />
-			<xs:element minOccurs="1" maxOccurs="1" name="string" nillable="true" type="tns:BiDataFlowParameterOfString" />
-			<xs:element minOccurs="1" maxOccurs="1" name="uuid" nillable="true" type="tns:BiDataFlowParameterOfGuid" />
-			<xs:element minOccurs="1" maxOccurs="1" name="date-time" nillable="true" type="tns:BiDataFlowParameterOfDateTime" />
-			<xs:element minOccurs="1" maxOccurs="1" name="bool" nillable="true" type="tns:BiDataFlowParameterOfBoolean" />
+			<xs:element minOccurs="0" maxOccurs="1" name="int" nillable="true"
+				type="tns:BiDataFlowParameterOfInt32" />
+			<xs:element minOccurs="0" maxOccurs="1" name="ref" nillable="true"
+				type="tns:BiDataFlowParameterOfBiObjectReference" />
+			<xs:element minOccurs="0" maxOccurs="1" name="string" nillable="true"
+				type="tns:BiDataFlowParameterOfString" />
+			<xs:element minOccurs="0" maxOccurs="1" name="uuid" nillable="true"
+				type="tns:BiDataFlowParameterOfGuid" />
+			<xs:element minOccurs="0" maxOccurs="1" name="date-time" nillable="true"
+				type="tns:BiDataFlowParameterOfDateTime" />
+			<xs:element minOccurs="0" maxOccurs="1" name="bool" nillable="true"
+				type="tns:BiDataFlowParameterOfBoolean" />
 		</xs:choice>
 	</xs:complexType>
 	<xs:simpleType name="BiDataMartFrequency">
@@ -781,7 +1032,8 @@
 	</xs:simpleType>
 	<xs:complexType name="ArrayOfString2">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="invariant" nillable="true" type="xs:string" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="invariant" nillable="true"
+				type="xs:string" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:complexType name="BiMaterializeDefinition">
@@ -793,26 +1045,20 @@
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiSqlColumnReference">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="column" nillable="true" type="tns:BiSqlColumnReference" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="column" nillable="true"
+				type="tns:BiSqlColumnReference" />
 		</xs:sequence>
-	</xs:complexType>
-	<xs:complexType name="BiSqlColumnReference">
-		<xs:simpleContent>
-			<xs:extension base="xs:string">
-				<xs:attribute name="name" type="xs:string" />
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:complexType name="BiAggregateSqlColumnReference">
-		<xs:simpleContent>
-			<xs:extension base="tns:BiSqlColumnReference">
-				<xs:attribute name="fn" type="tns:BiAggregateFunction" use="required" />
-			</xs:extension>
-		</xs:simpleContent>
 	</xs:complexType>
 	<xs:complexType name="ArrayOfBiAggregateSqlColumnReference">
 		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="column" nillable="true" type="tns:BiAggregateSqlColumnReference" />
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="column" nillable="true"
+				type="tns:BiAggregateSqlColumnReference" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ArrayOfBiOrderSqlColumnReference">
+		<xs:sequence>
+			<xs:element minOccurs="0" maxOccurs="unbounded" name="column" nillable="true"
+				type="tns:BiOrderSqlColumnReference" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="BiDataFlowDefinition" nillable="true" type="tns:BiDataFlowDefinition" />
@@ -832,82 +1078,21 @@
 	<xs:complexType name="BiDefinitionCollection">
 		<xs:sequence>
 			<xs:element minOccurs="0" maxOccurs="unbounded" name="resource" type="tns:BiDefinition" />
-			<xs:element minOccurs="1" maxOccurs="1" name="offset" type="xs:int" />
-			<xs:element minOccurs="1" maxOccurs="1" name="count" type="xs:int" />
-			<xs:element minOccurs="1" maxOccurs="1" name="totalResults" nillable="true" type="xs:int" />
+			<xs:element minOccurs="0" maxOccurs="1" name="offset" type="xs:int" />
+			<xs:element minOccurs="0" maxOccurs="1" name="count" type="xs:int" />
+			<xs:element minOccurs="0" maxOccurs="1" name="totalResults" nillable="true"
+				type="xs:int" />
 		</xs:sequence>
 	</xs:complexType>
 	<xs:element name="BiIndicatorDefinition" nillable="true" type="tns:BiIndicatorDefinition" />
-	<xs:complexType name="BiIndicatorDefinition">
-		<xs:complexContent mixed="false">
-			<xs:extension base="tns:BiDefinition">
-				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="query" type="tns:BiQueryDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="measures" type="tns:ArrayOfBiIndicatorMeasureDefinition" />
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-	<xs:complexType name="ArrayOfBiIndicatorMeasureDefinition">
-		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="add" nillable="true" type="tns:BiIndicatorMeasureDefinition" />
-		</xs:sequence>
-	</xs:complexType>
-	<xs:complexType name="BiIndicatorMeasureDefinition">
-		<xs:complexContent mixed="false">
-			<xs:extension base="tns:BiDefinition">
-				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="period" type="tns:BiIndicatorPeriodDefinition" />
-					<xs:element minOccurs="0" maxOccurs="1" name="subject" type="tns:BiIndicatorSubjectFieldRef" />
-					<xs:element minOccurs="0" maxOccurs="1" name="numerator" type="tns:BiAggregateSqlColumnReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="denominator" type="tns:BiAggregateSqlColumnReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="stratify" type="tns:ArrayOfBiIndicatorMeasureStratifier" />
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-	<xs:complexType name="BiIndicatorPeriodDefinition">
-		<xs:complexContent mixed="false">
-			<xs:extension base="tns:BiDefinition">
-				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="notBefore" type="xs:string" />
-					<xs:element minOccurs="0" maxOccurs="1" name="NotAfterXml" type="xs:string" />
-					<xs:element minOccurs="1" maxOccurs="1" name="spec" type="xs:dateTime" />
-					<xs:element minOccurs="0" maxOccurs="1" name="period" type="xs:string" />
-					<xs:element minOccurs="0" maxOccurs="1" name="startParameter" type="xs:string" />
-					<xs:element minOccurs="0" maxOccurs="1" name="endParameter" type="xs:string" />
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-	<xs:complexType name="BiIndicatorSubjectFieldRef">
-		<xs:simpleContent>
-			<xs:extension base="tns:BiSqlColumnReference">
-				<xs:attribute name="type" type="xs:string" />
-			</xs:extension>
-		</xs:simpleContent>
-	</xs:complexType>
-	<xs:complexType name="ArrayOfBiIndicatorMeasureStratifier">
-		<xs:sequence>
-			<xs:element minOccurs="0" maxOccurs="unbounded" name="by" nillable="true" type="tns:BiIndicatorMeasureStratifier" />
-		</xs:sequence>
-	</xs:complexType>
-	<xs:complexType name="BiIndicatorMeasureStratifier">
-		<xs:complexContent mixed="false">
-			<xs:extension base="tns:BiDefinition">
-				<xs:sequence>
-					<xs:element minOccurs="0" maxOccurs="1" name="select" type="tns:BiSqlColumnReference" />
-					<xs:element minOccurs="0" maxOccurs="1" name="thenBy" type="tns:BiIndicatorMeasureStratifier" />
-				</xs:sequence>
-			</xs:extension>
-		</xs:complexContent>
-	</xs:complexType>
-	<xs:element name="BiIndicatorPeriodDefinition" nillable="true" type="tns:BiIndicatorPeriodDefinition" />
+	<xs:element name="BiIndicatorPeriodDefinition" nillable="true"
+		type="tns:BiIndicatorPeriodDefinition" />
 	<xs:element name="BiMaterializeDefinition" nillable="true" type="tns:BiMaterializeDefinition" />
 	<xs:element name="BiPackage" nillable="true" type="tns:BiPackage" />
 	<xs:element name="BiParameterDefinition" nillable="true" type="tns:BiParameterDefinition" />
 	<xs:element name="BiQueryDefinition" nillable="true" type="tns:BiQueryDefinition" />
-	<xs:element name="BiReferenceDataSourceDefinition" nillable="true" type="tns:BiReferenceDataSourceDefinition" />
+	<xs:element name="BiReferenceDataSourceDefinition" nillable="true"
+		type="tns:BiReferenceDataSourceDefinition" />
 	<xs:element name="BiRenderFormatDefinition" nillable="true" type="tns:BiRenderFormatDefinition" />
 	<xs:element name="BiReportDefinition" nillable="true" type="tns:BiReportDefinition" />
 	<xs:element name="BiReportViewDefinition" nillable="true" type="tns:BiReportViewDefinition" />

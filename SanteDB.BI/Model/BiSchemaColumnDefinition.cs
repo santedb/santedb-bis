@@ -121,7 +121,8 @@ namespace SanteDB.BI.Model
                 case ulong i:
                     return expectedType == BiDataType.Integer ||
                         expectedType == BiDataType.DateTime || expectedType == BiDataType.Date ||
-                        (expectedType == BiDataType.Boolean && (long)value <= 1 && (long)value >= 0); // HACK: SQLITE dates are represented as integers as well and the BI layer doesnt differentiate between them sometimes
+                        (expectedType == BiDataType.Boolean && (long)value <= 1 && (long)value >= 0) ||
+                        expectedType == BiDataType.Decimal; // HACK: SQLITE dates are represented as integers as well and the BI layer doesnt differentiate between them sometimes
                 case Guid j:
                     return expectedType == BiDataType.Uuid;
                 case bool k:
