@@ -69,6 +69,9 @@ namespace SanteDB.BI.Services.Impl
                 case BiAggregateFunction.Sum:
                     aggFn = nameof(Enumerable.Sum);
                     break;
+                case BiAggregateFunction.Concatenate:
+                    return String.Join(" ", bucket);
+                    break;
                 default:
                     throw new InvalidOperationException($"Cannot apply aggregate function {aggregateFunction} on pivot");
             }

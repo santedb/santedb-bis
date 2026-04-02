@@ -80,7 +80,12 @@ namespace SanteDB.BI.Model
         /// The median
         /// </summary>
         [XmlEnum("median")]
-        Median
+        Median,
+        /// <summary>
+        /// Concatenate
+        /// </summary>
+        [XmlEnum("concat")]
+        Concatenate
     }
 
     /// <summary>
