@@ -48,6 +48,7 @@ namespace SanteDB.BI.Model
         [XmlArrayItem("call", typeof(BiDataFlowCallStep))]
         [XmlArrayItem("union", typeof(BiDataFlowUnionStreamStep))]
         //[XmlArrayItem("intersect", typeof(BiDataFlowIntersectStreamStep))]
+        [XmlArrayItem("exec", typeof(BiDataFlowSqlStep))]
         [XmlArrayItem("reader", typeof(BiDataFlowDataReaderStep))]
         [XmlArrayItem("writer", typeof(BiDataFlowDataWriterStep))]
         [XmlArrayItem("connection", typeof(BiDataFlowConnectionStep))]

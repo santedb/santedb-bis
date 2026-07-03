@@ -39,7 +39,8 @@ namespace SanteDB.BI.Datamart
         /// <summary>
         /// Open the data integrator connection for reading
         /// </summary>
-        void OpenRead();
+        /// <param name="decryptSourceData">When true, instructs the BI integrator to decrypt source ALE data</param>
+        void OpenRead(bool decryptSourceData);
 
         /// <summary>
         /// Open the data integrator connection for writing
@@ -154,8 +155,10 @@ namespace SanteDB.BI.Datamart
         /// <summary>
         /// Execute a query and don't return the result
         /// </summary>
-        /// <param name="sql">The sql definition</param>
-        void ExecuteNonQuery(BiSqlDefinition sql);
+        /// <param name="queryToExecute">The sql definition array (the provider will select the most appropriate definition)</param>
+        /// <param name="variableProvider">The variable provider which indicates</param>
+        /// <returns>The total number of records impacted by the query</returns>
+        int ExecuteNonQuery(IEnumerable<BiSqlDefinition> queryToExecute, IDataIntegratorVariableProvider variableProvider);
 
     }
 }
