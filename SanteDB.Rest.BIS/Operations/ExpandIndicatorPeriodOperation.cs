@@ -25,13 +25,10 @@ using SanteDB.BI.Services;
 using SanteDB.Core.Interop;
 using SanteDB.Core.Model.Parameters;
 using SanteDB.Rest.Common;
-using SharpCompress;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
-using ZstdSharp.Unsafe;
 
 namespace SanteDB.Rest.BIS.Operations
 {
