@@ -18,6 +18,7 @@
  * User: fyfej
  * Date: 2023-6-21
  */
+using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.BI.Util;
@@ -123,19 +124,27 @@ namespace SanteDB.BI.Jobs
 
                         this.m_stateManager.SetProgress(this, $"Refreshing {itm.Name ?? itm.Id}", ((float)i++ / (float)count));
 
-                        var dataSource = biProvider;
-                        var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
-                        var providerType = queryDefinition.DataSources.FirstOrDefault()?.ProviderType;
-                        if (providerType != null)
+                        try
                         {
-                            dataSource = serviceManager.CreateInjected(providerType) as IBiDataSource;
-                        }
-                        dataSource.RefreshMaterializedView(itm);
+                            var dataSource = biProvider;
+                            var queryDefinition = BiUtils.ResolveRefs(itm) as BiQueryDefinition;
+                            var providerType = queryDefinition.DataSources.FirstOrDefault()?.ProviderType;
+                            if (providerType != null)
+                            {
+                                dataSource = serviceManager.CreateInjected(providerType) as IBiDataSource;
+                            }
+                            dataSource.RefreshMaterializedView(itm);
 
-                        if (this.m_cancel)
+                            if (this.m_cancel)
+                            {
+                                this.m_stateManager.SetState(this, JobStateType.Cancelled);
+                                return;
+                            }
+                        }
+                        catch(BiException ex)
                         {
-                            this.m_stateManager.SetState(this, JobStateType.Cancelled);
-                            return;
+                            this.m_tracer.TraceWarning("Could not refresh materialized view - {0} - {1} - skipping", itm.Id, ex.ToHumanReadableString());
+                            continue;
                         }
                     }
                 }
