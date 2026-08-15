@@ -39,7 +39,7 @@ namespace SanteDB.BI.Services
         /// <param name="offset">The offset of the first result to retrieve</param>
         /// <returns>A query result indicating the results of the query</returns>
         /// <param name="aggregation">The aggregation to apply to the result</param>
-        BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int? offset = null, int? count = null);
+        BisResultContext ExecuteQuery(BiQueryDefinition queryDefinition, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation);
 
         /// <summary>
         /// Materializes the specified materialized view definition
@@ -61,7 +61,7 @@ namespace SanteDB.BI.Services
         /// <param name="count">The maximum number of results to return</param>
         /// <param name="offset">The offset of the first result if requested</param>
         /// <returns>A query result indicating the results of the query</returns>
-        BisResultContext ExecuteQuery(String queryId, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation, int? offset = null, int? count = null);
+        BisResultContext ExecuteQuery(String queryId, IDictionary<String, Object> parameters, BiAggregationDefinition[] aggregation);
 
         /// <summary>
         /// Executes the specified view returning the context
@@ -71,7 +71,7 @@ namespace SanteDB.BI.Services
         /// <param name="offset">The offset of the first result to return in the result context</param>
         /// <param name="count">The number of results to retrieve</param>
         /// <returns>The constructed result context</returns>
-        BisResultContext ExecuteView(BiViewDefinition viewDef, IDictionary<string, object> parameters, int? offset = null, int? count = null);
+        BisResultContext ExecuteView(BiViewDefinition viewDef, IDictionary<string, object> parameters);
 
         /// <summary>
         /// Executes the specified <paramref name="indicatorDef"/> and returns a data result context with the results 
