@@ -58,7 +58,7 @@ namespace SanteDB.BI.Datamart.DataFlow.Executors
                         }
                         else
                         {
-                            dataIntegrator.OpenRead();
+                            dataIntegrator.OpenRead(bcs.Mode == BiDataFlowConnectionMode.ReadOnlyDecrypt);
                         }
                         scope.SetSysVar(bcs.Name, dataIntegrator);
                     }

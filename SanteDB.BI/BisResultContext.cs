@@ -130,5 +130,13 @@ namespace SanteDB.BI
                 disp.Dispose();
             }
         }
+
+        /// <summary>
+        /// Limit the underlying query results
+        /// </summary>
+        public void Limit(int offset, int limit)
+        {
+            this.Records = this.Records.Skip(offset).Take(limit);
+        } 
     }
 }

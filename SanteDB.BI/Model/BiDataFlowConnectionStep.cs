@@ -45,7 +45,12 @@ namespace SanteDB.BI.Model
         /// Read or write
         /// </summary>
         [XmlEnum("read-write")]
-        ReadWrite
+        ReadWrite,
+        /// <summary>
+        /// Decrypt the source data in a readonly mode
+        /// </summary>
+        [XmlEnum("read-only-decrypt")]
+        ReadOnlyDecrypt
     }
 
     /// <summary>
@@ -62,6 +67,7 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlElement("dataSource"), JsonProperty("dataSource")]
         public BiDataSourceDefinition DataSource { get; set; }
+
 
         /// <summary>
         /// Gets or sets the mode

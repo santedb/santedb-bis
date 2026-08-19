@@ -114,7 +114,7 @@ namespace SanteDB.BI.Rendering
 
                 // Load from cache instead of DB?
 
-                int? count = null;
+                int? count = null, offset = null;
                 if (this.m_maxResultSetSize.HasValue)
                 {
                     count = this.m_maxResultSetSize.Value;
@@ -123,14 +123,18 @@ namespace SanteDB.BI.Rendering
                 {
                     count = tCount;
                 }
+                if(this.Parameters.TryGetValue("_offset", out var offsetRaw) && Int32.TryParse(offsetRaw.ToString(), out var tOffset))
+                {
+                    offset = tOffset;
+                }
 
                 switch(viewDef)
                 {
                     case BiViewDefinition bvd:
-                        retVal = providerImplementation.ExecuteView(bvd, this.Parameters, 0, count);
+                        retVal = providerImplementation.ExecuteView(bvd, this.Parameters);
                         break;
                     case BiQueryDefinition bqd:
-                        retVal = providerImplementation.ExecuteQuery(bqd, this.Parameters, null, 0, count);
+                        retVal = providerImplementation.ExecuteQuery(bqd, this.Parameters, null);
                         break;
                     case BiReferenceDataSourceDefinition brd:
                         retVal = new BisResultContext(brd);
@@ -139,6 +143,7 @@ namespace SanteDB.BI.Rendering
                         throw new InvalidOperationException($"Cannot determine data source type of {name}");
                 }
 
+                retVal.Limit(offset ?? 0, count ?? Int32.MaxValue);
                 this.m_dataSources.Add(name, retVal);
             }
             return retVal;

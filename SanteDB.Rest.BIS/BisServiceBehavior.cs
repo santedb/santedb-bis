@@ -344,14 +344,7 @@ namespace SanteDB.Rest.BIS
                     };
                 }
 
-                int offset = 0, count = 100;
-                _ = Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpOffsetParameterName], out offset);
-                if (!Int32.TryParse(RestOperationContext.Current.IncomingRequest.QueryString[QueryControlParameterNames.HttpCountParameterName], out count))
-                {
-                    count = 100;
-                }
-
-                var queryData = providerImplementation.ExecuteView(viewDef, parameters, offset, count);
+                var queryData = providerImplementation.ExecuteView(viewDef, parameters);
                 return queryData;
             }
             catch (KeyNotFoundException)

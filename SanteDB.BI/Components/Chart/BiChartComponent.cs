@@ -70,11 +70,9 @@ namespace SanteDB.BI.Components.Chart
             }
             using (var dataSource = (context.Root as RootRenderContext).GetOrExecuteQuery(element.Attribute("source").Value))
             {
-                var noRec = element.Attribute("no-records")?.Value;
-
-                if (!dataSource.Records.Any() && !"show".Equals(noRec))
+                if (!dataSource.Records.Any())
                 {
-                    writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");
+                        writer.WriteElementString("strong", BiConstants.HtmlNamespace, $"{dataSource.QueryDefinition?.Name} - 0 REC");
                 }
                 else
                 {
