@@ -52,7 +52,7 @@ using System.Xml.Serialization;
 namespace SanteDB.Rest.BIS
 {
     /// <summary>
-    /// Default implementation of the BIS service contract
+    /// Business Intelligence Service (BIS)
     /// </summary>
     [ServiceBehavior(Name = BisMessageHandler.ConfigurationName, InstanceMode = ServiceInstanceMode.Singleton)]
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
