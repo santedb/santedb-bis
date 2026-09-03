@@ -31,7 +31,7 @@
 		<EmbeddedResource Include="Resources\csv.xsl" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="ClosedXML" Version="0.104.2" />
+		<PackageReference Include="ClosedXML" Version="0.105.1" />
 		<PackageReference Include="DynamicExpresso.Core" Version="2.17.2" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 	</ItemGroup>
