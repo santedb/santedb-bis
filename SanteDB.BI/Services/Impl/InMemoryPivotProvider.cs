@@ -209,7 +209,7 @@ namespace SanteDB.BI.Services.Impl
         /// </summary>
         public BisResultContext Pivot(BisResultContext context, BiViewPivotDefinition pivot)
         {
-            return new BisResultContext(context.QueryDefinition, context.Arguments, context.DataSource, this.Pivot(context.Records, pivot), context.StartTime.DateTime);
+            return new BisResultContext(context.QueryDefinition, context.Arguments, context.DataSource, this.Pivot(context.Records.OfType<dynamic>(), pivot), context.StartTime.DateTime);
         }
 
     }

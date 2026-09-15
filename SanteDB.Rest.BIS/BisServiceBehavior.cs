@@ -377,7 +377,7 @@ namespace SanteDB.Rest.BIS
         public virtual IEnumerable<dynamic> RenderQuery(string id)
         {
             var retVal = this.HydrateQuery(id);
-            return retVal.Records;
+            return retVal.Records.OfType<dynamic>();
         }
 
         /// <summary>
