@@ -44,7 +44,7 @@ namespace SanteDB.BI.Components
         private static BiExpressionHelpers m_helpers = new BiExpressionHelpers();
 
         // Expression regex
-        private static Regex m_exprRegex = new Regex(@"^[\w_\s]+$");
+        private static Regex m_exprRegex = new Regex(@"^(?:([\w_\s]+)|\[(.+)\])$");
 
         // Component cache
         private static Dictionary<XName, IBiViewComponent> m_componentCache;
@@ -103,6 +103,8 @@ namespace SanteDB.BI.Components
             }
             else if (m_exprRegex.IsMatch(field))
             {
+                var match = m_exprRegex.Match(field);
+                field = match.Groups[1].Success ? match.Groups[1]?.Value : match.Groups[2]?.Value;
                 var scopedExpando = context.ScopedObject as IDictionary<String, Object>;
                 var currentContext = context;
                 while ((scopedExpando == null || !scopedExpando.TryGetValue(field, out value)) && currentContext != null)
