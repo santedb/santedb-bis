@@ -43,16 +43,32 @@ namespace SanteDB.BI.Components.Data
         public XName ComponentName => (XNamespace)BiConstants.ComponentNamespace + "dataTable";
 
         /// <summary>
+        /// Get expando fields
+        /// </summary>
+        private String[] GetExpandoFields(dynamic itm, String expandoStatement)
+        {
+            if(itm is IDictionary<String, Object> dict)
+            {
+                var filterCondition = new Interpreter(InterpreterOptions.Default).ParseAsDelegate<Func<String, bool>>(expandoStatement, "column");
+                return dict.Keys.Where(filterCondition).ToArray();
+            }
+            else
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
+        /// <summary>
         /// Writer header row
         /// </summary>
-        private void WriteHeaderRow(XmlWriter writer, dynamic itm, IRenderContext context, params XElement[] fieldTemplates)
+        private void WriteHeaderRow(XmlWriter writer, dynamic rowTemplate, IRenderContext context, IList<XElement> fieldTemplates)
         {
             writer.WriteStartElement("thead", BiConstants.HtmlNamespace);
             if (fieldTemplates.Any()) // user has custom fields specified
             {
+                var maxRowStack = this.PlanRowSpans(fieldTemplates, rowTemplate);
                 var subFieldStack = new Queue<List<XElement>>();
                 subFieldStack.Enqueue(new List<XElement>(fieldTemplates));
-                var maxRowStack = this.PlanRowSpans(fieldTemplates);
                 // Emit the fields
                 while (subFieldStack.Any())
                 {
@@ -96,7 +112,7 @@ namespace SanteDB.BI.Components.Data
                         // Write out header elements
                         foreach (var el in header.Nodes())
                         {
-                            ReportViewUtil.Write(writer, el, new RenderContext(context, itm));
+                            ReportViewUtil.Write(writer, el, new RenderContext(context, rowTemplate));
                         }
 
                         writer.WriteEndElement();
@@ -105,7 +121,7 @@ namespace SanteDB.BI.Components.Data
                     writer.WriteEndElement();
                 }
             }
-            else if (itm is IDictionary<String, Object> dict) // emit all fields
+            else if (rowTemplate is IDictionary<String, Object> dict) // emit all fields
             {
                 writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
 
@@ -118,16 +134,39 @@ namespace SanteDB.BI.Components.Data
             writer.WriteEndElement();
         }
 
-        private int PlanRowSpans(XElement[] fieldTemplates, int currentLevel = 0, int offsetFromParent = 0)
+        private int PlanRowSpans(IList<XElement> fieldTemplates, dynamic rowTemplate, int currentLevel = 0, int offsetFromParent = 0)
         {
             int maxDepth = currentLevel;
+
+            // Prepare auto columns at the root level
+            var expandoElements = fieldTemplates.Where(c => c.Name == (XNamespace)BiConstants.ComponentNamespace + "columns");
+            if (expandoElements.Any() && fieldTemplates is List<XElement> listInstance)
+            {
+                foreach(var expandoElement in expandoElements.ToArray())
+                {
+                    var replaceIdx = fieldTemplates.IndexOf(expandoElement);
+                    var varColumns = this.PrepareAutoColumns(expandoElement, rowTemplate);
+                    fieldTemplates.RemoveAt(replaceIdx);
+                    listInstance.InsertRange(replaceIdx, varColumns);
+
+                }
+            }
+
             var columns = fieldTemplates.Where(o => o.Name == (XNamespace)BiConstants.ComponentNamespace + "column").ToArray();
             foreach (var itm in columns)
             {
+                var expandoElement = itm.Element((XNamespace)BiConstants.ComponentNamespace + "columns");
+                if (expandoElement != null)
+                {
+                    var varColumns = this.PrepareAutoColumns(expandoElement, rowTemplate);
+                    expandoElement.Remove();
+                    itm.Add(varColumns);
+                }
+
                 var subContents = itm.Elements().Where(o => o.Name == (XNamespace)BiConstants.ComponentNamespace + "column");
                 if (subContents.Any())
                 {
-                    var contentDepth = PlanRowSpans(subContents.ToArray(), currentLevel + 1, Array.IndexOf(columns, itm));
+                    var contentDepth = PlanRowSpans(subContents.ToArray(), rowTemplate, currentLevel + 1, Array.IndexOf(columns, itm));
                     if (contentDepth > maxDepth)
                     {
                         maxDepth = contentDepth;
@@ -142,6 +181,7 @@ namespace SanteDB.BI.Components.Data
                 if (offsetFromParent > 0)
                 {
                     xe.SetAttributeValue("_offset", offsetFromParent);
+                    offsetFromParent = 0;
                 }
 
                 if (xe.Attribute("rowspan") != null ||
@@ -162,9 +202,51 @@ namespace SanteDB.BI.Components.Data
         }
 
         /// <summary>
+        /// Prepare auto columns
+        /// </summary>
+        private IEnumerable<XElement> PrepareAutoColumns(XElement columnsElement, dynamic rowTemplate)
+        {
+            // Is there an auto-columns? If so we construct it to real columns
+            if (columnsElement != null)
+            {
+                var expandoSelector = columnsElement.Element((XNamespace)BiConstants.ComponentNamespace + "fields");
+                string[] expandoColumNames = this.GetExpandoFields(rowTemplate, expandoSelector?.Value ?? "true");
+                var computedSubColumns = expandoColumNames.Select(o =>
+                    new XElement(
+                        (XNamespace)BiConstants.ComponentNamespace + "column",
+                        new XElement((XNamespace)BiConstants.ComponentNamespace + "header", o),
+                        new XElement((XNamespace)BiConstants.ComponentNamespace + "cell",
+                            this.CreateAutoColumnCell(columnsElement.Element((XNamespace)BiConstants.ComponentNamespace + "cell"), o))
+                    )
+                ).ToList();
+                return computedSubColumns;
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+
+        /// <summary>
+        /// Create auto-column cell
+        /// </summary>
+        private object CreateAutoColumnCell(XElement cellTemplate, String columnName)
+        {
+            if(cellTemplate.HasElements)
+            {
+                return XElement.Parse(cellTemplate.ToString().Replace("$column$", columnName)).Elements();
+            }
+            else
+            {
+                return new XElement((XNamespace)BiConstants.ComponentNamespace + "value", $"[{columnName}]");
+            }
+        }
+
+        /// <summary>
         /// Write row data
         /// </summary>
-        private void WriteDataRow(XmlWriter writer, dynamic itm, IRenderContext context, params XElement[] fieldTemplates)
+        private void WriteDataRow(XmlWriter writer, dynamic itm, IRenderContext context, IEnumerable<XElement> fieldTemplates)
         {
             writer.WriteStartElement("tr", BiConstants.HtmlNamespace);
             if (fieldTemplates.Any()) // user has custom fields specified
@@ -235,7 +317,8 @@ namespace SanteDB.BI.Components.Data
         /// </summary>
         public void Render(XElement element, XmlWriter writer, IRenderContext context)
         {
-            var columnList = element.Elements((XNamespace)BiConstants.ComponentNamespace + "column").ToArray();
+
+            var columnList = element.Elements().Where(o => o.Name == (XNamespace)BiConstants.ComponentNamespace + "column" || o.Name == (XNamespace)BiConstants.ComponentNamespace + "columns").ToList();
 
             writer.WriteStartElement("table", BiConstants.HtmlNamespace);
 

@@ -22,6 +22,7 @@ using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core.Data.Import;
 using SanteDB.Core.Data.Import.Format;
+using SanteDB.Core.Model.Query;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -46,7 +47,7 @@ namespace SanteDB.BI
         /// </summary>
         public BisResultContext(BiReferenceDataSourceDefinition rawDefinition)
         {
-            this.Records = this.IterateRawDefinition(rawDefinition).ToArray();
+            this.Records = this.IterateRawDefinition(rawDefinition).ToArray().AsResultSet();
         }
 
         /// <summary>
@@ -83,7 +84,15 @@ namespace SanteDB.BI
             )
         {
             this.Arguments = arguments;
-            this.Records = results;
+            if (results is IQueryResultSet iqrs)
+            {
+                this.Records = iqrs;
+            }
+            else
+            {
+                this.Records = results.AsResultSet();
+            }
+
             this.DataSource = dataSource;
             this.QueryDefinition = definition;
             this.StartTime = startTime;
@@ -103,7 +112,7 @@ namespace SanteDB.BI
         /// <summary>
         /// Gets the dataset
         /// </summary>
-        public IEnumerable<dynamic> Records { get; private set; }
+        public IQueryResultSet Records { get; private set; }
 
         /// <summary>
         /// Gets the data source
@@ -137,6 +146,6 @@ namespace SanteDB.BI
         public void Limit(int offset, int limit)
         {
             this.Records = this.Records.Skip(offset).Take(limit);
-        } 
+        }
     }
 }

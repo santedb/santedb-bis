@@ -23,6 +23,7 @@ using Newtonsoft.Json;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Rendering;
 using SanteDB.Core.i18n;
+using SanteDB.Core.Model.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -101,7 +102,7 @@ namespace SanteDB.BI.Components.Chart
                     }
 
                     var axisSelector = ReportViewUtil.CompileExpression(new RenderContext(chartContext, dataSource.Records.FirstOrDefault()), axisDataExpression);
-                    var chartData = dataSource.Records.OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).ToList();
+                    var chartData = dataSource.Records.OfType<dynamic>().OrderBy(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).ToList();
 
                     var refSets = element.Elements((XNamespace)BiConstants.ComponentNamespace + "refset");
 
@@ -109,7 +110,7 @@ namespace SanteDB.BI.Components.Chart
                     var axisElements = chartData.Select(o => axisSelector.Invoke(ReportViewUtil.ToParameterArray(o, axisSelector))).Select(o => String.Format($"{{0{axisFormat}}}", o ?? "null")).Distinct();
 
                     var refSetSource = element.Attribute("ref-source")?.Value;
-                    IEnumerable<dynamic> refData = null;
+                    IEnumerable refData = null;
                     if (!String.IsNullOrEmpty(refSetSource))
                     {
                         refData = (context.Root as RootRenderContext).GetOrExecuteQuery(refSetSource)?.Records;
