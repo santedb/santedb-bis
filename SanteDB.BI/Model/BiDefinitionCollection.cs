@@ -48,7 +48,7 @@ namespace SanteDB.BI.Model
     [XmlInclude(typeof(DatamartInfo))]
     [XmlInclude(typeof(DatamartLogEntry))]
     [ExcludeFromCodeCoverage] // Serialization class
-    public class BiDefinitionCollection : IResourceCollection
+    public class BiDefinitionCollection : BiDefinition, IResourceCollection
     {
 
         /// <summary>

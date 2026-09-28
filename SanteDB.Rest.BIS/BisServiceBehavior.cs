@@ -45,6 +45,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
@@ -468,6 +469,7 @@ namespace SanteDB.Rest.BIS
         }
 
         /// <inheritdoc/>
+        [Demand(PermissionPolicyIdentifiers.Login)]
         public virtual object Invoke(string resourceType, string id, string operationName, ParameterCollection parameters)
         {
             try
@@ -486,5 +488,42 @@ namespace SanteDB.Rest.BIS
                 throw;
             }
         }
+
+        /// <inheritdoc/>
+        [Demand(PermissionPolicyIdentifiers.Login)]
+        public Stream Metadata(string resourceType, string id)
+        {
+            try {
+                BiDefinition targetToDocument = null;
+                if(String.IsNullOrEmpty(id))
+                {
+                    targetToDocument = new BiDefinitionCollection(this.m_metadataRepository.Query(this.GetResourceType(resourceType), o => true).OfType<BiDefinition>());
+                }
+                else
+                {
+                    targetToDocument = this.m_metadataRepository.Get(this.GetResourceType(resourceType), id);
+                }
+
+                if(targetToDocument == null)
+                {
+                    throw new KeyNotFoundException(id);
+                }
+
+                var retVal = targetToDocument.DocumentObject();
+                RestOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+                RestOperationContext.Current.OutgoingResponse.AppendHeader("Content-Disposition", $"attachment; filename={id ?? resourceType}.html");
+                return retVal;
+            }
+            catch (Exception e)
+            {
+                this.m_tracer.TraceError("Error executing BIS Operation: {0}", e);
+                throw;
+            }
+        }
+
+        /// <inheritdoc/>
+        [Demand(PermissionPolicyIdentifiers.Login)]
+        public Stream Metadata(string resourceType) => this.Metadata(resourceType, null);
+
     }
 }

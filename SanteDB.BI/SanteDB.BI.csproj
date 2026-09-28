@@ -35,6 +35,12 @@
   </ItemGroup>
     
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Documentation\BiDatamartDefinition.xslt">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Documentation\Documentation.xslt">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\xlsxwork.xsl" />
     <EmbeddedResource Include="Resources\excel-xml.xsl" />
     <EmbeddedResource Include="Resources\csv.xsl" />

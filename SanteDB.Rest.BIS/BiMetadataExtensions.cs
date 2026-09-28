@@ -22,7 +22,10 @@ using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core.Model.Query;
 using System;
+using System.IO;
 using System.Linq.Expressions;
+using System.Xml;
+using System.Xml.Xsl;
 
 namespace SanteDB.Rest.BIS
 {
@@ -42,5 +45,16 @@ namespace SanteDB.Rest.BIS
             var mi = me.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Query), new Type[] { definitionType }, new Type[] { convertedExpression.GetType() });
             return mi.Invoke(me, new object[] { convertedExpression }) as IQueryResultSet;
         }
+
+
+        /// <summary>
+        /// Convert a non-generic query to the proper invokation
+        /// </summary>
+        public static BiDefinition Get(this IBiMetadataRepository me, Type definitionType, String id)
+        {
+            var mi = me.GetType().GetGenericMethod(nameof(IBiMetadataRepository.Get), new Type[] { definitionType }, new Type[] { typeof(String) });
+            return mi.Invoke(me, new object[] { id }) as BiDefinition;
+        }
+
     }
 }

@@ -16,6 +16,27 @@
 		<style type="text/css">
 			<![CDATA[
 			
+			body {
+			
+			}
+			
+			code.variable {
+				color: #00a;
+				font-weight:bold;
+			}
+			
+			code.invariant {
+				color: #0a0;
+				font-weight: bold;
+				padding: 0em 0.25em;
+			}
+			
+			code.table { 
+				color: #aaa;
+				font-weight: bold;
+				text-decoration: underline;
+						}
+				
 			
 			]]>
 		</style>
@@ -40,7 +61,7 @@
 
 	<!-- Metadata -->
 	<xsl:template match="bi:meta">
-		<xsl:if test="bi:authors">
+		<xsl:if test="bi:authors/bi:add">
 			<p>
 				<strong>Authors:</strong>
 				<ul>
@@ -58,7 +79,7 @@
 				<xsl:value-of select="bi:annotation/text()"/>
 			</p>
 		</xsl:if>
-		<xsl:if test="bi:policies">
+		<xsl:if test="bi:policies/bi:demand">
 			<p>
 				<strong>Policies / Demands:</strong>
 				<ul>
