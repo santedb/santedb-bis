@@ -10,12 +10,13 @@
 	
 	<!-- Include documentation links -->
 	<xsl:include href="BiDatamartDefinition.xslt" />
-
+	<xsl:include href="BiDefinitionCollection.xslt" />
+	<xsl:include href="BiReportDefinition.xslt"/>
 	<!-- Styles Template -->
 	<xsl:template name="Styles">
 		<style type="text/css">
 			<![CDATA[
-			
+				
 			body {
 			
 			}
@@ -35,9 +36,48 @@
 				color: #aaa;
 				font-weight: bold;
 				text-decoration: underline;
-						}
-				
+			}
 			
+			
+			div.preview { 
+				overflow:auto;
+				border: solid 1px #000;
+			}
+			
+      div.chart-placeholder {
+        background-color: #fafa99;
+        position: relative;
+        min-height: 250px;
+        margin:2em
+      }
+      
+      div.chart-type {
+        position: absolute;
+        right:0px;
+        bottom: 0px;
+        font-weight: bold;
+        border: #ababab;
+        background-color: #bababa;
+      }
+			
+      div.chart-header {
+        position:absolute;
+        width:100%;
+        top: 0px;
+        text-align: center;
+        font-size: larger;
+        font-weight:bold;
+        border-bottom: #000 dashed 1px;
+      }
+
+      div.chart-body {
+        position: absolute;
+        top: 3em;
+        bottom: 0px;
+        left:0px;
+        right:0px;
+      }
+
 			]]>
 		</style>
 	</xsl:template>
@@ -59,6 +99,18 @@
 		</xhtml:html>
 	</xsl:template>
 
+	<!-- Simple -->
+	<xsl:template match="bi:meta" mode="simple">
+		<xsl:if test="bi:annotation/xhtml:div">
+			<xsl:apply-templates select="bi:annotation/xhtml:div/xhtml:*" mode="stripHtmlNamespace"/>
+		</xsl:if>
+		<xsl:if test="bi:annotation/text()">
+			<p>
+				<xsl:value-of select="bi:annotation/text()"/>
+			</p>
+		</xsl:if>
+	</xsl:template>
+	
 	<!-- Metadata -->
 	<xsl:template match="bi:meta">
 		<xsl:if test="bi:authors/bi:add">

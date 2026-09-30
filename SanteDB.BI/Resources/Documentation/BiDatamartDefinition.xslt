@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl"
+    xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl xsi"
+				xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 				xmlns:bi="http://santedb.org/bi"
 >
 
@@ -9,15 +10,8 @@
 		<xsl:apply-templates select="(../bi:connection|../bi:pipeline|../bi:log|../bi:transaction|../bi:reader|../bi:writer|../bi:union|../bi:filter|../bi:crosstab|../bi:halt|../bi:call|../bi:transform)[bi:input/@ref = $inputName]" mode="flowdoc"/>
 	</xsl:template>
 
-	<xsl:template match="bi:BiDatamartDefinition" mode="body">
-		<h2>
-			<a name="{@id}">
-				Datamart -
-				<xsl:value-of select="@id"/>
-			</a>
-
-		</h2>
-		<xsl:apply-templates select="bi:meta" />
+	<xsl:template name="martContents">
+		<xsl:param name="headingClass" />
 
 		<table border="1">
 			<tr>
@@ -30,15 +24,44 @@
 				<th>Produces Datasource:</th>
 				<td>
 					<xsl:value-of select="bi:produces/@id"/> (<xsl:value-of select="bi:produces/@name"/>)
-					<xsl:apply-templates select="bi:produces/bi:meta"/>
+					<xsl:apply-templates select="bi:produces/bi:meta" mode="simple"/>
 				</td>
 			</tr>
 		</table>
 
-		<h3>Data Dictionary / Schema</h3>
+		<xsl:element name="{$headingClass}">Data Dictionary / Schema</xsl:element> 
 		<xsl:apply-templates select="bi:schema" />
-		<h3>Data Flows</h3>
+		<xsl:element name="{$headingClass}">Data Flows</xsl:element>
 		<xsl:apply-templates select="bi:dataFlows/bi:flow" />
+	</xsl:template>
+	
+	<xsl:template match="bi:BiDatamartDefinition" mode="body">
+		<h1>
+			<a name="{@id}">
+				Datamart -
+				<xsl:value-of select="@id"/>
+			</a>
+		</h1>
+		
+		
+		<xsl:apply-templates select="bi:meta" />
+		<xsl:call-template name="martContents">
+			<xsl:with-param name="headingClass" select="'h2'"/>
+		</xsl:call-template>
+	</xsl:template>
+
+	<xsl:template match="bi:resource[@xsi:type = 'BiDatamartDefinition']">
+		<h2>
+			<a name="{@id}">
+				Datamart -
+				<xsl:value-of select="@id"/>
+			</a>
+		</h2>
+
+		<xsl:apply-templates select="bi:meta" />
+		<xsl:call-template name="martContents">
+			<xsl:with-param name="headingClass" select="'h3'"/>
+		</xsl:call-template>
 	</xsl:template>
 
 	<xsl:template match="bi:flow">
@@ -47,7 +70,7 @@
 				<xsl:value-of select="@name"/>
 			</a>
 		</h4>
-		<xsl:apply-templates select="bi:meta" />
+		<xsl:apply-templates select="bi:meta" mode="simple" />
 		<ul>
 			<xsl:if test="bi:parameters">
 				<li>
@@ -307,7 +330,7 @@
 				</xsl:if>
 			</th>
 			<td colspan="3" align="left" valign="top">
-				<xsl:apply-templates select="bi:meta"/>
+				<xsl:apply-templates select="bi:meta" mode="simple"/>
 			</td>
 		</tr>
 		<xsl:apply-templates select="bi:column" mode="schemaRow"/>
@@ -348,7 +371,7 @@
 				</xsl:if>
 			</td>
 			<td>
-				<xsl:apply-templates select="bi:meta"/>
+				<xsl:apply-templates select="bi:meta" mode="simple"/>
 			</td>
 		</tr>
 	</xsl:template>
