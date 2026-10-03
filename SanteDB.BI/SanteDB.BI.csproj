@@ -30,11 +30,21 @@
   <ItemGroup>
     <None Remove="Model\csv.xsl" />
     <None Remove="Resources\csv.xsl" />
+    <None Remove="Resources\Documentation\BiDefinitionCollection.xslt" />
+    <None Remove="Resources\Documentation\BiReportDefinition.xslt" />
     <None Remove="Resources\excel-xml.xsl" />
     <None Remove="Resources\xlsxwork.xsl" />
   </ItemGroup>
     
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Documentation\BiDatamartDefinition.xslt">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Documentation\BiDefinitionCollection.xslt" />
+    <EmbeddedResource Include="Resources\Documentation\BiReportDefinition.xslt" />
+    <EmbeddedResource Include="Resources\Documentation\Documentation.xslt">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\xlsxwork.xsl" />
     <EmbeddedResource Include="Resources\excel-xml.xsl" />
     <EmbeddedResource Include="Resources\csv.xsl" />

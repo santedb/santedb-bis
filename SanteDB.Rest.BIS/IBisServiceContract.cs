@@ -53,6 +53,25 @@ namespace SanteDB.Rest.BIS
 
 
         /// <summary>
+        /// Get documentation for the specified <paramref name="resourceType"/>
+        /// </summary>
+        /// <param name="resourceType">The resource type to retrieve</param>
+        /// <param name="id">The </param>
+        /// <returns></returns>
+        [ServiceProduces("text/html")]
+        [Get("/Documentation/{resourceType}/{id}")]
+        Stream Metadata(String resourceType, String id);
+
+        /// <summary>
+        /// Get all documentation for the specified resource type
+        /// </summary>
+        /// <param name="resourceType">The type of resource</param>
+        /// <returns>The documentation</returns>
+        [ServiceProduces("text/html")]
+        [Get("/Documentation/{resourceType}")]
+        Stream Metadata(String resourceType);
+
+        /// <summary>
         /// Renders the specified BIS view in the specified format
         /// </summary>
         /// <param name="id"></param>
@@ -115,6 +134,7 @@ namespace SanteDB.Rest.BIS
         /// </summary>
         [Post("/{resourceType}/{id}/${operationName}")]
         object Invoke(String resourceType, String id, String operationName, ParameterCollection parameters);
+
 
     }
 }

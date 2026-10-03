@@ -82,6 +82,9 @@ namespace SanteDB.Rest.BIS
                     if (data is BiDefinition definition &&
                                        this.m_biRepository?.Query(data.GetType(), o => o.Id == definition.Id).Any() != true)
                     {
+                        if (null == definition.MetaData)
+                            definition.MetaData = new BiMetadata();
+
                         definition.MetaData.Tags.Add(new BiMetadataTag("$upstream", "true"));
                     }
                     else if (data is BiDefinitionCollection bundle)

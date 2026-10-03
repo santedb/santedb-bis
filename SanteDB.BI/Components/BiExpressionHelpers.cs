@@ -19,6 +19,7 @@
  * Date: 2023-6-21
  */
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -37,5 +38,28 @@ namespace SanteDB.BI.Components
         /// Split a CSV string into a collection of values
         /// </summary>
         public String[] CsvSplit(object csvString) => csvRegex.Matches($"{csvString},").OfType<Match>().Select(o => o.Value.EndsWith(",") ? o.Value.Substring(0, o.Value.Length - 1) : o.Value).ToArray();
+
+        /// <summary>
+        /// Checks if an object is dictionary-like and has <paramref name="parameterName"/> as a key. Returns <c>true</c> if the lookup is successful, and <c>false</c> in all other cases.
+        /// </summary>
+        /// <param name="obj">The object to check.</param>
+        /// <param name="parameterName">The name of the parameter to check in <paramref name="obj"/>.</param>
+        /// <returns><c>True</c> if the parameter is found, <c>false</c> otherwise.</returns>
+        public bool HasParameter(object obj, string parameterName)
+        {
+            try
+            {
+                if (obj is IDictionary<string, object> dict)
+                    return dict.ContainsKey(parameterName);
+                else if (obj is IReadOnlyDictionary<string, object> rodict)
+                    return rodict.ContainsKey(parameterName);
+            }
+            catch
+            {
+                ; //Intentional no-op
+            }
+
+            return false;
+        }
     }
 }

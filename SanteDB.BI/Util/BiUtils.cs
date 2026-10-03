@@ -18,18 +18,25 @@
  * User: fyfej
  * Date: 2023-6-21
  */
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Wordprocessing;
 using SanteDB.BI.Exceptions;
 using SanteDB.BI.Model;
 using SanteDB.BI.Services;
 using SanteDB.Core;
+using SanteDB.Core.Data;
 using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Map;
+using SanteDB.Core.Model.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using System.Xml.Serialization;
+using System.Xml.Xsl;
 
 namespace SanteDB.BI.Util
 {
@@ -234,6 +241,52 @@ namespace SanteDB.BI.Util
             {
                 unresolved = be.Definition;
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Document the specified object
+        /// </summary>
+        public static Stream DocumentObject(this BiDefinition biDefinition)
+        {
+            var documentationTransform = GetBiDocumentationXslTransform();
+            var outStream = new TemporaryFileStream();
+            using(var inStream = new MemoryStream())
+            {
+                BiUtils.ResolveRefs(biDefinition).Save(inStream);
+                inStream.Seek(0, SeekOrigin.Begin);
+                using(var xr = XmlReader.Create(inStream))
+                using(var xw = XmlWriter.Create(outStream, new XmlWriterSettings()
+                {
+                    OmitXmlDeclaration = true,
+                    Indent = true
+                }))
+                {
+                    documentationTransform.Transform(xr, xw);
+                }
+                outStream.Seek(0, SeekOrigin.Begin);
+            }
+            return outStream;
+        }
+
+
+        /// <summary>
+        /// Get the documentation XSL transform
+        /// </summary>
+        public static XslCompiledTransform GetBiDocumentationXslTransform()
+        {
+            var thisAsm = typeof(BiUtils).Assembly;
+            var retVal = new XslCompiledTransform();
+            var xmlResolver = new EmbeddedResourceXmlResolver(thisAsm, "SanteDB.BI.Resources.Documentation");
+            using(var str = thisAsm.GetManifestResourceStream("SanteDB.BI.Resources.Documentation.Documentation.xslt"))
+            using(var xr = XmlReader.Create(str)) 
+            {
+                retVal.Load(xr, new XsltSettings()
+                {
+                    EnableScript = true,
+                    EnableDocumentFunction = true
+                }, xmlResolver);
+                return retVal;
             }
         }
     }

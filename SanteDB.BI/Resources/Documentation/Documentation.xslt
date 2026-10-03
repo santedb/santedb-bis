@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl"
+				xmlns:xhtml="http://www.w3.org/1999/xhtml"
+				xmlns:bi="http://santedb.org/bi"
+>
+	<xsl:output method="html" indent="yes"/>
+
+	<xsl:namespace-alias stylesheet-prefix="xhtml" result-prefix="#default"/>
+	
+	<!-- Include documentation links -->
+	<xsl:include href="BiDatamartDefinition.xslt" />
+	<xsl:include href="BiDefinitionCollection.xslt" />
+	<xsl:include href="BiReportDefinition.xslt"/>
+	<!-- Styles Template -->
+	<xsl:template name="Styles">
+		<style type="text/css">
+			<![CDATA[
+				
+			body {
+			
+			}
+			
+			code.variable {
+				color: #00a;
+				font-weight:bold;
+			}
+			
+			code.invariant {
+				color: #0a0;
+				font-weight: bold;
+				padding: 0em 0.25em;
+			}
+			
+			code.table { 
+				color: #aaa;
+				font-weight: bold;
+				text-decoration: underline;
+			}
+			
+			
+			div.preview { 
+				overflow:auto;
+				border: solid 1px #000;
+			}
+			
+      div.chart-placeholder {
+        background-color: #fafa99;
+        position: relative;
+        min-height: 250px;
+        margin:2em
+      }
+      
+      div.chart-type {
+        position: absolute;
+        right:0px;
+        bottom: 0px;
+        font-weight: bold;
+        border: #ababab;
+        background-color: #bababa;
+      }
+			
+      div.chart-header {
+        position:absolute;
+        width:100%;
+        top: 0px;
+        text-align: center;
+        font-size: larger;
+        font-weight:bold;
+        border-bottom: #000 dashed 1px;
+      }
+
+      div.chart-body {
+        position: absolute;
+        top: 3em;
+        bottom: 0px;
+        left:0px;
+        right:0px;
+      }
+
+			]]>
+		</style>
+	</xsl:template>
+
+	<!-- Root Entry -->
+	<xsl:template match="/bi:*">
+
+		<xhtml:html>
+			<head>
+				<title>
+					Documentation - <xsl:value-of select="@name"/>
+				</title>
+				<xsl:call-template name="Styles" />
+			</head>
+			<body>
+				<xsl:apply-templates select="." mode="body" />
+			</body>
+
+		</xhtml:html>
+	</xsl:template>
+
+	<!-- Simple -->
+	<xsl:template match="bi:meta" mode="simple">
+		<xsl:if test="bi:annotation/xhtml:div">
+			<xsl:apply-templates select="bi:annotation/xhtml:div/xhtml:*" mode="stripHtmlNamespace"/>
+		</xsl:if>
+		<xsl:if test="bi:annotation/text()">
+			<p>
+				<xsl:value-of select="bi:annotation/text()"/>
+			</p>
+		</xsl:if>
+	</xsl:template>
+	
+	<!-- Metadata -->
+	<xsl:template match="bi:meta">
+		<xsl:if test="bi:authors/bi:add">
+			<p>
+				<strong>Authors:</strong>
+				<ul>
+					<xsl:for-each select="bi:authors/bi:add">
+						<xsl:value-of select="."/>
+					</xsl:for-each>
+				</ul>
+			</p>
+		</xsl:if>
+		<xsl:if test="bi:annotation/xhtml:div">
+			<xsl:apply-templates select="bi:annotation/xhtml:div/xhtml:*" mode="stripHtmlNamespace"/>
+		</xsl:if>
+		<xsl:if test="bi:annotation/text()">
+			<p>
+				<xsl:value-of select="bi:annotation/text()"/>
+			</p>
+		</xsl:if>
+		<xsl:if test="bi:policies/bi:demand">
+			<p>
+				<strong>Policies / Demands:</strong>
+				<ul>
+					<xsl:for-each select="bi:policies/bi:demand">
+						<li>
+							<xsl:value-of select="."/>
+						</li>
+					</xsl:for-each>
+				</ul>
+			</p>
+
+		</xsl:if>
+	</xsl:template>
+
+	<xsl:template match="xhtml:*" mode="stripHtmlNamespace">
+		<xsl:element name="{local-name()}">
+			<xsl:apply-templates select="@* | node()"  mode="stripHtmlNamespace" />
+		</xsl:element>
+	</xsl:template>
+</xsl:stylesheet>

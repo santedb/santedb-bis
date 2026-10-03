@@ -41,6 +41,12 @@ namespace SanteDB.BI.Model
         public XElement Body { get; set; }
 
         /// <summary>
+        /// When the mody is simple text
+        /// </summary>
+        [XmlText, JsonProperty("value")]
+        public string PlainTextBody { get; set; }
+
+        /// <summary>
         /// Gets the body in JSON format
         /// </summary>
         [XmlIgnore, JsonProperty("doc")]
@@ -68,5 +74,10 @@ namespace SanteDB.BI.Model
         /// </summary>
         [XmlAttribute("lang"), JsonProperty("lang")]
         public string Language { get; set; }
+
+        /// <summary>
+        /// Convert documentation to string
+        /// </summary>
+        public override string ToString() => this.Body?.ToString() ?? this.PlainTextBody;
     }
 }
