@@ -72,8 +72,23 @@ namespace SanteDB.BI.Components.Base
 
             writer.WriteStartElement("a", BiConstants.HtmlNamespace);
 
-            writer.WriteAttributeString("_target", "blank");
+            bool wrotetarget = false;
+
             writer.WriteAttributeString("href", targetUrl);
+
+            foreach (var attr in element.Attributes())
+            {
+                if (attr.Name == "href") //We wrote href ourselves, ignore an href from the incoming node.
+                    continue;
+
+                if (attr.Name == "target") //Mark that the report specifies target so we do not write it.
+                    wrotetarget = true;
+
+                writer.WriteAttributeString(attr.Name.LocalName, attr.Value); //Pass additional attributes out.
+            }
+
+            if (!wrotetarget) //If the report does not specify, use the default value.
+                writer.WriteAttributeString("target", "_blank");
 
             foreach (var itm in element.Nodes())
             {
